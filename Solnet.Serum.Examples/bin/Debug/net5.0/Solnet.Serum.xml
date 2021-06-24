@@ -1,0 +1,602 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Solnet.Serum</name>
+    </assembly>
+    <members>
+        <member name="T:Solnet.Serum.ClientFactory">
+            <summary>
+            The client factory for the Serum Client.
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.ClientFactory.GetClient(Solnet.Rpc.Cluster,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Instantiate a the serum client.
+            </summary>
+            <param name="cluster">The network cluster.</param>
+            <param name="logger">The logger.</param>
+            <returns>The http client.</returns>
+        </member>
+        <member name="T:Solnet.Serum.Converters.PublicKeyJsonConverter">
+            <summary>
+            Implements a json converter to deserialize public keys from a string.
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.Converters.PublicKeyJsonConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Solnet.Serum.Converters.PublicKeyJsonConverter.Write(System.Text.Json.Utf8JsonWriter,Solnet.Wallet.PublicKey,System.Text.Json.JsonSerializerOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Solnet.Serum.ISerumClient">
+            <summary>
+            Specifies functionality for the Serum Client.
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.ISerumClient.GetMarketsAsync">
+            <summary>
+            Gets the available markets in the Serum DEX. This is an asynchronous operation.
+            </summary>
+            <returns>A task which may return a list with the market's info.</returns>
+        </member>
+        <member name="M:Solnet.Serum.ISerumClient.GetMarkets">
+            <summary>
+            Gets the available markets in the Serum DEX.
+            </summary>
+            <returns>A list with the market's info.</returns>
+        </member>
+        <member name="M:Solnet.Serum.ISerumClient.GetTokensAsync">
+            <summary>
+            Gets the available tokens in the Serum DEX. This is an asynchronous operation.
+            </summary>
+            <returns>A task which may return a list with the token's info.</returns>
+        </member>
+        <member name="M:Solnet.Serum.ISerumClient.GetTokens">
+            <summary>
+            Gets the available tokens in the Serum DEX.
+            </summary>
+            <returns>A list with the token's info.</returns>
+        </member>
+        <member name="M:Solnet.Serum.ISerumClient.GetMarketAsync(System.String)">
+            <summary>
+            Gets the account data associated with the given market address in the Serum DEX.
+            This is an asynchronous operation.
+            </summary>
+            <param name="address">The public key of the market account.</param>
+            <returns>A task which may return the market's account data.</returns>
+        </member>
+        <member name="M:Solnet.Serum.ISerumClient.GetMarket(System.String)">
+            <summary>
+            Gets the account data associated with the given market address in the Serum DEX.
+            </summary>
+            <param name="address">The public key of the market account.</param>
+            <returns>The market's account data.</returns>
+        </member>
+        <member name="T:Solnet.Serum.Models.AccountFlags">
+            <summary>
+            Represents the account's flags.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.Initialized">
+            <summary>
+            The value to check against to see if the account is initialized.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.Market">
+            <summary>
+            The value to check against to see if the account is a market account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.OpenOrders">
+            <summary>
+            The value to check against to see if the account is an open orders account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.RequestQueue">
+            <summary>
+            The value to check against to see if the account is a request queue account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.EventQueue">
+            <summary>
+            The value to check against to see if the account is an event queue account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.Bids">
+            <summary>
+            The value to check against to see if the account is a bids account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.Asks">
+            <summary>
+            The value to check against to see if the account is an asks account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.AccountFlags.Bitmask">
+            <summary>
+            The bitmask for the account flags.
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsInitialized">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsMarket">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsOpenOrders">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsRequestQueue">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsEventQueue">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsBids">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.AccountFlags.IsAsks">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.Models.AccountFlags.#ctor(System.Byte)">
+            <summary>
+            Initialize the account flags with the given bit mask.
+            </summary>
+            <param name="bitmask">The bit mask.</param>
+        </member>
+        <member name="M:Solnet.Serum.Models.AccountFlags.Deserialize(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Deserialize a span of bytes into a <see cref="F:Solnet.Serum.Models.AccountFlags.Market"/> instance.
+            </summary>
+            <param name="data">The data to deserialize into the structure.</param>
+            <returns>The Market structure.</returns>
+        </member>
+        <member name="T:Solnet.Serum.Models.MarketInfo">
+            <summary>
+            Represents information about a market in Serum.
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.MarketInfo.Name">
+            <summary>
+            The name of the market.
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.MarketInfo.Address">
+            <summary>
+            The public key of the market account.
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.MarketInfo.ProgramId">
+            <summary>
+            The public key of the program id.
+            </summary>
+        </member>
+        <member name="T:Solnet.Serum.Models.TokenInfo">
+            <summary>
+            Represents information about a market in Serum.
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.TokenInfo.Name">
+            <summary>
+            The name of the token.
+            </summary>
+        </member>
+        <member name="P:Solnet.Serum.Models.TokenInfo.Address">
+            <summary>
+            The public key of the token mint.
+            </summary>
+        </member>
+        <member name="T:Solnet.Serum.Models.Market">
+            <summary>
+            Represents a market in Serum.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.Flags">
+            <summary>
+            The account flags.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.OwnAddress">
+            <summary>
+            The market's own address.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.VaultSignerNonce">
+            <summary>
+            The vault signer nonce.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.BaseMint">
+            <summary>
+            The public key of the base token mint of this market.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.QuoteMint">
+            <summary>
+            The public key of the quote token mint of this market.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.BaseVault">
+            <summary>
+            The public key of the base vault.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.BaseDepositsTotal">
+            <summary>
+            The total deposits of the base token.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.BaseFeesAccrued">
+            <summary>
+            The fees accrued by the base token.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.QuoteVault">
+            <summary>
+            The public key of the quote vault.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.QuoteDepositsTotal">
+            <summary>
+            The total deposits of the quote token.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.QuoteFeesAccrued">
+            <summary>
+            The fees accrued by the quote token.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.QuoteDustThreshold">
+            <summary>
+            The dust threshold of the quote token.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.RequestQueue">
+            <summary>
+            The public key of the request queue of this market.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.EventQueue">
+            <summary>
+            The public key of the event queue of this market.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.Bids">
+            <summary>
+            The public key of the market's bids account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.Asks">
+            <summary>
+            The public key of the market's asks account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.BaseLotSize">
+            <summary>
+            The market's base token lot size.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.QuoteLotSize">
+            <summary>
+            The market's quote token lot size.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.FeeRateBasis">
+            <summary>
+            The market's fee rate in basis points.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.Market.ReferrerRebateAccrued">
+            <summary>
+            The market's referrer rebate accrued.
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.Models.Market.Deserialize(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Deserialize a span of bytes into a <see cref="T:Solnet.Serum.Models.Market"/> instance.
+            </summary>
+            <param name="data">The data to deserialize into the structure.</param>
+            <returns>The Market structure.</returns>
+        </member>
+        <member name="T:Solnet.Serum.Models.MarketDataLayout">
+            <summary>
+            Represents the layout of the market data structure.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.MarketAccountDataSize">
+            <summary>
+            The size of the data for a market account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.StartPadding">
+            <summary>
+            The number of bytes of the padding at the beginning of the market structure.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.EndPadding">
+            <summary>
+            The number of bytes of the padding at the end of the market structure.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.OwnAddressOffset">
+            <summary>
+            The offset at which the market's own address begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.VaultSignerOffset">
+            <summary>
+            The offset at which the vault signer's nonce begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.BaseMintOffset">
+            <summary>
+            The offset at which the public key of the market's base mint begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.QuoteMintOffset">
+            <summary>
+            The offset at which the public key of the market's quote mint begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.BaseVaultOffset">
+            <summary>
+            The offset at which the public key of the market's base token vault begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.BaseDepositsOffset">
+            <summary>
+            The offset at which the value of the total base token deposits begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.BaseFeesOffset">
+            <summary>
+            The offset at which the value of the base token fees accrued begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.QuoteVaultOffset">
+            <summary>
+            The offset at which the public key of the market's quote token vault begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.QuoteDepositsOffset">
+            <summary>
+            The offset at which the value of the total quote token deposits begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.QuoteFeesOffset">
+            <summary>
+            The offset at which the value of the quote token fees accrued begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.QuoteDustThresholdOffset">
+            <summary>
+            The offset at which the value of the quote token dust threshold begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.RequestQueueOffset">
+            <summary>
+            The offset at which the public key of the market's request queue account begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.EventQueueOffset">
+            <summary>
+            The offset at which the public key of the market's event queue account begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.BidsOffset">
+            <summary>
+            The offset at which the public key of the market's bids account begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.AsksOffset">
+            <summary>
+            The offset at which the public key of the market's asks account begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.BaseLotOffset">
+            <summary>
+            The offset at which the value of the market's base token lot size begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.QuoteLotOffset">
+            <summary>
+            The offset at which the value of the market's quote token lot size begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.FeeRateBasisOffset">
+            <summary>
+            The offset at which the value of the market's fee rate basis points begins.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.MarketDataLayout.ReferrerRebateAccruedOffset">
+            <summary>
+            The offset at which the value of the market's referrer rebate accrued begins.
+            </summary>
+        </member>
+        <member name="T:Solnet.Serum.Models.OrderTypeLayout">
+            <summary>
+            Represents the order type.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.OrderTypeLayout.Limit">
+            <summary>
+            A limit order.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.OrderTypeLayout.ImmediateOrCancel">
+            <summary>
+            An order which is immediately filled or cancelled.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.OrderTypeLayout.PostOnly">
+            <summary>
+            The order is a post only order.
+            </summary>
+        </member>
+        <member name="T:Solnet.Serum.Models.SideLayout">
+            <summary>
+            Represents the side of an order.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.SideLayout.Buy">
+            <summary>
+            The order is a buy order.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.Models.SideLayout.Sell">
+            <summary>
+            The order is a sell order.
+            </summary>
+        </member>
+        <member name="T:Solnet.Serum.SerumClient">
+            <summary>
+            Implements the Serum Program and client functionality for easy access to data.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient.InfosBaseUrl">
+            <summary>
+            The base url to fetch the market's data from github.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient.TokenMintsEndpoint">
+            <summary>
+            The name of the file containing token mints.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient.MarketInfosEndpoint">
+            <summary>
+            The name of the file containing market infos.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient._httpClient">
+            <summary>
+            The http client to fetch the market data.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient._jsonSerializerOptions">
+            <summary>
+            The json serializer options.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient._logger">
+            <summary>
+            The logger instance.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient.RpcClient">
+            <summary>
+            The rpc client instance to perform requests.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumClient.StreamingRpcClient">
+            <summary>
+            The streaming rpc client instance to subscribe to data.
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.#ctor(Solnet.Rpc.Cluster,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Initialize the Serum client.
+            </summary>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.GetMarketAsync(System.String)">
+            <inheritdoc cref="M:Solnet.Serum.ISerumClient.GetMarketAsync(System.String)"/>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.GetMarket(System.String)">
+            <inheritdoc cref="M:Solnet.Serum.ISerumClient.GetMarket(System.String)"/>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.GetMarketsAsync">
+            <inheritdoc cref="M:Solnet.Serum.ISerumClient.GetMarkets"/>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.GetMarkets">
+            <inheritdoc cref="M:Solnet.Serum.ISerumClient.GetMarkets"/>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.GetTokensAsync">
+            <inheritdoc cref="M:Solnet.Serum.ISerumClient.GetTokensAsync"/>
+        </member>
+        <member name="M:Solnet.Serum.SerumClient.GetTokens">
+            <inheritdoc cref="M:Solnet.Serum.ISerumClient.GetTokens"/>
+        </member>
+        <member name="T:Solnet.Serum.SerumProgram">
+            <summary>
+            Implements the Serum Program methods.
+            <remarks>
+            For more information see: https://github.com/project-serum/awesome-serum
+            </remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgram.ProgramIdKey">
+            <summary>
+            The Serum Program key.
+            </summary>
+        </member>
+        <member name="T:Solnet.Serum.SerumProgramInstructions">
+            <summary>
+            Represents the instruction types for the <see cref="T:Solnet.Serum.SerumProgram"/>.
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.InitializeMarket">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.NewOrder">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.MatchOrder">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.ConsumeEvents">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.CancelOrder">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.SettleFunds">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.CancelOrderByClientId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.NewOrderV3">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.CancelOrderV2">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Solnet.Serum.SerumProgramInstructions.CancelOrderByClientIdV2">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>

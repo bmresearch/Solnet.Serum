@@ -1,0 +1,847 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Solnet.Programs</name>
+    </assembly>
+    <members>
+        <member name="T:Solnet.Programs.AssociatedTokenAccountProgram">
+            <summary>
+            Implements the Associated Token Account Program methods.
+            <remarks>
+            For more information see: https://spl.solana.com/associated-token-account
+            </remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.AssociatedTokenAccountProgram.ProgramIdKey">
+            <summary>
+            The address of the Shared Memory Program.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(Solnet.Wallet.Account,Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey)">
+            <summary>
+            Initialize a new transaction which interacts with the Associated Token Account Program to create
+            a new associated token account.
+            </summary>
+            <param name="payer">The account used to fund the associated token account.</param>
+            <param name="owner">The public key of the owner account for the new associated token account.</param>
+            <param name="mint">The public key of the mint for the new associated token account.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="T:Solnet.Programs.AuthorityType">
+            <summary>
+            Represents the types of authorities for <see cref="M:Solnet.Programs.TokenProgram.SetAuthority(Solnet.Wallet.PublicKey,Solnet.Programs.AuthorityType,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})"/> instructions.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.AuthorityType.MintTokens">
+            <summary>
+            Authority to mint new tokens.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.AuthorityType.FreezeAccount">
+            <summary>
+            Authority to freeze any account associated with the mint.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.AuthorityType.AccountOwner">
+            <summary>
+            Owner of a given account token.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.AuthorityType.CloseAccount">
+            <summary>
+            Authority to close a given account.
+            </summary>
+        </member>
+        <member name="T:Solnet.Programs.MemoProgram">
+            <summary>
+            Helper class for the Memo Program.
+            <remarks>
+            Used to write UTF-8 data into Solana transactions.
+            </remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.MemoProgram.Encoder">
+            <summary>
+            The base58 encoder instance.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.MemoProgram.ProgramId">
+            <summary>
+            The address of the Memo Program.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.MemoProgram.NewMemo(Solnet.Wallet.Account,System.String)">
+            <summary>
+            Initialize a new transaction instruction which interacts with the Memo Program.
+            </summary>
+            <param name="account">The account associated with the memo.</param>
+            <param name="memo">The memo to be included in the transaction.</param>
+            <returns>The <see cref="T:Solnet.Rpc.Models.TransactionInstruction"/> which includes the memo data.</returns>
+        </member>
+        <member name="T:Solnet.Programs.NameServiceInstructions">
+            <summary>
+            Represents the instruction types for the <see cref="T:Solnet.Programs.NameServiceProgram"/>.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceInstructions.Create">
+             <summary>
+             Create a name record.
+             <remarks>
+             The address of the name record (account #1) is a program-derived address with the following
+             seeds to ensure uniqueness:
+             <para>
+             <list type="bullet">
+             <item>
+             SHA256(HASH_PREFIX, <c>name</c>)
+             </item> 
+             <item>
+             Account class (account #3)
+             </item>
+             <item>
+             Parent name record address (account #4)
+             </item>
+             </list>
+            </para>
+             If this is a child record, the parent record's owner must approve by signing (account #5)
+             </remarks>
+             </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceInstructions.Update">
+            <summary>
+            Update the data in a name record.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceInstructions.Transfer">
+            <summary>
+            Transfer ownership of a name record.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceInstructions.Delete">
+            <summary>
+            Delete a name record.
+            <remarks>
+            Any lamports left in the account will be transferred to the refund account.
+            </remarks>
+            </summary>
+        </member>
+        <member name="T:Solnet.Programs.NameServiceProgram">
+            <summary>
+            Implements the Token Program methods.
+            <remarks>
+            For more information see: https://spl.solana.com/name-service
+            </remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceProgram.HashPrefix">
+            <summary>
+            The hash prefix used to calculate the SHA256 of the name record to be created.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceProgram.ProgramIdKey">
+            <summary>
+            The public key of the Name Service Program.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.NameServiceProgram.NameAccountSize">
+            <summary>
+            The space to be used when creating the name record.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.CreateNameRegistry(Solnet.Wallet.PublicKey,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.UInt64,System.Int32,Solnet.Wallet.Account,Solnet.Wallet.Account,Solnet.Wallet.PublicKey)">
+            <summary>
+            Initialize a new transaction instruction to create a name record.
+            </summary>
+            <param name="name">The name to use.</param>
+            <param name="payer">The account of the payer.</param>
+            <param name="nameOwner">The public key of the name owner.</param>
+            <param name="nameClass">The account of the name class.</param>
+            <param name="parentName">The public key of the parent name.</param>
+            <param name="parentNameOwner">The account of the parent name owner.</param>
+            <param name="space">The space to assign to the account.</param>
+            <param name="lamports">The amount of lamports the account needs to be rate exempt.</param>
+            <returns>The transaction instruction.</returns>
+            <exception cref="T:System.Exception">Thrown when it was not possible to derive a program address for the account.</exception>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.ComputeHashedName(System.String)">
+            <summary>
+            Gets the hash for the given value with the attached hash prefix.
+            </summary>
+            <param name="name">The name to hash attach the prefix and hash.</param>
+            <returns>The hash as bytes.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.DeriveNameAccountKey(System.Byte[],Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey)">
+            <summary>
+            Get's the program derived address for the name.
+            </summary>
+            <param name="hashedName">The hash of the name with the name service hash prefix.</param>
+            <param name="nameClass">The account of the name class.</param>
+            <param name="parentName">The public key of the parent name.</param>
+            <returns>The program derived address for the name.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.CreateNameRegistryInstruction(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,System.Byte[],System.UInt64,System.Int32,Solnet.Wallet.Account,Solnet.Wallet.Account,Solnet.Wallet.PublicKey)">
+            <summary>
+            Initialize a new transaction instruction to create a name record.
+            </summary>
+            <param name="nameKey">The public key of the name record.</param>
+            <param name="nameOwner">The public key of the name owner.</param>
+            <param name="payer">The account of the payer.</param>
+            <param name="hashedName">The hash of the name with the hash prefix.</param>
+            <param name="space">The space to assign to the account.</param>
+            <param name="lamports">The amount of lamports the account needs to be rate exempt.</param>
+            <param name="nameClass">The account of the name class.</param>
+            <param name="parentName">The public key of the parent name.</param>
+            <param name="parentNameOwner">The account of the parent name owner.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.UpdateNameRegistry(Solnet.Wallet.PublicKey,System.Int32,System.Byte[],Solnet.Wallet.Account,Solnet.Wallet.Account)">
+            <summary>
+            Initialize a new transaction instruction to update the data of a name record.
+            <remarks>
+            If the name class was defined upon name record creation then the name class parameter must be passed.
+            </remarks>
+            </summary>
+            <param name="nameKey">The public key of the name record.</param>
+            <param name="offset">The offset at which to update the data.</param>
+            <param name="data">The data to insert.</param>
+            <param name="nameOwner">The public key of the name owner.</param>
+            <param name="nameClass">The account of the name class.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.TransferNameRegistry(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,Solnet.Wallet.Account)">
+            <summary>
+            Initialize a new transaction instruction to transfer ownership of a name record. 
+            <remarks>
+            If the name class was defined upon name record creation then the name class parameter must be passed.
+            </remarks>
+            </summary>
+            <param name="nameKey">The public key of the name record.</param>
+            <param name="newOwner">The public key of the new name owner.</param>
+            <param name="nameOwner">The public key of the name owner.</param>
+            <param name="nameClass">The account of the name class.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.DeleteNameRegistry(Solnet.Wallet.PublicKey,Solnet.Wallet.Account,Solnet.Wallet.PublicKey)">
+            <summary>
+            Initialize a new transaction instruction to delete a name record.
+            </summary>
+            <param name="nameKey">The public key of the name record.</param>
+            <param name="nameOwner">The public key of the name owner.</param>
+            <param name="refundPublicKey">The public key of the refund account.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.EncodeCreateNameRegistryData(System.Byte[],System.UInt64,System.Int32)">
+            <summary>
+            Encode the instruction data to be used with the <see cref="F:Solnet.Programs.NameServiceInstructions.Create"/> instruction.
+            </summary>
+            <param name="hashedName">The hashed name for the record.</param>
+            <param name="lamports">The number of lamports for rent exemption.</param>
+            <param name="space">The space for the account.</param>
+            <returns>The transaction instruction data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.EncodeUpdateNameRegistryData(System.Int32,System.Byte[])">
+            <summary>
+            Encode the instruction data to be used with the <see cref="F:Solnet.Programs.NameServiceInstructions.Update"/> instruction.
+            </summary>
+            <param name="offset">The offset at which to update the data.</param>
+            <param name="data">The data to insert.</param>
+            <returns>The transaction instruction data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.EncodeTransferNameRegistryData(System.Byte[])">
+            <summary>
+            Encode the instruction data to be used with the <see cref="F:Solnet.Programs.NameServiceInstructions.Transfer"/> instruction.
+            </summary>
+            <param name="publicKey">The public key of the account to transfer ownership to.</param>
+            <returns>The transaction instruction data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.NameServiceProgram.EncodeDeleteNameRegistryData">
+            <summary>
+            Encode the instruction data to be used with the <see cref="F:Solnet.Programs.NameServiceInstructions.Delete"/> instruction.
+            </summary>
+            <returns>The transaction instruction data.</returns>
+        </member>
+        <member name="T:Solnet.Programs.SystemProgram">
+            <summary>
+            Implements the System Program methods.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgram.ProgramIdKey">
+            <summary>
+            The bytes that represent the program id address.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgram.SysVarRentKey">
+            <summary>
+            The public key of the Rent System Variable.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgram.AccountDataSize">
+            <summary>
+            Account layout size.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.SystemProgram.Transfer(Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.UInt64)">
+            <summary>
+            Initialize a transaction to transfer lamports.
+            </summary>
+            <param name="fromPublicKey">The account to transfer from.</param>
+            <param name="toPublicKey">The account to transfer to.</param>
+            <param name="lamports">The amount of lamports</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.SystemProgram.CreateAccount(Solnet.Wallet.Account,Solnet.Wallet.Account,System.UInt64,System.UInt64,Solnet.Wallet.PublicKey)">
+            <summary>
+            Initialize a new transaction instruction which interacts with the System Program to create a new account.
+            </summary>
+            <param name="fromAccount">The account from which the lamports will be transferred.</param>
+            <param name="newAccountPublicKey">The public key of the account to which the lamports will be transferred.</param>
+            <param name="lamports">The amount of lamports to transfer</param>
+            <param name="space">Number of bytes of memory to allocate for the account.</param>
+            <param name="programId">The program id of the account.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="T:Solnet.Programs.SystemProgramInstructions">
+            <summary>
+            Implements the Token Program methods.
+            <remarks>
+            For more information see:
+            https://docs.solana.com/developing/runtime-facilities/programs#system-program
+            https://docs.rs/solana-sdk/1.7.0/solana_sdk/system_instruction/enum.SystemInstruction.html
+            </remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.CreateAccount">
+            <summary>
+            Create a new account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.Assign">
+            <summary>
+            Assign account to a program.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.Transfer">
+            <summary>
+            Transfer lamports.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.CreateAccountWithSeed">
+            <summary>
+            Create a new account at an address derived from a base public key and a seed.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.AdvanceNonceAccount">
+            <summary>
+            Consumes a stored nonce, replacing it with a successor.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.WithdrawNonceAccount">
+            <summary>
+            Withdraw funds from a nonce account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.InitializeNonceAccount">
+            <summary>
+            Drive state of uninitialized nonce account to Initialized, setting the nonce value.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.AuthorizeNonceAccount">
+            <summary>
+            Change the entity authorized to execute nonce instructions on the account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.Allocate">
+            <summary>
+            Allocate space in a (possibly new) account without funding.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.AllocateWithSeed">
+            <summary>
+            Allocate space for and assign an account at an address derived from a base public key and a seed.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.AssignWithSeed">
+            <summary>
+            Assign account to a program based on a seed
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.SystemProgramInstructions.TransferWithSeed">
+            <summary>
+            Transfer lamports from a derived address.
+            </summary>
+        </member>
+        <member name="T:Solnet.Programs.TokenProgram">
+            <summary>
+            Implements the Token Program methods.
+            <remarks>
+            For more information see: https://spl.solana.com/token
+            </remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgram.ProgramIdKey">
+            <summary>
+            The public key of the Token Program.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgram.MintAccountDataSize">
+            <summary>
+            Mint account account layout size.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.Transfer(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,System.UInt64,Solnet.Wallet.Account)">
+            <summary>
+            Initializes an instruction to transfer tokens from one account to another either directly or via a delegate.
+            If this account is associated with the native mint then equal amounts of SOL and Tokens will be transferred to the destination account.
+            </summary>
+            <param name="source">The public key of the account to transfer tokens from.</param>
+            <param name="destination">The public key of the account to account to transfer tokens to.</param>
+            <param name="amount">The amount of tokens to transfer.</param>
+            <param name="owner">The account owner.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.TransferChecked(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,System.UInt64,System.Int32,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            <para>
+            Initializes an instruction to transfer tokens from one account to another either directly or via a delegate.
+            If this account is associated with the native mint then equal amounts of SOL and Tokens will be transferred to the destination account.
+            </para>
+            <para>
+            This instruction differs from Transfer in that the token mint and decimals value is checked by the caller.
+            This may be useful when creating transactions offline or within a hardware wallet.
+            </para>
+            </summary>
+            <param name="source">The public key of the account to transfer tokens from.</param>
+            <param name="destination">The public key of the account to account to transfer tokens to.</param>
+            <param name="amount">The amount of tokens to transfer.</param>
+            <param name="decimals">The token decimals.</param>
+            <param name="owner">The account owner.</param>
+            <param name="tokenMint">The public key token mint.</param>
+            <param name="signers">Signing accounts if the `owner` is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.InitializeAccount(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey)">
+            <summary>
+            <para>Initializes an instruction to initialize a new account to hold tokens.
+            If this account is associated with the native mint then the token balance of the initialized account will be equal to the amount of SOL in the account.
+            If this account is associated with another mint, that mint must be initialized before this command can succeed.
+            </para>
+            <para>
+            The InitializeAccount instruction requires no signers and MUST be included within the same Transaction
+            as the system program's <see cref="M:Solnet.Programs.SystemProgram.CreateAccount(Solnet.Wallet.Account,Solnet.Wallet.Account,System.UInt64,System.UInt64,Solnet.Wallet.PublicKey)"/>"/>
+            instruction that creates the account being initialized.
+            Otherwise another party can acquire ownership of the uninitialized account.
+            </para>
+            </summary>
+            <param name="account">The public key of the account to initialize.</param>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="owner">The public key of the account to set as owner of the initialized account.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.InitializeMultiSignature(Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.PublicKey},System.Int32)">
+            <summary>
+            Initializes an instruction to initialize a multi signature token account.
+            </summary>
+            <param name="multiSignature">Public key of the multi signature account.</param>
+            <param name="signers">Addresses of multi signature signers.</param>
+            <param name="m">The number of signatures required to validate this multi signature account.</param>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.InitializeMint(Solnet.Wallet.PublicKey,System.Int32,Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey)">
+            <summary>
+            Initializes an instruction to transfer tokens from one account to another either directly or via a delegate.
+            If this account is associated with the native mint then equal amounts of SOL and Tokens will be transferred to the destination account.
+            </summary>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="decimals">The token decimals.</param>
+            <param name="mintAuthority">The public key of the token mint authority.</param>
+            <param name="freezeAuthority">The token freeze authority.</param>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.MintTo(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,System.UInt64,Solnet.Wallet.Account)">
+            <summary>
+            Initializes an instruction to mint tokens to a destination account.
+            </summary>
+            <param name="mint">The public key token mint.</param>
+            <param name="destination">The public key of the account to mint tokens to.</param>
+            <param name="amount">The amount of tokens.</param>
+            <param name="mintAuthority">The token mint authority account.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.Approve(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,System.UInt64,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initializes an instruction to approve a transaction.
+            </summary>
+            <param name="source">The public key source account.</param>
+            <param name="delegatePublicKey">The public key of the delegate account authorized to perform a transfer from the source account.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="amount">The maximum amount of tokens the delegate may transfer.</param>
+            <param name="signers">Signing accounts if the `owner` is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.Revoke(Solnet.Wallet.PublicKey,Solnet.Wallet.Account,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initializes an instruction to revoke a transaction.
+            </summary>
+            <param name="delegatePublicKey">The delegate account authorized to perform a transfer from the source account.</param>
+            <param name="ownerAccount">The owner account of the source account.</param>
+            <param name="signers">Signing accounts if the `owner` is a multisig.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.SetAuthority(Solnet.Wallet.PublicKey,Solnet.Programs.AuthorityType,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to set an authority on an account.
+            </summary>
+            <param name="account">The account to set the authority on.</param>
+            <param name="authority">The type of authority to set.</param>
+            <param name="currentAuthority">The current authority of the specified type.</param>
+            <param name="newAuthority">The new authority.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.Burn(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,System.UInt64,Solnet.Wallet.Account,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to burn tokens.
+            </summary>
+            <param name="account">The public key of the account to burn tokens from.</param>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="amount">The amount of tokens to burn.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.CloseAccount(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to close an account.
+            </summary>
+            <param name="account">The public key of the account to close.</param>
+            <param name="destination">The public key of the account that will receive the SOL.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="programId">The public key which represents the associated program id.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.FreezeAccount(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to freeze a token account.
+            </summary>
+            <param name="account">The public key of the account to freeze.</param>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="programId">The public key which represents the associated program id.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.ThawAccount(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to thaw a token account.
+            </summary>
+            <param name="account">The public key of the account to thaw.</param>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="programId">The public key which represents the associated program id.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.ApproveChecked(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,System.UInt64,System.Byte,Solnet.Wallet.Account,Solnet.Wallet.PublicKey,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to approve a transaction.
+            <para>
+            This instruction differs from Approve in that the amount and decimals value is checked by the caller.
+            This may be useful when creating transactions offline or within a hardware wallet.
+            </para>
+            </summary>
+            <param name="source">The public key of the source account.</param>
+            <param name="delegatePublicKey">The public key of the delegate account authorized to perform a transfer from the source account.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="amount">The maximum amount of tokens the delegate may transfer.</param>
+            <param name="signers">Signing accounts if the `owner` is a multi signature.</param>
+            <param name="decimals">The token decimals.</param>
+            <param name="mint">The public key of the token mint.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.MintToChecked(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,System.UInt64,System.Int32,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to approve a transaction.
+            <para>
+            This instruction differs from MintTo in that the amount and decimals value is checked by the caller.
+            This may be useful when creating transactions offline or within a hardware wallet.
+            </para>
+            </summary>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="destination">The public key of the account to mint tokens to.</param>
+            <param name="mintAuthority">The token mint authority account.</param>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The token decimals.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.BurnChecked(Solnet.Wallet.PublicKey,Solnet.Wallet.PublicKey,Solnet.Wallet.Account,System.UInt64,System.Int32,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Initialize an instruction to burn tokens.
+            <para>
+            This instruction differs from Burn in that the amount and decimals value is checked by the caller.
+            This may be useful when creating transactions offline or within a hardware wallet.
+            </para>
+            </summary>
+            <param name="mint">The public key of the token mint.</param>
+            <param name="account">The public key of the account to burn from.</param>
+            <param name="owner">The owner account of the source account.</param>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The token decimals.</param>
+            <param name="signers">Signing accounts if the <c>account</c> is a multi signature.</param>
+            <returns>The transaction instruction.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgram.AddSigners(System.Collections.Generic.List{Solnet.Rpc.Models.AccountMeta},Solnet.Wallet.Account,System.Collections.Generic.IEnumerable{Solnet.Wallet.Account})">
+            <summary>
+            Adds the list of signers to the list of keys.
+            </summary>
+            <param name="keys">The instruction's list of keys.</param>
+            <param name="owner">The owner account.</param>
+            <param name="signers">The list of signers.</param>
+            <returns>The list of keys with the added signers.</returns>
+        </member>
+        <member name="T:Solnet.Programs.TokenProgramData">
+            <summary>
+            Implements the token program data encodings.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeRevokeData">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.Revoke"/> method.
+            </summary>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeApproveData(System.UInt64)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.Approve"/> method.
+            </summary>
+            <param name="amount">The amount of tokens to approve the transfer of.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeInitializeAccountData">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.InitializeAccount"/> method.
+            </summary>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeInitializeMintData(System.Byte[],System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.InitializeMint"/> method.
+            </summary>
+            <param name="mintAuthority">The mint authority for the token.</param>
+            <param name="freezeAuthority">The freeze authority for the token.</param>
+            <param name="decimals">The amount of decimals.</param>
+            <param name="freezeAuthorityOption">The freeze authority option for the token.</param>
+            <remarks>The <c>freezeAuthorityOption</c> parameter is related to the existence or not of a freeze authority.</remarks>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeTransferData(System.UInt64)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.Transfer"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeTransferCheckedData(System.UInt64,System.Int32)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.TransferChecked"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The number of decimals of the token.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeMintToData(System.UInt64)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.MintTo"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeInitializeMultiSignatureData(System.Int32)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.InitializeMultiSignature"/> method.
+            </summary>
+            <param name="m">The number of signers necessary to validate the account.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeSetAuthorityData(Solnet.Programs.AuthorityType,System.Int32,System.Byte[])">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.SetAuthority"/> method.
+            </summary>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeBurnData(System.UInt64)">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.Burn"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeCloseAccountData">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.CloseAccount"/> method.
+            </summary>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeFreezeAccountData">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.FreezeAccount"/> method.
+            </summary>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeThawAccountData">
+            <summary>
+            Encode the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.ThawAccount"/> method.
+            </summary>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeApproveCheckedData(System.UInt64,System.Int32)">
+            <summary>
+            Encodes the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.ApproveChecked"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The decimals of the token.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeMintToCheckedData(System.UInt64,System.Int32)">
+            <summary>
+            Encodes the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.MintToChecked"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The decimals of the token.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeBurnCheckedData(System.UInt64,System.Int32)">
+            <summary>
+            Encodes the transaction instruction data for the <see cref="F:Solnet.Programs.TokenProgramInstructions.BurnChecked"/> method.
+            </summary>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The decimals of the token.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeAmountLayout(System.Byte,System.UInt64)">
+            <summary>
+            Encodes the transaction data for the methods which only require the amount.
+            </summary>
+            <param name="method">The method identifier.</param>
+            <param name="amount">The amount of tokens.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="M:Solnet.Programs.TokenProgramData.EncodeAmountCheckedLayout(System.Byte,System.UInt64,System.Byte)">
+            <summary>
+            Encodes the transaction data for the methods which only require the amount and the number of decimals.
+            </summary>
+            <param name="method">The method identifier.</param>
+            <param name="amount">The amount of tokens.</param>
+            <param name="decimals">The decimals of the token.</param>
+            <returns>The byte array with the encoded data.</returns>
+        </member>
+        <member name="T:Solnet.Programs.TokenProgramInstructions">
+            <summary>
+            Represents the instruction types for the <see cref="T:Solnet.Programs.TokenProgram"/>.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.InitializeMint">
+            <summary>
+            Initialize a token mint.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.InitializeAccount">
+            <summary>
+            Initialize a token account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.InitializeMultiSignature">
+            <summary>
+            Initialize a multi signature token account.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.Transfer">
+            <summary>
+            Transfer token transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.Approve">
+            <summary>
+            Approve token transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.Revoke">
+            <summary>
+            Revoke token transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.SetAuthority">
+            <summary>
+            Set token authority transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.MintTo">
+            <summary>
+            MintTo token account transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.Burn">
+            <summary>
+            Burn token transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.CloseAccount">
+            <summary>
+            Close token account transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.FreezeAccount">
+            <summary>
+            Freeze token account transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.ThawAccount">
+            <summary>
+            Thaw token account transaction.
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.TransferChecked">
+            <summary>
+            Transfer checked token transaction.
+            <remarks>Differs from <see cref="F:Solnet.Programs.TokenProgramInstructions.Transfer"/> in that the decimals value is asserted by the caller.</remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.ApproveChecked">
+            <summary>
+            Approve checked token transaction.
+            <remarks>Differs from <see cref="F:Solnet.Programs.TokenProgramInstructions.Approve"/> in that the decimals value is asserted by the caller.</remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.MintToChecked">
+            <summary>
+            MintTo checked token transaction.
+            <remarks>Differs from <see cref="F:Solnet.Programs.TokenProgramInstructions.MintTo"/> in that the decimals value is asserted by the caller.</remarks>
+            </summary>
+        </member>
+        <member name="F:Solnet.Programs.TokenProgramInstructions.BurnChecked">
+            <summary>
+            Burn checked token transaction.
+            <remarks>Differs from <see cref="F:Solnet.Programs.TokenProgramInstructions.Burn"/> in that the decimals value is asserted by the caller.</remarks>
+            </summary>
+        </member>
+        <member name="T:Solnet.Programs.Utils">
+            <summary>
+            Utilities class for programs message encoding.
+            </summary>
+        </member>
+        <member name="M:Solnet.Programs.Utils.Uint32ToByteArrayLe(System.Int64,System.Byte[],System.Int32)">
+            <summary>
+            Write 4 bytes to the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
+            </summary>
+            <param name="val">The value to write.</param>
+            <param name="array">The array to write in.</param>
+            <param name="offset">The offset at which to start writing.</param>
+        </member>
+        <member name="M:Solnet.Programs.Utils.Int64ToByteArrayLe(System.UInt64,System.Byte[],System.Int32)">
+            <summary>
+            Write 8 bytes to the byte array (starting at the offset) as signed 64-bit integer in little endian format.
+            </summary>
+            <param name="val">The value to write.</param>
+            <param name="array">The array to write in.</param>
+            <param name="offset">The offset at which to start writing.</param>
+        </member>
+    </members>
+</doc>

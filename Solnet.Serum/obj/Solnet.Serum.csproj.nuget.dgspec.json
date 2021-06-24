@@ -1,0 +1,74 @@
+{
+  "format": 1,
+  "restore": {
+    "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj": {}
+  },
+  "projects": {
+    "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj": {
+      "version": "0.1.1",
+      "restore": {
+        "projectUniqueName": "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj",
+        "projectName": "Solnet.Serum",
+        "projectPath": "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj",
+        "packagesPath": "/home/murlux/.nuget/packages/",
+        "outputPath": "/envs/Solnet.Serum/Solnet.Serum/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/murlux/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Console": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/home/murlux/.dotnet/sdk/5.0.200/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

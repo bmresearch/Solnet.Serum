@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "5454emheGLlLm5Qb4vbG7T1cFtA/NSTB0yoHlt7f6HfC1manMHF5VMZKGbo5w7I/AuRdNSGYWHw49/Wsr4sT2g==",
+  "success": true,
+  "projectFilePath": "/envs/Solnet.Serum/Solnet.Serum.Examples/Solnet.Serum.Examples.csproj",
+  "expectedPackageFiles": [
+    "/home/murlux/.nuget/packages/microsoft.extensions.configuration/5.0.0/microsoft.extensions.configuration.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.configuration.abstractions/5.0.0/microsoft.extensions.configuration.abstractions.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.configuration.binder/5.0.0/microsoft.extensions.configuration.binder.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.dependencyinjection/5.0.0/microsoft.extensions.dependencyinjection.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/5.0.0/microsoft.extensions.dependencyinjection.abstractions.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.logging/5.0.0/microsoft.extensions.logging.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.logging.abstractions/5.0.0/microsoft.extensions.logging.abstractions.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.logging.configuration/5.0.0/microsoft.extensions.logging.configuration.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.logging.console/5.0.0/microsoft.extensions.logging.console.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.options/5.0.0/microsoft.extensions.options.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.options.configurationextensions/5.0.0/microsoft.extensions.options.configurationextensions.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/microsoft.extensions.primitives/5.0.0/microsoft.extensions.primitives.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
