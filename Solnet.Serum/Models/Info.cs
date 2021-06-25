@@ -1,5 +1,3 @@
-// unset
-
 using Solnet.Serum.Converters;
 using Solnet.Wallet;
 using System.Diagnostics;
@@ -13,6 +11,11 @@ namespace Solnet.Serum.Models
     [DebuggerDisplay("Market = {Address.Key}")]
     public class MarketInfo
     {
+        /// <summary>
+        /// Whether the market has been deprecated or not.
+        /// </summary>
+        public bool Deprecated { get; set; }
+
         /// <summary>
         /// The name of the market.
         /// </summary>

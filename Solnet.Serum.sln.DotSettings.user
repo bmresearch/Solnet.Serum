@@ -1,5 +1,11 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=_002Fenvs_002FSolnet_002Fsrc_002FSolnet_002ERpc_002Fbin_002FDebug_002Fnet5_002E0_002FSolnet_002ERpc_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/home/murlux/.cache/JetBrains/Rider2021.1/resharper-host/temp/Rider/vAny/CoverageData/_Solnet.Serum.318005801/Snapshot/snapshot.utdcvr</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bbbdfd05_002D6430_002D4a89_002Da7b0_002D12fb9c9d93b1/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ClientFactoryTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/envs/Solnet.Serum/Solnet.Serum.Test" Presentation="&amp;lt;Solnet.Serum.Test&amp;gt;" /&gt;
+&lt;/SessionState&gt;</s:String>
+	
+	
 	
 	
 	

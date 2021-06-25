@@ -1,5 +1,5 @@
-// unset
-
+using Solnet.Serum.Layouts;
+using Solnet.Serum.Models.Flags;
 using Solnet.Wallet;
 using System;
 using System.Buffers.Binary;
@@ -8,13 +8,13 @@ using System.Diagnostics;
 namespace Solnet.Serum.Models
 {
     /// <summary>
-    /// Represents a market in Serum.
+    /// Represents a Market in Serum.
     /// </summary>
     [DebuggerDisplay("PubKey = {OwnAddress.Key}")]
     public class Market
     {
         /// <summary>
-        /// The account flags.
+        /// The flags that define the account type.
         /// </summary>
         public AccountFlags Flags;
 

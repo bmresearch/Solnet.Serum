@@ -41,6 +41,16 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
+          "dependencies": {
+            "Solnet.Rpc": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Solnet.Wallet": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -105,6 +115,18 @@
             "Microsoft.Extensions.Logging.Console": {
               "target": "Package",
               "version": "[5.0.0, )"
+            },
+            "Solnet.Programs": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Solnet.Rpc": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Solnet.Wallet": {
+              "target": "Package",
+              "version": "[0.2.0, )"
             }
           },
           "imports": [

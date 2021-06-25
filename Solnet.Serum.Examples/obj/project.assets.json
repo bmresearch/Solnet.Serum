@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net5.0": {
+      "Chaos.NaCl.Standard/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Chaos.NaCl.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Chaos.NaCl.dll": {}
+        }
+      },
       "Microsoft.Extensions.Configuration/5.0.0": {
         "type": "package",
         "dependencies": {
@@ -159,13 +168,64 @@
           "lib/netcoreapp3.0/Microsoft.Extensions.Primitives.dll": {}
         }
       },
+      "Portable.BouncyCastle/1.8.2": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/BouncyCastle.Crypto.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/BouncyCastle.Crypto.dll": {}
+        }
+      },
+      "Solnet.Programs/0.2.0": {
+        "type": "package",
+        "dependencies": {
+          "Solnet.Rpc": "0.2.0"
+        },
+        "compile": {
+          "lib/net5.0/Solnet.Programs.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/Solnet.Programs.dll": {}
+        }
+      },
+      "Solnet.Rpc/0.2.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "5.0.0",
+          "Microsoft.Extensions.Logging.Console": "5.0.0",
+          "Solnet.Wallet": "0.2.0"
+        },
+        "compile": {
+          "lib/net5.0/Solnet.Rpc.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/Solnet.Rpc.dll": {}
+        }
+      },
+      "Solnet.Wallet/0.2.0": {
+        "type": "package",
+        "dependencies": {
+          "Chaos.NaCl.Standard": "1.0.0",
+          "Portable.BouncyCastle": "1.8.2"
+        },
+        "compile": {
+          "lib/net5.0/Solnet.Wallet.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/Solnet.Wallet.dll": {}
+        }
+      },
       "Solnet.Serum/0.1.1": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
           "Microsoft.Extensions.Logging": "5.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "5.0.0",
-          "Microsoft.Extensions.Logging.Console": "5.0.0"
+          "Microsoft.Extensions.Logging.Console": "5.0.0",
+          "Solnet.Programs": "0.2.0",
+          "Solnet.Rpc": "0.2.0",
+          "Solnet.Wallet": "0.2.0"
         },
         "compile": {
           "bin/placeholder/Solnet.Serum.dll": {}
@@ -177,6 +237,18 @@
     }
   },
   "libraries": {
+    "Chaos.NaCl.Standard/1.0.0": {
+      "sha512": "8ajPyzu49LSIdPgeg56eDdKu1j8FZJngKgTn9rXHV3GNVly49XFvPAwoWuUT8xPze3OjVUOWQZaO82HWrYFFEw==",
+      "type": "package",
+      "path": "chaos.nacl.standard/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "chaos.nacl.standard.1.0.0.nupkg.sha512",
+        "chaos.nacl.standard.nuspec",
+        "lib/netstandard2.0/Chaos.NaCl.dll"
+      ]
+    },
     "Microsoft.Extensions.Configuration/5.0.0": {
       "sha512": "LN322qEKHjuVEhhXueTUe7RNePooZmS8aGid5aK2woX3NPjSnONFyKUc6+JknOS6ce6h2tCLfKPTBXE3mN/6Ag==",
       "type": "package",
@@ -429,6 +501,69 @@
         "version.txt"
       ]
     },
+    "Portable.BouncyCastle/1.8.2": {
+      "sha512": "XpJVIhjPiO0o+DU36eeIzqnRilDmE8Z7Kfhm9V9o1yNqM3ikgleD94Z5W/LeEu3t63LaZl2CNJexaix+I6AUMg==",
+      "type": "package",
+      "path": "portable.bouncycastle/1.8.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/BouncyCastle.Crypto.dll",
+        "lib/net40/BouncyCastle.Crypto.xml",
+        "lib/netstandard1.0/BouncyCastle.Crypto.dll",
+        "lib/netstandard1.0/BouncyCastle.Crypto.xml",
+        "lib/netstandard1.3/BouncyCastle.Crypto.dll",
+        "lib/netstandard1.3/BouncyCastle.Crypto.xml",
+        "lib/netstandard2.0/BouncyCastle.Crypto.dll",
+        "lib/netstandard2.0/BouncyCastle.Crypto.xml",
+        "lib/portable-net40+sl5+win8+wp8+wpa81/BouncyCastle.Crypto.dll",
+        "lib/portable-net40+sl5+win8+wp8+wpa81/BouncyCastle.Crypto.xml",
+        "portable.bouncycastle.1.8.2.nupkg.sha512",
+        "portable.bouncycastle.nuspec"
+      ]
+    },
+    "Solnet.Programs/0.2.0": {
+      "sha512": "fTznjuDKCkMrQz5H/Q1R85OwkgBoyZcjerv/peQMmQdrPwdYnl8UxEi6Yu72oFd+6V2zo31PxCLfbSciBi9olA==",
+      "type": "package",
+      "path": "solnet.programs/0.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net5.0/Solnet.Programs.dll",
+        "lib/net5.0/Solnet.Programs.xml",
+        "solnet.programs.0.2.0.nupkg.sha512",
+        "solnet.programs.nuspec"
+      ]
+    },
+    "Solnet.Rpc/0.2.0": {
+      "sha512": "rJmFDkwWqOAJQkbJ4k3hSTEY8VuyCoKWWwXwHzmg9VArbM2dBsdl0kHpkl7UgKRdLMnhQZdFDCasFxkQgwklvg==",
+      "type": "package",
+      "path": "solnet.rpc/0.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net5.0/Solnet.Rpc.dll",
+        "lib/net5.0/Solnet.Rpc.xml",
+        "solnet.rpc.0.2.0.nupkg.sha512",
+        "solnet.rpc.nuspec"
+      ]
+    },
+    "Solnet.Wallet/0.2.0": {
+      "sha512": "4iht9igZEs7AZC3yTK0YUVv9d5VlrNetVgCxP9YvJTNucvw4Di9k9C0k5HcukQmgOw4hEH/YWLLbcWnWMl3Eug==",
+      "type": "package",
+      "path": "solnet.wallet/0.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net5.0/Solnet.Wallet.dll",
+        "lib/net5.0/Solnet.Wallet.xml",
+        "solnet.wallet.0.2.0.nupkg.sha512",
+        "solnet.wallet.nuspec"
+      ]
+    },
     "Solnet.Serum/0.1.1": {
       "type": "project",
       "path": "../Solnet.Serum/Solnet.Serum.csproj",
@@ -437,7 +572,9 @@
   },
   "projectFileDependencyGroups": {
     "net5.0": [
-      "Solnet.Serum >= 0.1.1"
+      "Solnet.Rpc >= 0.2.0",
+      "Solnet.Serum >= 0.1.1",
+      "Solnet.Wallet >= 0.2.0"
     ]
   },
   "packageFolders": {
@@ -480,6 +617,16 @@
     "frameworks": {
       "net5.0": {
         "targetAlias": "net5.0",
+        "dependencies": {
+          "Solnet.Rpc": {
+            "target": "Package",
+            "version": "[0.2.0, )"
+          },
+          "Solnet.Wallet": {
+            "target": "Package",
+            "version": "[0.2.0, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

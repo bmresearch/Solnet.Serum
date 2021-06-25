@@ -1,5 +1,3 @@
-// unset
-
 using Solnet.Rpc;
 using System;
 

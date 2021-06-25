@@ -1,14 +1,16 @@
-// unset
-
 using System;
 using System.Buffers.Binary;
 
-namespace Solnet.Serum.Models
+namespace Solnet.Serum.Models.Flags
 {
     /// <summary>
     /// Represents the account's flags.
+    /// <remarks>
+    /// According to this, the account can be a <see cref="Market"/>, an <see cref="OpenOrdersAccount"/>,
+    /// an <see cref="EventQueue"/>, a <see cref="RequestQueue"/> or the Bids/Asks account for the order book.
+    /// </remarks>
     /// </summary>
-    public class AccountFlags
+    public class AccountFlags : Flag
     {
         #region Flag Mask Values
 
@@ -50,42 +52,37 @@ namespace Solnet.Serum.Models
         #endregion
 
         /// <summary>
-        /// The bitmask for the account flags.
-        /// </summary>
-        public readonly byte Bitmask;
-        
-        /// <summary>
-        /// 
+        /// Whether the account is initialized or not.
         /// </summary>
         public bool IsInitialized => (Bitmask & Initialized) == Initialized;
         
         /// <summary>
-        /// 
+        /// Whether the account is a market account or not.
         /// </summary>
         public bool IsMarket => (Bitmask & Market) == Market;
 
         /// <summary>
-        /// 
+        /// Whether the account is an open orders account or not.
         /// </summary>
         public bool IsOpenOrders => (Bitmask & OpenOrders) == OpenOrders;
         
         /// <summary>
-        /// 
+        /// Whether the account is a request queue account or not.
         /// </summary>
         public bool IsRequestQueue => (Bitmask & RequestQueue) == RequestQueue;
 
         /// <summary>
-        /// 
+        /// Whether the account is an event queue account or not.
         /// </summary>
         public bool IsEventQueue => (Bitmask & EventQueue) == EventQueue;
         
         /// <summary>
-        /// 
+        /// Whether the account is a bids account or not.
         /// </summary>
         public bool IsBids => (Bitmask & Bids) == Bids;
 
         /// <summary>
-        /// 
+        /// Whether the account is an asks account or not.
         /// </summary>
         public bool IsAsks => (Bitmask & Asks) == Asks;
 
@@ -93,10 +90,7 @@ namespace Solnet.Serum.Models
         /// Initialize the account flags with the given bit mask.
         /// </summary>
         /// <param name="bitmask">The bit mask.</param>
-        private AccountFlags(byte bitmask)
-        {
-            Bitmask = bitmask;
-        }
+        private AccountFlags(byte bitmask) : base(bitmask) { }
 
         /// <summary>
         /// Deserialize a span of bytes into a <see cref="Market"/> instance.

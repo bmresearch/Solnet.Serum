@@ -1,5 +1,3 @@
-// unset
-
 using Solnet.Rpc;
 using Solnet.Serum.Models;
 using System;
@@ -14,7 +12,7 @@ namespace Solnet.Serum.Examples
         private readonly ISerumClient _serumClient;
         
         /// <summary>
-        /// Public key for SXP/USDC Serum market.
+        /// Public key for SXP/USDC Serum Market.
         /// </summary>
         private const string MarketAddress = "13vjJ8pxDMmzen26bQ5UrouX8dkXYPW1p3VLVDjxXrKR";
 

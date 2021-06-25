@@ -1,9 +1,9 @@
-// unset
+using Solnet.Serum.Models;
 
-namespace Solnet.Serum.Models
+namespace Solnet.Serum.Layouts
 {
     /// <summary>
-    /// Represents the layout of the market data structure.
+    /// Represents the layout of the <see cref="Market"/> data structure.
     /// </summary>
     internal static class MarketDataLayout
     {

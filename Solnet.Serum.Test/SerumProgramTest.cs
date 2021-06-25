@@ -3,11 +3,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Solnet.Serum.Test
 {
     [TestClass]
-    public class SerumTest
+    public class SerumProgramTest
     {
-        [TestMethod]
-        public void TestMethod1()
-        {
-        }
+        
     }
 }

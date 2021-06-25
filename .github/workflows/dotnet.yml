@@ -16,5 +16,5 @@ jobs:
         uses: cake-build/cake-action@v1
         with:
             script-path: build.cake
-            target: Build
+            target: Pack
             cake-bootstrap: true

@@ -375,12 +375,12 @@
         </member>
         <member name="P:Solnet.Rpc.Core.Http.RequestResult`1.WasSuccessful">
             <summary>
-            Returns <c>true</c> if the request was succesffully handled and parsed.
+            Returns <c>true</c> if the request was successfully handled and parsed.
             </summary>
         </member>
         <member name="P:Solnet.Rpc.Core.Http.RequestResult`1.WasHttpRequestSuccessful">
             <summary>
-            Returns <c>true</c> if the HTTP request was successfull (e.g. Code 200).
+            Returns <c>true</c> if the HTTP request was successful (e.g. Code 200).
             </summary>
         </member>
         <member name="P:Solnet.Rpc.Core.Http.RequestResult`1.WasRequestSuccessfullyHandled">
@@ -406,6 +406,13 @@
         <member name="P:Solnet.Rpc.Core.Http.RequestResult`1.ServerErrorCode">
             <summary>
             Returns the error code if one was found in the error object when the server is unable to handle the request.
+            </summary>
+        </member>
+        <member name="M:Solnet.Rpc.Core.Http.RequestResult`1.#ctor(System.Net.Http.HttpResponseMessage,`0)">
+            <summary>
+            Initialize the request result.
+            <param name="resultMsg">An http request result.</param>
+            <param name="result">The type of the request result.</param>
             </summary>
         </member>
         <member name="T:Solnet.Rpc.Core.IdGenerator">

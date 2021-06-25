@@ -1,11 +1,9 @@
-// unset
-
 namespace Solnet.Serum.Models
 {
     /// <summary>
     /// Represents the order type.
     /// </summary>
-    public enum OrderTypeLayout
+    public enum OrderType
     {
         /// <summary>
         /// A limit order.

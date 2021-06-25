@@ -1,7 +1,6 @@
-// unset
-
 using Solnet.Wallet;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -23,7 +22,7 @@ namespace Solnet.Serum.Converters
         /// <inheritdoc/>
         public override void Write(Utf8JsonWriter writer, PublicKey value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            writer.WriteStringValue(value.Key);
         }
     }
 }

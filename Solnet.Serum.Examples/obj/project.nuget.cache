@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "5454emheGLlLm5Qb4vbG7T1cFtA/NSTB0yoHlt7f6HfC1manMHF5VMZKGbo5w7I/AuRdNSGYWHw49/Wsr4sT2g==",
+  "dgSpecHash": "+TCxD4m7q7wYxveYP+hyMHrEMs9b/uC0dkFa/E4DQ+sQRqmJqzN/O8EbpkFT3RA0hvD3guMk9AgvOoT9lakI/A==",
   "success": true,
   "projectFilePath": "/envs/Solnet.Serum/Solnet.Serum.Examples/Solnet.Serum.Examples.csproj",
   "expectedPackageFiles": [
+    "/home/murlux/.nuget/packages/chaos.nacl.standard/1.0.0/chaos.nacl.standard.1.0.0.nupkg.sha512",
     "/home/murlux/.nuget/packages/microsoft.extensions.configuration/5.0.0/microsoft.extensions.configuration.5.0.0.nupkg.sha512",
     "/home/murlux/.nuget/packages/microsoft.extensions.configuration.abstractions/5.0.0/microsoft.extensions.configuration.abstractions.5.0.0.nupkg.sha512",
     "/home/murlux/.nuget/packages/microsoft.extensions.configuration.binder/5.0.0/microsoft.extensions.configuration.binder.5.0.0.nupkg.sha512",
@@ -15,7 +16,11 @@
     "/home/murlux/.nuget/packages/microsoft.extensions.logging.console/5.0.0/microsoft.extensions.logging.console.5.0.0.nupkg.sha512",
     "/home/murlux/.nuget/packages/microsoft.extensions.options/5.0.0/microsoft.extensions.options.5.0.0.nupkg.sha512",
     "/home/murlux/.nuget/packages/microsoft.extensions.options.configurationextensions/5.0.0/microsoft.extensions.options.configurationextensions.5.0.0.nupkg.sha512",
-    "/home/murlux/.nuget/packages/microsoft.extensions.primitives/5.0.0/microsoft.extensions.primitives.5.0.0.nupkg.sha512"
+    "/home/murlux/.nuget/packages/microsoft.extensions.primitives/5.0.0/microsoft.extensions.primitives.5.0.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/portable.bouncycastle/1.8.2/portable.bouncycastle.1.8.2.nupkg.sha512",
+    "/home/murlux/.nuget/packages/solnet.programs/0.2.0/solnet.programs.0.2.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/solnet.rpc/0.2.0/solnet.rpc.0.2.0.nupkg.sha512",
+    "/home/murlux/.nuget/packages/solnet.wallet/0.2.0/solnet.wallet.0.2.0.nupkg.sha512"
   ],
   "logs": []
 }

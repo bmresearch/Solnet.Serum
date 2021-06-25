@@ -1,5 +1,3 @@
-// unset
-
 namespace Solnet.Serum.Models
 {
     /// <summary>

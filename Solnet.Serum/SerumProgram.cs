@@ -1,5 +1,3 @@
-// unset
-
 using Solnet.Wallet;
 
 namespace Solnet.Serum

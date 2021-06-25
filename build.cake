@@ -51,7 +51,8 @@ Task("Test")
         var coverletSettings = new CoverletSettings {
             CollectCoverage = true,
             CoverletOutputDirectory = coverageFolder,
-            CoverletOutputName = coberturaFileName
+            CoverletOutputName = coberturaFileName,
+            CoverletOutputFormat  = CoverletOutputFormat.cobertura
         };
 
         var testSettings = new DotNetCoreTestSettings
@@ -59,20 +60,10 @@ Task("Test")
             NoRestore = true,
             Configuration = configuration,
             NoBuild = true,
-            ArgumentCustomization = args => args.Append($"--logger trx")
+            ArgumentCustomization = args => args.Append($"--logger trx"),
         };
 
         DotNetCoreTest(testProjectsRelativePaths[0], testSettings, coverletSettings);
-
-        coverletSettings.MergeWithFile = jsonFilePath;
-        for (int i = 1; i < testProjectsRelativePaths.Length; i++)
-        {
-            if (i == testProjectsRelativePaths.Length - 1)
-            {
-                coverletSettings.CoverletOutputFormat  = CoverletOutputFormat.cobertura;
-            }
-            DotNetCoreTest(testProjectsRelativePaths[i], testSettings, coverletSettings);
-        }
     });
 
 

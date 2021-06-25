@@ -1,7 +1,17 @@
-![solnet](assets/solnet-serum-horizontal.png)
+<p align="center">
+    <img src="https://raw.githubusercontent.com/bmresearch/Solnet.Serum/master/assets/solnet-serum-icon.png" margin="auto" height="175"/>
+</p>
 
 <p align="center">
-    <a href="">
+    <a href="https://dev.azure.com/bmresearch/solnet/_build/latest?definitionId=2&branchName=refs%2Fpull%2F7%2Fmerge">
+        <img src="https://github/workflow/status/bmresearch/Solnet.Serum/dotnet.yml?style=flat-square"
+            alt="GitHub Workflow Build Status (master)" ></a>
+
+[![.NET](https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml/badge.svg)]
+(https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml)
+    
+
+<a href="">
         <img src="https://img.shields.io/github/license/bmresearch/solnet.serum?style=flat-square"
             alt="Code License"></a>
     <br>

@@ -25,7 +25,11 @@
         "frameworks": {
           "net5.0": {
             "targetAlias": "net5.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj": {
+                "projectPath": "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
@@ -50,9 +54,105 @@
               "target": "Package",
               "version": "[16.7.1, )"
             },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.16.1, )"
+            },
+            "Solnet.Rpc": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Solnet.Wallet": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
             "coverlet.collector": {
               "target": "Package",
               "version": "[1.3.0, )"
+            },
+            "coverlet.msbuild": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/home/murlux/.dotnet/sdk/5.0.200/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj": {
+      "version": "0.1.1",
+      "restore": {
+        "projectUniqueName": "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj",
+        "projectName": "Solnet.Serum",
+        "projectPath": "/envs/Solnet.Serum/Solnet.Serum/Solnet.Serum.csproj",
+        "packagesPath": "/home/murlux/.nuget/packages/",
+        "outputPath": "/envs/Solnet.Serum/Solnet.Serum/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/murlux/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Console": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Solnet.Programs": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Solnet.Rpc": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Solnet.Wallet": {
+              "target": "Package",
+              "version": "[0.2.0, )"
             }
           },
           "imports": [
