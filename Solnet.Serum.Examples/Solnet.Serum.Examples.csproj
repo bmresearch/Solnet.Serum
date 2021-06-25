@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Solnet.Serum\Solnet.Serum.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Solnet.Rpc" Version="0.2.0" />
+      <PackageReference Include="Solnet.Wallet" Version="0.2.0" />
+    </ItemGroup>
+
+</Project>
