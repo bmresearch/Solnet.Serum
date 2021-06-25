@@ -15,6 +15,6 @@ jobs:
       - name: Run the build script
         uses: cake-build/cake-action@v1
         with:
-            script-path: './build.sh'
+            script-path: build.cake
             target: Build
             cake-bootstrap: true
