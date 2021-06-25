@@ -16,18 +16,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Solnet.Rpc, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\Solnet\src\Solnet.Rpc\bin\Debug\net5.0\Solnet.Rpc.dll</HintPath>
-        </Reference>
-        <Reference Include="Solnet.Wallet, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\Solnet\src\Solnet.Wallet\bin\Debug\net5.0\Solnet.Wallet.dll</HintPath>
-        </Reference>
-        <Reference Include="Solnet.Programs, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\Solnet\src\Solnet.Programs\bin\Debug\net5.0\Solnet.Programs.dll</HintPath>
-        </Reference>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0.0" />
+        <PackageReference Include="Solnet.Programs" Version="0.2.0" />
+        <PackageReference Include="Solnet.Rpc" Version="0.2.0" />
+        <PackageReference Include="Solnet.Wallet" Version="0.2.0" />
     </ItemGroup>
 
     <Import Project="..\SharedBuildProperties.props" />

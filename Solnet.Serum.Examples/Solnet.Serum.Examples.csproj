@@ -10,12 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Solnet.Rpc, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=MSIL">
-        <HintPath>..\..\Solnet\src\Solnet.Rpc\bin\Debug\net5.0\Solnet.Rpc.dll</HintPath>
-      </Reference>
-      <Reference Include="Solnet.Wallet, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=MSIL">
-        <HintPath>..\..\Solnet\src\Solnet.Wallet\bin\Debug\net5.0\Solnet.Wallet.dll</HintPath>
-      </Reference>
+      <PackageReference Include="Solnet.Rpc" Version="0.2.0" />
+      <PackageReference Include="Solnet.Wallet" Version="0.2.0" />
     </ItemGroup>
 
 </Project>
