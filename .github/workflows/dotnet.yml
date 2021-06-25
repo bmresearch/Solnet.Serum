@@ -8,19 +8,13 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Get the sources
         uses: actions/checkout@v1
       - name: Run the build script
         uses: cake-build/cake-action@v1
         with:
-            # The path of the Cake script to run.
             script-path: './build.sh'
-            # The name of the task to execute. Note that this argument must be supported by the script.
             target: Build
-            # Flag for if Cake modules should be installed/bootstrapped.
             cake-bootstrap: true
