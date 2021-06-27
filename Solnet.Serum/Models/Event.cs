@@ -3,6 +3,7 @@ using Solnet.Serum.Models.Flags;
 using Solnet.Wallet;
 using System;
 using System.Buffers.Binary;
+using System.Linq;
 
 namespace Solnet.Serum.Models
 {
