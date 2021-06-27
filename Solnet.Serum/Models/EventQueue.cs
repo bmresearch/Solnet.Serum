@@ -39,15 +39,14 @@ namespace Solnet.Serum.Models
 
             for (int i = 0; i < numElements; i++)
             {
-                ReadOnlySpan<byte> eventData = headLessData[..EventDataLayout.EventSpanLength];
-                Event evt = Event.Deserialize(eventData);
+                long idx = (header.Head + header.Count + numElements - 1 - i) % numElements;
+                long evtOffset = idx * EventDataLayout.EventSpanLength;
+
+                Event evt = Event.Deserialize(
+                    headLessData.Slice((int) evtOffset, EventDataLayout.EventSpanLength));
                 events.Add(evt);
-
-                headLessData = headLessData.Slice(
-                    EventDataLayout.EventSpanLength, 
-                    headLessData.Length - EventDataLayout.EventSpanLength);
             }
-
+            
             return new EventQueue
             {
                 Header = header,
