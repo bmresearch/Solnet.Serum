@@ -108,7 +108,34 @@ namespace Solnet.Serum
                 ? Solnet.Rpc.ClientFactory.GetStreamingClient(url, logger)
                 : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger);
         }
+        
+        
+        /// <inheritdoc cref="ISerumClient.GetEventQueueAsync(string,Commitment)"/>
+        public async Task<EventQueue> GetEventQueueAsync(string marketAddress, Commitment commitment = Commitment.Finalized)
+        {
+            RequestResult<ResponseValue<AccountInfo>> res =
+                await _rpcClient.GetAccountInfoAsync(marketAddress, commitment);
+            return res.WasSuccessful ? EventQueue.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0])) : null;
+        }
+        
+        /// <inheritdoc cref="ISerumClient.GetEventQueue(string,Commitment)"/>
+        public EventQueue GetEventQueue(string marketAddress, Commitment commitment = Commitment.Finalized)
+            => GetEventQueueAsync(marketAddress, commitment).Result;
 
+        /// <inheritdoc cref="ISerumClient.GetMarketAsync(string,Commitment)"/>
+        public async Task<Market> GetMarketAsync(string marketAddress, Commitment commitment = Commitment.Finalized)
+        {
+            RequestResult<ResponseValue<AccountInfo>> res =
+                await _rpcClient.GetAccountInfoAsync(marketAddress, commitment);
+            return res.WasSuccessful ? Market.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0])) : null;
+        }
+        
+        /// <inheritdoc cref="ISerumClient.GetMarket(string,Commitment)"/>
+        public Market GetMarket(string marketAddress, Commitment commitment = Commitment.Finalized)
+            => GetMarketAsync(marketAddress, commitment).Result;
+
+        #region Token Mints and Markets
+        
         /// <summary>
         /// Handle the response to the request.
         /// </summary>
@@ -120,18 +147,8 @@ namespace Solnet.Serum
             _logger?.LogInformation(new EventId(0, "REC"), $"Result: {data}");
             return JsonSerializer.Deserialize<T>(data, _jsonSerializerOptions);
         }
+        
 
-        /// <inheritdoc cref="ISerumClient.GetMarketAsync(string,Commitment)"/>
-        public async Task<Market> GetMarketAsync(string marketAddress, Commitment commitment = Commitment.Finalized)
-        {
-            RequestResult<ResponseValue<AccountInfo>> res =
-                await _rpcClient.GetAccountInfoAsync(marketAddress, commitment);
-            return res.WasSuccessful ? Market.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0])) : null;
-        }
-
-        /// <inheritdoc cref="ISerumClient.GetMarket(string,Commitment)"/>
-        public Market GetMarket(string marketAddress, Commitment commitment = Commitment.Finalized)
-            => GetMarketAsync(marketAddress, commitment).Result;
 
         /// <inheritdoc cref="ISerumClient.GetMarkets"/>
         public async Task<IList<MarketInfo>> GetMarketsAsync()
@@ -164,5 +181,7 @@ namespace Solnet.Serum
 
         /// <inheritdoc cref="ISerumClient.GetTokens"/>
         public IList<TokenInfo> GetTokens() => GetTokensAsync().Result;
+
+        #endregion
     }
 }

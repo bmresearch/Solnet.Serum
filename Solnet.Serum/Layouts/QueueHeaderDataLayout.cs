@@ -5,12 +5,12 @@ namespace Solnet.Serum.Layouts
     /// <summary>
     /// Represents the layout of the <see cref="QueueHeader"/> data structure.
     /// </summary>
-    internal class QueueHeaderLayout
+    internal class QueueHeaderDataLayout
     {
         /// <summary>
         /// The size of the data for a queue header structure.
         /// </summary>
-        internal const int QueueHeaderDataSize = 37;
+        internal const int QueueHeaderSpanLength = 37;
 
         /// <summary>
         /// The number of bytes of the padding at the beginning of the queue header structure.
