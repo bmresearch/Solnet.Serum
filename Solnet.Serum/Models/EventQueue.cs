@@ -46,7 +46,6 @@ namespace Solnet.Serum.Models
                     headLessData.Slice((int) evtOffset, EventDataLayout.EventSpanLength));
                 events.Add(evt);
             }
-            
             return new EventQueue
             {
                 Header = header,
