@@ -108,10 +108,10 @@ namespace Solnet.Serum
             _streamingRpcClient = url != null
                 ? Solnet.Rpc.ClientFactory.GetStreamingClient(url, logger)
                 : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger);
+            _streamingRpcClient.Init().Wait();
         }
 
         #region Streaming RPC
-
         
         /// <inheritdoc cref="SubscribeEventQueueAsync"/>
         public Task<SubscriptionState> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized)
@@ -161,8 +161,7 @@ namespace Solnet.Serum
             => GetMarketAsync(marketAddress, commitment).Result;
 
         #endregion
-        
-        
+
         #region Token Mints and Markets
         
         /// <summary>
