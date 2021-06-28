@@ -108,7 +108,6 @@ namespace Solnet.Serum
             _streamingRpcClient = url != null
                 ? Solnet.Rpc.ClientFactory.GetStreamingClient(url, logger)
                 : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger);
-            _streamingRpcClient.Init().Wait();
         }
 
         #region Streaming RPC
