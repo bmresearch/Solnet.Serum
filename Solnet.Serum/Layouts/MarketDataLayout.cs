@@ -10,7 +10,7 @@ namespace Solnet.Serum.Layouts
         /// <summary>
         /// The size of the data for a market account.
         /// </summary>
-        internal const int MarketAccountDataSize = 388;
+        internal const int MarketAccountSpanLength = 388;
         
         /// <summary>
         /// The number of bytes of the padding at the beginning of the market structure.

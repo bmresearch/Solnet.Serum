@@ -207,5 +207,26 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(0UL, result.ReferrerRebateAccrued);
             Assert.AreEqual(17329972132752316649UL, result.VaultSignerNonce);
         }
+        
+        [TestMethod]
+        public void GetEventQueueTest()
+        {
+            string getAccountInfoResponseData = File.ReadAllText("Resources/GetEventQueueAccountInfoResponse.json");
+            Mock<IRpcClient> rpcMock = SetupGetAccountInfo(
+                getAccountInfoResponseData,
+                "3bdmcKUenYeRaEXnJEC2skJhU5KKY7JqK3aPMmxtEqTd",
+                "https://api.mainnet-beta.solana.com",
+                Commitment.Confirmed);
+
+            SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+
+            EventQueue result = sut.GetEventQueue("3bdmcKUenYeRaEXnJEC2skJhU5KKY7JqK3aPMmxtEqTd", Commitment.Confirmed);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2021U, result.Header.Head);
+            Assert.AreEqual(0U, result.Header.Count);
+            Assert.AreEqual(4112696U, result.Header.NextSequenceNumber);
+            Assert.AreEqual(11915, result.Events.Count);
+        }
     }
 }

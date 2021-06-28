@@ -1,5 +1,7 @@
+using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -50,5 +52,38 @@ namespace Solnet.Serum
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         /// <returns>The market's account data.</returns>
         Market GetMarket(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Gets the account data associated with the given event queue address in the Serum DEX.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <param name="address">The public key of the event queue account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>A task which may return the event queue's account data.</returns>
+        Task<EventQueue> GetEventQueueAsync(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Gets the account data associated with the given event queue address in the Serum DEX.
+        /// </summary>
+        /// <param name="address">The public key of the event queue account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>The event queue's account data.</returns>
+        EventQueue GetEventQueue(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Event Queue. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action which receives an event queue.</param>
+        /// <param name="eventQueueAddress">The public key of the event queue account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        Task<SubscriptionState> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Event Queue.
+        /// </summary>
+        /// <param name="action">An action which receives an event queue.</param>
+        /// <param name="eventQueueAddress">The public key of the event queue account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        SubscriptionState SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
     }
 }

@@ -6,7 +6,7 @@ using System.Buffers.Binary;
 namespace Solnet.Serum.Models
 {
     /// <summary>
-    /// Represents the header of either an <see cref="EventQueue"/> or a <see cref="RequestQueue"/>.
+    /// Represents the header of either an <see cref="EventQueue"/>.
     /// </summary>
     public class QueueHeader
     {
@@ -37,12 +37,12 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static QueueHeader Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != QueueHeaderLayout.QueueHeaderDataSize)
+            if (data.Length != QueueHeaderDataLayout.QueueHeaderSpanLength)
                 return null;
 
             ReadOnlySpan<byte> padLessData = data.Slice(
                 MarketDataLayout.StartPadding,
-                data.Length - (QueueHeaderLayout.StartPadding + QueueHeaderLayout.EndPadding));
+                data.Length - (QueueHeaderDataLayout.StartPadding + QueueHeaderDataLayout.EndPadding));
 
             AccountFlags flags = AccountFlags.Deserialize(padLessData[..8]);
 
@@ -50,11 +50,11 @@ namespace Solnet.Serum.Models
             {
                 Flags = flags,
                 Head = BinaryPrimitives.ReadUInt32LittleEndian(
-                    padLessData.Slice(QueueHeaderLayout.HeadOffset, 4)),
+                    padLessData.Slice(QueueHeaderDataLayout.HeadOffset, 4)),
                 Count = BinaryPrimitives.ReadUInt32LittleEndian(
-                    padLessData.Slice(QueueHeaderLayout.CountOffset, 4)),
+                    padLessData.Slice(QueueHeaderDataLayout.CountOffset, 4)),
                 NextSequenceNumber = BinaryPrimitives.ReadUInt32LittleEndian(
-                    padLessData.Slice(QueueHeaderLayout.NextSequenceNumberOffset, 4))
+                    padLessData.Slice(QueueHeaderDataLayout.NextSequenceNumberOffset, 4))
             };
 
             return header;
