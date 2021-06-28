@@ -5,7 +5,7 @@ using System;
 namespace Solnet.Serum.Examples
 {
     /// <summary>
-    /// An example which fetches the account data of a serum market.
+    /// An example which fetches the account data of a serum event queue.
     /// </summary>
     public class GetEventQueue : IRunnableExample
     {

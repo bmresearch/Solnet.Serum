@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Solnet.Rpc;
 using Solnet.Rpc.Core.Http;
+using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
@@ -107,20 +108,45 @@ namespace Solnet.Serum
             _streamingRpcClient = url != null
                 ? Solnet.Rpc.ClientFactory.GetStreamingClient(url, logger)
                 : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger);
+            _streamingRpcClient.Init().Wait();
+        }
+
+        #region Streaming RPC
+
+        
+        /// <inheritdoc cref="SubscribeEventQueueAsync"/>
+        public Task<SubscriptionState> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized)
+        {
+            return _streamingRpcClient.SubscribeAccountInfoAsync(eventQueueAddress,
+                (state, value) =>
+                {
+                    EventQueue eventQueue = EventQueue.Deserialize(Convert.FromBase64String(value.Value.Data[0]));
+                    if (eventQueue != null)
+                    {
+                        action(eventQueue);
+                    }
+                }, commitment);
         }
         
+        /// <inheritdoc cref="SubscribeEventQueue"/>
+        public SubscriptionState SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized) 
+            => SubscribeEventQueueAsync(action, eventQueueAddress, commitment).Result;
+
+        #endregion
         
+        #region RPC Requests
+
         /// <inheritdoc cref="ISerumClient.GetEventQueueAsync(string,Commitment)"/>
-        public async Task<EventQueue> GetEventQueueAsync(string marketAddress, Commitment commitment = Commitment.Finalized)
+        public async Task<EventQueue> GetEventQueueAsync(string eventQueueAddress, Commitment commitment = Commitment.Finalized)
         {
             RequestResult<ResponseValue<AccountInfo>> res =
-                await _rpcClient.GetAccountInfoAsync(marketAddress, commitment);
+                await _rpcClient.GetAccountInfoAsync(eventQueueAddress, commitment);
             return res.WasSuccessful ? EventQueue.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0])) : null;
         }
         
         /// <inheritdoc cref="ISerumClient.GetEventQueue(string,Commitment)"/>
-        public EventQueue GetEventQueue(string marketAddress, Commitment commitment = Commitment.Finalized)
-            => GetEventQueueAsync(marketAddress, commitment).Result;
+        public EventQueue GetEventQueue(string eventQueueAddress, Commitment commitment = Commitment.Finalized)
+            => GetEventQueueAsync(eventQueueAddress, commitment).Result;
 
         /// <inheritdoc cref="ISerumClient.GetMarketAsync(string,Commitment)"/>
         public async Task<Market> GetMarketAsync(string marketAddress, Commitment commitment = Commitment.Finalized)
@@ -134,6 +160,8 @@ namespace Solnet.Serum
         public Market GetMarket(string marketAddress, Commitment commitment = Commitment.Finalized)
             => GetMarketAsync(marketAddress, commitment).Result;
 
+        #endregion
+        
         #region Token Mints and Markets
         
         /// <summary>

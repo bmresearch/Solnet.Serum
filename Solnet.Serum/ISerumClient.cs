@@ -1,5 +1,7 @@
+using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -67,5 +69,21 @@ namespace Solnet.Serum
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         /// <returns>The event queue's account data.</returns>
         EventQueue GetEventQueue(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Event Queue. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action which receives an event queue.</param>
+        /// <param name="eventQueueAddress">The public key of the event queue account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        Task<SubscriptionState> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Event Queue.
+        /// </summary>
+        /// <param name="action">An action which receives an event queue.</param>
+        /// <param name="eventQueueAddress">The public key of the event queue account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        SubscriptionState SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
     }
 }
