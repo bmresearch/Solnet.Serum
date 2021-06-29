@@ -38,24 +38,30 @@ namespace Solnet.Serum.Models
         public ulong ClientOrderId;
 
         /// <summary>
-        /// 
+        /// The native quantity released due to this order.
         /// </summary>
         public ulong NativeQuantityReleased;
 
         /// <summary>
-        /// 
+        /// The native quantity paid by this order.
         /// </summary>
         public ulong NativeQuantityPaid;
 
         /// <summary>
-        /// 
+        /// The native fee or rebate of this order.
         /// </summary>
         public ulong NativeFeeOrRebate;
 
         /// <summary>
-        /// 
+        /// The public key of the open order's account.
         /// </summary>
         public PublicKey PublicKey;
+
+        /// <summary>
+        /// The event's sequence number.
+        /// <remarks>This is used to allow to process only the most recent events.</remarks>
+        /// </summary>
+        public long? SequenceNumber;
 
         /// <summary>
         /// Deserialize a span of bytes into a <see cref="EventQueue"/> instance.

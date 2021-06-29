@@ -16,9 +16,9 @@ namespace Solnet.Serum.Examples
         
         public string Name { get; set; }
 
-        public Handler(SubscriptionState subscriptionState)
+        public Handler(Subscription<EventQueue> sub)
         {
-            subscriptionState.SubscriptionChanged += SubscriptionChanged;
+            sub.SubscriptionState.SubscriptionChanged += SubscriptionChanged;
         }
         
         private void SubscriptionChanged(object sender, SubscriptionEvent e)
@@ -61,7 +61,7 @@ namespace Solnet.Serum.Examples
                 
             Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-            SubscriptionState subState = _serumClient.SubscribeEventQueue(queue =>
+            Subscription<EventQueue> sub = _serumClient.SubscribeEventQueue(queue =>
             {
                 Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSequenceNumber}");
             }, market.EventQueue);
@@ -87,12 +87,12 @@ namespace Solnet.Serum.Examples
                 if(market == null) continue;
                 Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-                SubscriptionState subState = _serumClient.SubscribeEventQueue(queue =>
+                Subscription<EventQueue> sub = _serumClient.SubscribeEventQueue(queue =>
                 {
                     Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSequenceNumber}");
                 }, market.EventQueue);
                 
-                _handlers.Add(new Handler(subState));
+                _handlers.Add(new Handler(sub));
                 Thread.Sleep(100);
             }
             

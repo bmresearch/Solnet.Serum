@@ -76,7 +76,7 @@ namespace Solnet.Serum
         /// <param name="action">An action which receives an event queue.</param>
         /// <param name="eventQueueAddress">The public key of the event queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        Task<SubscriptionState> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        Task<Subscription<EventQueue>> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Event Queue.
@@ -84,6 +84,6 @@ namespace Solnet.Serum
         /// <param name="action">An action which receives an event queue.</param>
         /// <param name="eventQueueAddress">The public key of the event queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        SubscriptionState SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        Subscription<EventQueue> SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
     }
 }
