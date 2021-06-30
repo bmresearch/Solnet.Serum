@@ -195,7 +195,7 @@ namespace Solnet.Serum
         public IList<MarketInfo> GetMarkets() => GetMarketsAsync().Result;
 
         /// <inheritdoc cref="ISerumClient.GetTokensAsync"/>
-        public async Task<IList<TokenInfo>> GetTokensAsync()
+        public async Task<IList<TokenMintInfo>> GetTokensAsync()
         {
             Task<HttpResponseMessage> res = _httpClient.GetAsync(MarketInfosEndpoint);
 
@@ -204,11 +204,11 @@ namespace Solnet.Serum
                 return null;
             }
 
-            return await HandleResponse<List<TokenInfo>>(res.Result);
+            return await HandleResponse<List<TokenMintInfo>>(res.Result);
         }
 
         /// <inheritdoc cref="ISerumClient.GetTokens"/>
-        public IList<TokenInfo> GetTokens() => GetTokensAsync().Result;
+        public IList<TokenMintInfo> GetTokens() => GetTokensAsync().Result;
 
         #endregion
     }

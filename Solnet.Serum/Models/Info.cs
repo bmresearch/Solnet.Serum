@@ -5,51 +5,26 @@ using System.Text.Json.Serialization;
 
 namespace Solnet.Serum.Models
 {
-    /// <summary>
-    /// Represents information about a market in Serum.
-    /// </summary>
+    // Represents information about a market in Serum.
     [DebuggerDisplay("Market = {Address.Key}")]
     public class MarketInfo
     {
-        /// <summary>
-        /// Whether the market has been deprecated or not.
-        /// </summary>
-        public bool Deprecated { get; set; }
-
-        /// <summary>
-        /// The name of the market.
-        /// </summary>
-        public string Name { get; set; }
-        
-        /// <summary>
-        /// The public key of the market account.
-        /// </summary>
+        public bool   Deprecated { get; set; }   // Whether the market has been deprecated or not.
+        public string Name       { get; set; }   // The name of the market.
+       
         [JsonConverter(typeof(PublicKeyJsonConverter))]
-        public PublicKey Address { get; set; }
+        public PublicKey Address { get; set; }   // The public key of the market account.
         
-        /// <summary>
-        /// The public key of the program id.
-        /// </summary>
         [JsonConverter(typeof(PublicKeyJsonConverter))]
-        public PublicKey ProgramId { get; set; }
+        public PublicKey ProgramId { get; set; } // The public key of the program id.
     }
     
-    /// <summary>
-    /// Represents information about a market in Serum.
-    /// </summary>
+    /// Represents information about a token mint in Serum.
     [DebuggerDisplay("Mint = {Address.Key}")]
-    public class TokenInfo
+    public class TokenMintInfo
     {
-        /// <summary>
-        /// The name of the token.
-        /// </summary>
-        public string Name { get; set; }
-        
-        /// <summary>
-        /// The public key of the token mint.
-        /// </summary>
+        public string Name { get; set; }        // The name of the token mint.
         [JsonConverter(typeof(PublicKeyJsonConverter))]
-        public PublicKey Address { get; set; }
+        public PublicKey Address { get; set; }  // The public key of the token mint.
     }
-
 }

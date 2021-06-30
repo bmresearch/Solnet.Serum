@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Solnet.Serum.Examples": {
+      "commandName": "Project",
+      "commandLineArgs": "GetEventQueue"
+    }
+  }
+}

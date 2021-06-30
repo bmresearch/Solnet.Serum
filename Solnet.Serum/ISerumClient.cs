@@ -28,13 +28,13 @@ namespace Solnet.Serum
         /// Gets the available tokens in the Serum DEX. This is an asynchronous operation.
         /// </summary>
         /// <returns>A task which may return a list with the token's info.</returns>
-        Task<IList<TokenInfo>> GetTokensAsync();
+        Task<IList<TokenMintInfo>> GetTokensAsync();
         
         /// <summary>
         /// Gets the available tokens in the Serum DEX.
         /// </summary>
         /// <returns>A list with the token's info.</returns>
-        IList<TokenInfo> GetTokens();
+        IList<TokenMintInfo> GetTokens();
         
         /// <summary>
         /// Gets the account data associated with the given market address in the Serum DEX.

@@ -1,166 +1,91 @@
-using Solnet.Serum.Layouts;
-using Solnet.Serum.Models.Flags;
-using Solnet.Wallet;
 using System;
-using System.Buffers.Binary;
 using System.Diagnostics;
+using Solnet.Wallet;
+using Solnet.Serum.Shared;
 
 namespace Solnet.Serum.Models
 {
-    /// <summary>
-    /// Represents a Market in Serum.
-    /// </summary>
     [DebuggerDisplay("PubKey = {OwnAddress.Key}")]
     public class Market
     {
-        /// <summary>
-        /// The flags that define the account type.
-        /// </summary>
-        public AccountFlags Flags;
+        public const int SerializedLength = 388;
+        public const int PadBytesAtStart = 5;   // Number of padding bytes at the start
+        public const int PadBytesAtEnd   = 7;   // Number of padding bytes at the end
 
-        /// <summary>
-        /// The market's own address.
-        /// </summary>
-        public PublicKey OwnAddress;
-
-        /// <summary>
-        /// The vault signer nonce.
-        /// </summary>
-        public ulong VaultSignerNonce;
-
-        /// <summary>
-        /// The public key of the base token mint of this market.
-        /// </summary>
-        public PublicKey BaseMint;
-
-        /// <summary>
-        /// The public key of the quote token mint of this market.
-        /// </summary>
-        public PublicKey QuoteMint;
-
-        /// <summary>
-        /// The public key of the base vault.
-        /// </summary>
-        public PublicKey BaseVault;
-
-        /// <summary>
-        /// The total deposits of the base token.
-        /// </summary>
-        public ulong BaseDepositsTotal;
-
-        /// <summary>
-        /// The fees accrued by the base token.
-        /// </summary>
-        public ulong BaseFeesAccrued;
-
-        /// <summary>
-        /// The public key of the quote vault.
-        /// </summary>
-        public PublicKey QuoteVault;
-
-        /// <summary>
-        /// The total deposits of the quote token.
-        /// </summary>
-        public ulong QuoteDepositsTotal;
-
-        /// <summary>
-        /// The fees accrued by the quote token.
-        /// </summary>
-        public ulong QuoteFeesAccrued;
-
-        /// <summary>
-        /// The dust threshold of the quote token.
-        /// </summary>
-        public ulong QuoteDustThreshold;
-
-        /// <summary>
-        /// The public key of the request queue of this market.
-        /// </summary>
-        public PublicKey RequestQueue;
-
-        /// <summary>
-        /// The public key of the event queue of this market.
-        /// </summary>
-        public PublicKey EventQueue;
-
-        /// <summary>
-        /// The public key of the market's bids account.
-        /// </summary>
-        public PublicKey Bids;
-
-        /// <summary>
-        /// The public key of the market's asks account.
-        /// </summary>
-        public PublicKey Asks;
-        
-        /// <summary>
-        /// The market's base token lot size.
-        /// </summary>
-        public ulong BaseLotSize;
-        
-        /// <summary>
-        /// The market's quote token lot size.
-        /// </summary>
-        public ulong QuoteLotSize;
-        
-        /// <summary>
-        /// The market's fee rate in basis points.
-        /// </summary>
-        public ulong FeeRateBasis;
-        
-        /// <summary>
-        /// The market's referrer rebate accrued.
-        /// </summary>
-        public ulong ReferrerRebateAccrued;
-
-        /// <summary>
-        /// Deserialize a span of bytes into a <see cref="Market"/> instance.
-        /// </summary>
-        /// <param name="data">The data to deserialize into the structure.</param>
-        /// <returns>The Market structure.</returns>
-        public static Market Deserialize(ReadOnlySpan<byte> data)
+        public static class Layout
         {
-            if (data.Length != MarketDataLayout.MarketAccountSpanLength)
-                return null;
+            // The following offsets are after padding has been removed
+            public const int AccountFlags          =   0;
+            public const int OwnAddress            =   8;
+            public const int VaultSigner           =  10;
+            public const int BaseMint              =  48;
+            public const int QuoteMint             =  80;
+            public const int BaseVault             = 112;
+            public const int BaseDeposits          = 144;
+            public const int BaseFees              = 152;
+            public const int QuoteVault            = 160;
+            public const int QuoteDeposits         = 192;
+            public const int QuoteFees             = 200;
+            public const int QuoteDustThreshold    = 208;
+            public const int RequestQueue          = 216;
+            public const int EventQueue            = 248;
+            public const int Bids                  = 280;
+            public const int Asks                  = 312;
+            public const int BaseLot               = 344;
+            public const int QuoteLot              = 352;
+            public const int FeeRateBasis          = 360;
+            public const int ReferrerRebateAccrued = 368;
+        }
 
-            ReadOnlySpan<byte> padLessData = data.Slice(
-                MarketDataLayout.StartPadding,
-                data.Length - (MarketDataLayout.StartPadding + MarketDataLayout.EndPadding));
+        public AccountFlags Flags;                  // The flags that define the account type.
+        public PublicKey    OwnAddress;             // The market's own address.
+        public ulong        VaultSignerNonce;       // The vault signer nonce.
+        public PublicKey    BaseMint;               // The public key of the base token mint of this market.
+        public PublicKey    QuoteMint;              // The public key of the quote token mint of this market.
+        public PublicKey    BaseVault;              // The public key of the base vault.
+        public ulong        BaseDepositsTotal;      // The total deposits of the base token.
+        public ulong        BaseFeesAccrued;        // The fees accrued by the base token.
+        public PublicKey    QuoteVault;             // The public key of the quote vault.
+        public ulong        QuoteDepositsTotal;     // The total deposits of the quote token.
+        public ulong        QuoteFeesAccrued;       // The fees accrued by the quote token.
+        public ulong        QuoteDustThreshold;     // The dust threshold of the quote token.
+        public PublicKey    RequestQueue;           // The public key of the request queue of this market.
+        public PublicKey    EventQueue;             // The public key of the event queue of this market.
+        public PublicKey    Bids;                   // The public key of the market's bids account.
+        public PublicKey    Asks;                   // The public key of the market's asks account.
+        public ulong        BaseLotSize;            // The market's base token lot size.
+        public ulong        QuoteLotSize;           // The market's quote token lot size.
+        public ulong        FeeRateBasis;           // The market's fee rate in basis points.
+        public ulong        ReferrerRebateAccrued;  // The market's referrer rebate accrued.
 
-            AccountFlags flags = AccountFlags.Deserialize(padLessData[..8]);
+        public static Market Deserialize(ReadOnlySpan<byte> dataWithPadding)
+        {
+            if (dataWithPadding.Length != SerializedLength) { return null; }
+            int lengthWithoutPadding = dataWithPadding.Length - (PadBytesAtStart + PadBytesAtEnd);    
+            ReadOnlySpan<byte> data  = dataWithPadding.Slice(PadBytesAtStart, lengthWithoutPadding);
 
             Market market = new()
             {
-                Flags = flags,
-                OwnAddress = new PublicKey(padLessData.Slice(MarketDataLayout.OwnAddressOffset, 32).ToArray()),
-                VaultSignerNonce = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.VaultSignerOffset, 8)),
-                BaseMint = new PublicKey(padLessData.Slice(MarketDataLayout.BaseMintOffset, 32).ToArray()),
-                QuoteMint = new PublicKey(padLessData.Slice(MarketDataLayout.QuoteMintOffset, 32).ToArray()),
-                BaseVault = new PublicKey(padLessData.Slice(MarketDataLayout.BaseVaultOffset, 32).ToArray()),
-                BaseDepositsTotal = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.BaseDepositsOffset, 8)),
-                BaseFeesAccrued = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.BaseFeesOffset, 8)),
-                QuoteVault = new PublicKey(padLessData.Slice(MarketDataLayout.QuoteVaultOffset, 32).ToArray()),
-                QuoteDepositsTotal = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteDepositsOffset, 8)),
-                QuoteFeesAccrued = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteFeesOffset, 8)),
-                QuoteDustThreshold = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteDustThresholdOffset, 8)),
-                RequestQueue = new PublicKey(padLessData.Slice(MarketDataLayout.RequestQueueOffset, 32).ToArray()),
-                EventQueue = new PublicKey(padLessData.Slice(MarketDataLayout.EventQueueOffset, 32).ToArray()),
-                Bids = new PublicKey(padLessData.Slice(MarketDataLayout.BidsOffset, 32).ToArray()),
-                Asks = new PublicKey(padLessData.Slice(MarketDataLayout.AsksOffset, 32).ToArray()),
-                BaseLotSize = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.BaseLotOffset, 8)),
-                QuoteLotSize = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteLotOffset, 8)),
-                FeeRateBasis = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.FeeRateBasisOffset, 8)),
-                ReferrerRebateAccrued = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.ReferrerRebateAccruedOffset, 8)),
+                Flags                 = data.GetU64      (Layout.AccountFlags),
+                OwnAddress            = data.GetPublicKey(Layout.OwnAddress),
+                VaultSignerNonce      = data.GetU64      (Layout.VaultSigner),
+                BaseMint              = data.GetPublicKey(Layout.BaseMint),
+                QuoteMint             = data.GetPublicKey(Layout.QuoteMint),
+                BaseVault             = data.GetPublicKey(Layout.BaseVault),
+                BaseDepositsTotal     = data.GetU64      (Layout.BaseDeposits),
+                BaseFeesAccrued       = data.GetU64      (Layout.BaseFees),
+                QuoteVault            = data.GetPublicKey(Layout.QuoteVault),
+                QuoteDepositsTotal    = data.GetU64      (Layout.QuoteDeposits),
+                QuoteFeesAccrued      = data.GetU64      (Layout.QuoteFees),
+                QuoteDustThreshold    = data.GetU64      (Layout.QuoteDustThreshold),
+                RequestQueue          = data.GetPublicKey(Layout.RequestQueue),
+                EventQueue            = data.GetPublicKey(Layout.EventQueue),
+                Bids                  = data.GetPublicKey(Layout.Bids),
+                Asks                  = data.GetPublicKey(Layout.Asks),
+                BaseLotSize           = data.GetU64      (Layout.BaseLot),
+                QuoteLotSize          = data.GetU64      (Layout.QuoteLot),
+                FeeRateBasis          = data.GetU64      (Layout.FeeRateBasis),
+                ReferrerRebateAccrued = data.GetU64      (Layout.ReferrerRebateAccrued)
             };
 
             return market;

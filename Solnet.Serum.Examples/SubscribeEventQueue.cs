@@ -10,11 +10,9 @@ namespace Solnet.Serum.Examples
 {
     public class Handler
     {
-        public SubscriptionState State { get; set; }
-        
-        public PublicKey EventQueue { get; set; }
-        
-        public string Name { get; set; }
+        public SubscriptionState State      { get; set; }
+        public PublicKey         EventQueue { get; set; }
+        public string            Name       { get; set; }
 
         public Handler(SubscriptionState subscriptionState)
         {
@@ -63,7 +61,7 @@ namespace Solnet.Serum.Examples
                 
             SubscriptionState subState = _serumClient.SubscribeEventQueue(queue =>
             {
-                Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSequenceNumber}");
+                Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSeqNum}");
             }, market.EventQueue);
             
             Console.ReadKey();
@@ -89,7 +87,7 @@ namespace Solnet.Serum.Examples
                 
                 SubscriptionState subState = _serumClient.SubscribeEventQueue(queue =>
                 {
-                    Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSequenceNumber}");
+                    Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSeqNum}");
                 }, market.EventQueue);
                 
                 _handlers.Add(new Handler(subState));

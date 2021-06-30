@@ -1,90 +1,54 @@
-using Solnet.Serum.Layouts;
-using Solnet.Serum.Models.Flags;
-using Solnet.Wallet;
 using System;
-using System.Buffers.Binary;
-using System.Linq;
+using Solnet.Wallet;
+using Solnet.Serum.Shared;
 
 namespace Solnet.Serum.Models
 {
-    /// <summary>
-    /// Represents an Event in Serum.
-    /// </summary>
+    //===========================================================
+    // Event Model
+    //===========================================================
     public class Event
     {
-        /// <summary>
-        /// The flags that define the event type.
-        /// </summary>
-        public EventFlags Flags;
+        public const int SerializedLength = 88;  // Total (serialized) size of this class
 
-        /// <summary>
-        /// The open order's slot.
-        /// </summary>
-        public byte OpenOrderSlot;
+        public static class Layout
+        {
+            public const int Flags             =  0;
+            public const int OpenOrderSlot     =  1;
+            public const int FeeTier           =  2;
+            public const int NativeQtyReleased =  8;
+            public const int NativeQtyPaid     = 16;
+            public const int NativeFeeOrRebate = 24;
+            public const int OrderId           = 32;
+            public const int PublicKey         = 48;
+            public const int ClientOrderId     = 80;
+        }
 
-        /// <summary>
-        /// The fee tier.
-        /// </summary>
-        public byte FeeTier;
+        public EventFlags  Flags;              // The flags that define the event type.
+        public byte        OpenOrderSlot;      // The open order's slot.
+        public byte        FeeTier;            // The fee tier.
+        public OrderId     OrderId;            // Order Id
+        public ulong       ClientOrderId;      // The client's order id.
+        public ulong       NativeQtyReleased;  
+        public ulong       NativeQtyPaid;
+        public ulong       NativeFeeOrRebate;
+        public PublicKey   PublicKey;
 
-        /// <summary>
-        /// The order id.
-        /// </summary>
-        public byte[] OrderId;
-
-        /// <summary>
-        /// The client's order id.
-        /// </summary>
-        public ulong ClientOrderId;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ulong NativeQuantityReleased;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ulong NativeQuantityPaid;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ulong NativeFeeOrRebate;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public PublicKey PublicKey;
-
-        /// <summary>
-        /// Deserialize a span of bytes into a <see cref="EventQueue"/> instance.
-        /// </summary>
-        /// <param name="data">The data to deserialize into the structure.</param>
-        /// <returns>The Event Queue structure.</returns>
+        // Deserialize a span of bytes into an 'Event'
         public static Event Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != EventDataLayout.EventSpanLength)
-                return null;
-
-            EventFlags flags = EventFlags.Deserialize(data[..1]);
-            
+            if (data.Length != SerializedLength) { return null; }
             return new Event
             {
-                Flags = flags,
-                OpenOrderSlot = data[EventDataLayout.OpenOrderSlotOffset],
-                FeeTier = data[EventDataLayout.FeeTierOffset],
-                NativeQuantityReleased = BinaryPrimitives.ReadUInt64LittleEndian(
-                    data.Slice(EventDataLayout.NativeQuantityReleasedOffset, 8)),
-                NativeQuantityPaid = BinaryPrimitives.ReadUInt64LittleEndian(
-                    data.Slice(EventDataLayout.NativeQuantityPaidOffset, 8)),
-                NativeFeeOrRebate = BinaryPrimitives.ReadUInt64LittleEndian(
-                    data.Slice(EventDataLayout.NativeFeeOrRebateOffset, 8)),
-                OrderId = data.Slice(EventDataLayout.OrderIdOffset, 16).ToArray(),
-                PublicKey = 
-                    new PublicKey(data.Slice(EventDataLayout.PublicKeyOffset, 32).ToArray()),
-                ClientOrderId = BinaryPrimitives.ReadUInt64LittleEndian(
-                    data.Slice(EventDataLayout.ClientOrderIdOffset, 8))
+                Flags              = data.GetU8       (Layout.Flags), 
+                OpenOrderSlot      = data.GetU8       (Layout.OpenOrderSlot),
+                FeeTier            = data.GetU8       (Layout.FeeTier),
+                NativeQtyReleased  = data.GetU64      (Layout.NativeQtyReleased),
+                NativeQtyPaid      = data.GetU64      (Layout.NativeQtyPaid),
+                NativeFeeOrRebate  = data.GetU64      (Layout.NativeFeeOrRebate),
+                OrderId            = data.GetOrderId  (Layout.OrderId),
+                PublicKey          = data.GetPublicKey(Layout.PublicKey),
+                ClientOrderId      = data.GetU64      (Layout.ClientOrderId)
             };
         }
     }

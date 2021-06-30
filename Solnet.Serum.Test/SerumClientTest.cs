@@ -110,7 +110,7 @@ namespace Solnet.Serum.Test
         {
             string testData = File.ReadAllText("Resources/PublicKeyConverterTestData.json");
             string testNamingPolicyData = File.ReadAllText("Resources/PublicKeyConverterNamingTestData.json");
-            var tokenInfo = new TokenInfo()
+            var tokenInfo = new TokenMintInfo()
             {
                 Name = "BTC",
                 Address = new PublicKey("9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E")
@@ -139,7 +139,7 @@ namespace Solnet.Serum.Test
 
             SerumClient sut = new(Cluster.MainNet, null, httpClient);
 
-            IList<TokenInfo> result = sut.GetTokens();
+            IList<TokenMintInfo> result = sut.GetTokens();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(18, result.Count);
@@ -223,10 +223,10 @@ namespace Solnet.Serum.Test
             EventQueue result = sut.GetEventQueue("3bdmcKUenYeRaEXnJEC2skJhU5KKY7JqK3aPMmxtEqTd", Commitment.Confirmed);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2021U, result.Header.Head);
-            Assert.AreEqual(0U, result.Header.Count);
-            Assert.AreEqual(4112696U, result.Header.NextSequenceNumber);
-            Assert.AreEqual(11915, result.Events.Count);
+            Assert.AreEqual(2021U,    result.Header.Head);
+            Assert.AreEqual(0U,       result.Header.Count);
+            Assert.AreEqual(4112696U, result.Header.NextSeqNum);
+            Assert.AreEqual(11915,    result.Events.Count);
         }
     }
 }

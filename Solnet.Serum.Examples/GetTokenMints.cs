@@ -22,9 +22,9 @@ namespace Solnet.Serum.Examples
         {
             Console.WriteLine($"Running {ToString()}");
             
-            IList<TokenInfo> res = _serumClient.GetTokens();
+            IList<TokenMintInfo> res = _serumClient.GetTokens();
 
-            foreach (TokenInfo tokenInfo in res)
+            foreach (TokenMintInfo tokenInfo in res)
             {
                 Console.WriteLine($"TokenInfo :: Name:\t{tokenInfo.Name}\t:: Address: {tokenInfo.Address.Key}");
             }
