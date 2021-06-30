@@ -1,5 +1,3 @@
-// unset
-
 namespace Solnet.Serum.Models
 {
     /// <summary>
@@ -16,10 +14,5 @@ namespace Solnet.Serum.Models
         /// Whether this slot within the <see cref="OpenOrdersAccount"/> Orders is free or not.
         /// </summary>
         public bool IsFreeSlot;
-
-        /// <summary>
-        /// Whether this order is a bid or not.
-        /// </summary>
-        public bool IsBid;
     }
 }
