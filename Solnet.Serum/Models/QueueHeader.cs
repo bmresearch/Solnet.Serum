@@ -1,8 +1,6 @@
 using Solnet.Programs.Utilities;
-using Solnet.Serum.Layouts;
 using Solnet.Serum.Models.Flags;
 using System;
-using System.Buffers.Binary;
 
 namespace Solnet.Serum.Models
 {

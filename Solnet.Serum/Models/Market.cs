@@ -1,9 +1,7 @@
 using Solnet.Programs.Utilities;
-using Solnet.Serum.Layouts;
 using Solnet.Serum.Models.Flags;
 using Solnet.Wallet;
 using System;
-using System.Buffers.Binary;
 using System.Diagnostics;
 
 namespace Solnet.Serum.Models
