@@ -1,8 +1,7 @@
-using Solnet.Serum.Layouts;
+using Solnet.Programs.Utilities;
 using Solnet.Serum.Models.Flags;
 using Solnet.Wallet;
 using System;
-using System.Buffers.Binary;
 using System.Diagnostics;
 
 namespace Solnet.Serum.Models
@@ -13,6 +12,126 @@ namespace Solnet.Serum.Models
     [DebuggerDisplay("PubKey = {OwnAddress.Key}")]
     public class Market
     {
+        #region Layout
+        
+        /// <summary>
+        /// Represents the layout of the <see cref="Market"/> data structure.
+        /// </summary>
+        internal static class Layout
+        {
+            /// <summary>
+            /// The size of the data for a market account.
+            /// </summary>
+            internal const int MarketAccountSpanLength = 388;
+            
+            /// <summary>
+            /// The number of bytes of the padding at the beginning of the market structure.
+            /// </summary>
+            internal const int StartPadding = 5;
+
+            /// <summary>
+            /// The number of bytes of the padding at the end of the market structure.
+            /// </summary>
+            internal const int EndPadding = 7;
+
+            /// <summary>
+            /// The offset at which the market's own address begins.
+            /// </summary>
+            internal const int OwnAddressOffset = 8;
+
+            /// <summary>
+            /// The offset at which the vault signer's nonce begins.
+            /// </summary>
+            internal const int VaultSignerOffset = 10;
+
+            /// <summary>
+            /// The offset at which the public key of the market's base mint begins.
+            /// </summary>
+            internal const int BaseMintOffset = 48;
+
+            /// <summary>
+            /// The offset at which the public key of the market's quote mint begins.
+            /// </summary>
+            internal const int QuoteMintOffset = 80;
+            
+            /// <summary>
+            /// The offset at which the public key of the market's base token vault begins.
+            /// </summary>
+            internal const int BaseVaultOffset = 112;
+            
+            /// <summary>
+            /// The offset at which the value of the total base token deposits begins.
+            /// </summary>
+            internal const int BaseDepositsOffset = 144;
+            
+            /// <summary>
+            /// The offset at which the value of the base token fees accrued begins.
+            /// </summary>
+            internal const int BaseFeesOffset = 152;
+            
+            /// <summary>
+            /// The offset at which the public key of the market's quote token vault begins.
+            /// </summary>
+            internal const int QuoteVaultOffset = 160;
+            
+            /// <summary>
+            /// The offset at which the value of the total quote token deposits begins.
+            /// </summary>
+            internal const int QuoteDepositsOffset = 192;
+            
+            /// <summary>
+            /// The offset at which the value of the quote token fees accrued begins.
+            /// </summary>
+            internal const int QuoteFeesOffset = 200;
+            
+            /// <summary>
+            /// The offset at which the value of the quote token dust threshold begins.
+            /// </summary>
+            internal const int QuoteDustThresholdOffset = 208;
+            
+            /// <summary>
+            /// The offset at which the public key of the market's request queue account begins.
+            /// </summary>
+            internal const int RequestQueueOffset = 216;
+            
+            /// <summary>
+            /// The offset at which the public key of the market's event queue account begins.
+            /// </summary>
+            internal const int EventQueueOffset = 248;
+            
+            /// <summary>
+            /// The offset at which the public key of the market's bids account begins.
+            /// </summary>
+            internal const int BidsOffset = 280;
+            
+            /// <summary>
+            /// The offset at which the public key of the market's asks account begins.
+            /// </summary>
+            internal const int AsksOffset = 312;
+            
+            /// <summary>
+            /// The offset at which the value of the market's base token lot size begins.
+            /// </summary>
+            internal const int BaseLotOffset = 344;
+            
+            /// <summary>
+            /// The offset at which the value of the market's quote token lot size begins.
+            /// </summary>
+            internal const int QuoteLotOffset = 352;
+            
+            /// <summary>
+            /// The offset at which the value of the market's fee rate basis points begins.
+            /// </summary>
+            internal const int FeeRateBasisOffset = 360;
+            
+            /// <summary>
+            /// The offset at which the value of the market's referrer rebate accrued begins.
+            /// </summary>
+            internal const int ReferrerRebateAccruedOffset = 368;
+        }
+        
+        #endregion
+        
         /// <summary>
         /// The flags that define the account type.
         /// </summary>
@@ -120,47 +239,37 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static Market Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != MarketDataLayout.MarketAccountSpanLength)
+            if (data.Length != Layout.MarketAccountSpanLength)
                 return null;
 
             ReadOnlySpan<byte> padLessData = data.Slice(
-                MarketDataLayout.StartPadding,
-                data.Length - (MarketDataLayout.StartPadding + MarketDataLayout.EndPadding));
+                Layout.StartPadding,
+                data.Length - (Layout.StartPadding + Layout.EndPadding));
 
             AccountFlags flags = AccountFlags.Deserialize(padLessData[..8]);
 
             Market market = new()
             {
                 Flags = flags,
-                OwnAddress = new PublicKey(padLessData.Slice(MarketDataLayout.OwnAddressOffset, 32).ToArray()),
-                VaultSignerNonce = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.VaultSignerOffset, 8)),
-                BaseMint = new PublicKey(padLessData.Slice(MarketDataLayout.BaseMintOffset, 32).ToArray()),
-                QuoteMint = new PublicKey(padLessData.Slice(MarketDataLayout.QuoteMintOffset, 32).ToArray()),
-                BaseVault = new PublicKey(padLessData.Slice(MarketDataLayout.BaseVaultOffset, 32).ToArray()),
-                BaseDepositsTotal = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.BaseDepositsOffset, 8)),
-                BaseFeesAccrued = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.BaseFeesOffset, 8)),
-                QuoteVault = new PublicKey(padLessData.Slice(MarketDataLayout.QuoteVaultOffset, 32).ToArray()),
-                QuoteDepositsTotal = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteDepositsOffset, 8)),
-                QuoteFeesAccrued = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteFeesOffset, 8)),
-                QuoteDustThreshold = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteDustThresholdOffset, 8)),
-                RequestQueue = new PublicKey(padLessData.Slice(MarketDataLayout.RequestQueueOffset, 32).ToArray()),
-                EventQueue = new PublicKey(padLessData.Slice(MarketDataLayout.EventQueueOffset, 32).ToArray()),
-                Bids = new PublicKey(padLessData.Slice(MarketDataLayout.BidsOffset, 32).ToArray()),
-                Asks = new PublicKey(padLessData.Slice(MarketDataLayout.AsksOffset, 32).ToArray()),
-                BaseLotSize = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.BaseLotOffset, 8)),
-                QuoteLotSize = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.QuoteLotOffset, 8)),
-                FeeRateBasis = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.FeeRateBasisOffset, 8)),
-                ReferrerRebateAccrued = BinaryPrimitives.ReadUInt64LittleEndian(
-                    padLessData.Slice(MarketDataLayout.ReferrerRebateAccruedOffset, 8)),
+                OwnAddress = padLessData.GetPubKey(Layout.OwnAddressOffset),
+                VaultSignerNonce = padLessData.GetU64(Layout.VaultSignerOffset),
+                BaseMint = padLessData.GetPubKey(Layout.BaseMintOffset),
+                QuoteMint = padLessData.GetPubKey(Layout.QuoteMintOffset),
+                BaseVault = padLessData.GetPubKey(Layout.BaseVaultOffset),
+                BaseDepositsTotal = padLessData.GetU64(Layout.BaseDepositsOffset),
+                BaseFeesAccrued = padLessData.GetU64(Layout.BaseFeesOffset),
+                QuoteVault = padLessData.GetPubKey(Layout.QuoteVaultOffset),
+                QuoteDepositsTotal = padLessData.GetU64(Layout.QuoteDepositsOffset),
+                QuoteFeesAccrued = padLessData.GetU64(Layout.QuoteFeesOffset),
+                QuoteDustThreshold = padLessData.GetU64(Layout.QuoteDustThresholdOffset),
+                RequestQueue = padLessData.GetPubKey(Layout.RequestQueueOffset),
+                EventQueue = padLessData.GetPubKey(Layout.EventQueueOffset),
+                Bids = padLessData.GetPubKey(Layout.BidsOffset),
+                Asks = padLessData.GetPubKey(Layout.AsksOffset),
+                BaseLotSize = padLessData.GetU64(Layout.BaseLotOffset),
+                QuoteLotSize = padLessData.GetU64(Layout.QuoteLotOffset),
+                FeeRateBasis = padLessData.GetU64(Layout.FeeRateBasisOffset),
+                ReferrerRebateAccrued = padLessData.GetU64(Layout.ReferrerRebateAccruedOffset),
             };
 
             return market;

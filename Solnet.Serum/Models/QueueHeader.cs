@@ -1,7 +1,6 @@
-using Solnet.Serum.Layouts;
+using Solnet.Programs.Utilities;
 using Solnet.Serum.Models.Flags;
 using System;
-using System.Buffers.Binary;
 
 namespace Solnet.Serum.Models
 {
@@ -10,6 +9,46 @@ namespace Solnet.Serum.Models
     /// </summary>
     public class QueueHeader
     {
+        #region Layout
+        
+        /// <summary>
+        /// Represents the layout of the <see cref="QueueHeader"/> data structure.
+        /// </summary>
+        internal class Layout
+        {
+            /// <summary>
+            /// The size of the data for a queue header structure.
+            /// </summary>
+            internal const int QueueHeaderSpanLength = 37;
+
+            /// <summary>
+            /// The number of bytes of the padding at the beginning of the queue header structure.
+            /// </summary>
+            internal const int StartPadding = 5;
+
+            /// <summary>
+            /// The number of bytes of the padding at the end of the queue header structure.
+            /// </summary>
+            internal const int EndPadding = 4;
+
+            /// <summary>
+            /// The offset at which the value of the queue's head begins.
+            /// </summary>
+            internal const int HeadOffset = 8;
+
+            /// <summary>
+            /// The offset at which the value of the queue's count begins.
+            /// </summary>
+            internal const int CountOffset = 16;
+
+            /// <summary>
+            /// The offset at which the value of the queue's next sequence number begins.
+            /// </summary>
+            internal const int NextSequenceNumberOffset = 24;
+        }
+
+        #endregion
+        
         /// <summary>
         /// The flags which define this queue account.
         /// </summary>
@@ -37,24 +76,21 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static QueueHeader Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != QueueHeaderDataLayout.QueueHeaderSpanLength)
+            if (data.Length != Layout.QueueHeaderSpanLength)
                 return null;
 
             ReadOnlySpan<byte> padLessData = data.Slice(
-                MarketDataLayout.StartPadding,
-                data.Length - (QueueHeaderDataLayout.StartPadding + QueueHeaderDataLayout.EndPadding));
+                Market.Layout.StartPadding,
+                data.Length - (Layout.StartPadding + Layout.EndPadding));
 
             AccountFlags flags = AccountFlags.Deserialize(padLessData[..8]);
 
             QueueHeader header = new()
             {
                 Flags = flags,
-                Head = BinaryPrimitives.ReadUInt32LittleEndian(
-                    padLessData.Slice(QueueHeaderDataLayout.HeadOffset, 4)),
-                Count = BinaryPrimitives.ReadUInt32LittleEndian(
-                    padLessData.Slice(QueueHeaderDataLayout.CountOffset, 4)),
-                NextSequenceNumber = BinaryPrimitives.ReadUInt32LittleEndian(
-                    padLessData.Slice(QueueHeaderDataLayout.NextSequenceNumberOffset, 4))
+                Head = padLessData.GetU32(Layout.HeadOffset),
+                Count = padLessData.GetU32(Layout.CountOffset),
+                NextSequenceNumber = padLessData.GetU32(Layout.NextSequenceNumberOffset)
             };
 
             return header;

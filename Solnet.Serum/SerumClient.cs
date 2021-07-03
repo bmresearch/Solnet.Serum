@@ -122,7 +122,7 @@ namespace Solnet.Serum
         /// <inheritdoc cref="SubscribeEventQueueAsync"/>
         public async Task<Subscription<EventQueue>> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized)
         {
-            _streamingRpcClient.Init().Wait();
+            _streamingRpcClient.ConnectAsync().Wait();
             SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(eventQueueAddress,
                 (_, value) =>
                 {
