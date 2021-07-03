@@ -27,22 +27,22 @@ namespace Solnet.Serum.Models
         /// <returns>The Event Queue structure.</returns>
         public static EventQueue Deserialize(ReadOnlySpan<byte> data)
         {
-            QueueHeader header = QueueHeader.Deserialize(data[..QueueHeaderDataLayout.QueueHeaderSpanLength]);
+            QueueHeader header = QueueHeader.Deserialize(data[..QueueHeader.Layout.QueueHeaderSpanLength]);
 
             ReadOnlySpan<byte> headLessData = data.Slice(
-                QueueHeaderDataLayout.QueueHeaderSpanLength, 
-                data.Length - QueueHeaderDataLayout.QueueHeaderSpanLength);
+                QueueHeader.Layout.QueueHeaderSpanLength, 
+                data.Length - QueueHeader.Layout.QueueHeaderSpanLength);
 
-            int numElements = headLessData.Length / EventDataLayout.EventSpanLength;
+            int numElements = headLessData.Length / Event.Layout.EventSpanLength;
             List<Event> events = new (numElements);
 
             for (int i = 0; i < numElements; i++)
             {
                 long idx = (header.Head + header.Count + numElements - 1 - i) % numElements;
-                long evtOffset = idx * EventDataLayout.EventSpanLength;
+                long evtOffset = idx * Event.Layout.EventSpanLength;
 
                 Event evt = Event.Deserialize(
-                    headLessData.Slice((int) evtOffset, EventDataLayout.EventSpanLength));
+                    headLessData.Slice((int) evtOffset, Event.Layout.EventSpanLength));
                 events.Add(evt);
             }
             return new EventQueue
@@ -61,13 +61,13 @@ namespace Solnet.Serum.Models
         /// <returns>The Event Queue structure.</returns>
         public static EventQueue DeserializeSince(ReadOnlySpan<byte> data, long lastSequenceNumber = 0)
         {
-            QueueHeader header = QueueHeader.Deserialize(data[..QueueHeaderDataLayout.QueueHeaderSpanLength]);
+            QueueHeader header = QueueHeader.Deserialize(data[..QueueHeader.Layout.QueueHeaderSpanLength]);
 
             ReadOnlySpan<byte> headLessData = data.Slice(
-                QueueHeaderDataLayout.QueueHeaderSpanLength, 
-                data.Length - QueueHeaderDataLayout.QueueHeaderSpanLength);
+                QueueHeader.Layout.QueueHeaderSpanLength, 
+                data.Length - QueueHeader.Layout.QueueHeaderSpanLength);
 
-            int numElements = headLessData.Length / EventDataLayout.EventSpanLength;
+            int numElements = headLessData.Length / Event.Layout.EventSpanLength;
 
             // Calculate number of missed events
             // Account for u32 & ring buffer overflows
@@ -90,10 +90,10 @@ namespace Solnet.Serum.Models
             for (int i = 0; i < missedEvents; i++)
             {
                 long idx = (startIdx + i) % numElements;
-                long evtOffset = idx * EventDataLayout.EventSpanLength;
+                long evtOffset = idx * Event.Layout.EventSpanLength;
 
                 Event evt = Event.Deserialize(
-                    headLessData.Slice((int) evtOffset, EventDataLayout.EventSpanLength));
+                    headLessData.Slice((int) evtOffset, Event.Layout.EventSpanLength));
                 evt.SequenceNumber = (startSequence + i) % modulo;
                 events.Add(evt);
             }
