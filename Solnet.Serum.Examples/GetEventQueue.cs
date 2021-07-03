@@ -33,7 +33,6 @@ namespace Solnet.Serum.Examples
                               $" Quote Mint: {res.QuoteMint.Key}");
 
             EventQueue eventQueue = _serumClient.GetEventQueue(res.EventQueue);
-
             Console.WriteLine($"EventQueue:: Events: {eventQueue.Events.Count} Head: {eventQueue.Header.Head} Count: {eventQueue.Header.Count} Sequence: {eventQueue.Header.NextSequenceNumber}");
         }
     }

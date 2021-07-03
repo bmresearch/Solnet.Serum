@@ -7,6 +7,7 @@ using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
+using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -63,6 +64,11 @@ namespace Solnet.Serum
         private IStreamingRpcClient _streamingRpcClient;
 
         /// <summary>
+        /// The list of event queue subscriptions.
+        /// </summary>
+        private IList<Subscription<EventQueue>> _eventQueueSubscriptions;
+        
+        /// <summary>
         /// The address of the cluster node.
         /// </summary>
         public Uri NodeAddress => _rpcClient.NodeAddress;
@@ -108,28 +114,50 @@ namespace Solnet.Serum
             _streamingRpcClient = url != null
                 ? Solnet.Rpc.ClientFactory.GetStreamingClient(url, logger)
                 : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger);
+            _eventQueueSubscriptions = new List<Subscription<EventQueue>>();
         }
 
         #region Streaming RPC
-
         
         /// <inheritdoc cref="SubscribeEventQueueAsync"/>
-        public Task<SubscriptionState> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized)
+        public async Task<Subscription<EventQueue>> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized)
         {
             _streamingRpcClient.Init().Wait();
-            return _streamingRpcClient.SubscribeAccountInfoAsync(eventQueueAddress,
-                (state, value) =>
+            SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(eventQueueAddress,
+                (_, value) =>
                 {
-                    EventQueue eventQueue = EventQueue.Deserialize(Convert.FromBase64String(value.Value.Data[0]));
-                    if (eventQueue != null)
+                    Subscription<EventQueue> evtQueueSub = null;
+                    EventQueue evtQueue;
+                    foreach (Subscription<EventQueue> subscription in _eventQueueSubscriptions)
                     {
-                        action(eventQueue);
+                        if (subscription.Address.Key == eventQueueAddress)
+                        {
+                            evtQueueSub = subscription;
+                        }
                     }
+
+                    if (evtQueueSub?.Data != null)
+                    {
+                        evtQueue = EventQueue.DeserializeSince(
+                            Convert.FromBase64String(value.Value.Data[0]), evtQueueSub.Data.Header.NextSequenceNumber);
+                        evtQueueSub.Data = evtQueue;
+                    }
+                    else
+                    {
+                        evtQueue = EventQueue.Deserialize(Convert.FromBase64String(value.Value.Data[0]));
+                        if (evtQueueSub != null) evtQueueSub.Data = evtQueue;
+                    }
+
+                    action(evtQueue);
                 }, commitment);
+            
+            Subscription<EventQueue> subEvtQueue = new () {SubscriptionState = sub, Address = new PublicKey(eventQueueAddress)};
+            _eventQueueSubscriptions.Add(subEvtQueue);
+            return subEvtQueue;
         }
         
         /// <inheritdoc cref="SubscribeEventQueue"/>
-        public SubscriptionState SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized) 
+        public Subscription<EventQueue> SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized) 
             => SubscribeEventQueueAsync(action, eventQueueAddress, commitment).Result;
 
         #endregion
@@ -161,7 +189,7 @@ namespace Solnet.Serum
             => GetMarketAsync(marketAddress, commitment).Result;
 
         #endregion
-        
+
         #region Token Mints and Markets
         
         /// <summary>
