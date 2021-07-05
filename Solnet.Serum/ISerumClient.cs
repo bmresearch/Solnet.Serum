@@ -19,9 +19,9 @@ namespace Solnet.Serum
         IRpcClient RpcClient { get; }
         
         /// <summary>
-        /// The cluster the client is connected to.
+        /// The statistics of the current websocket connection.
         /// </summary>
-        Uri NodeAddress { get; }
+        IConnectionStatistics ConnectionStatistics { get; }
         
         /// <summary>
         /// Gets the available markets in the Serum DEX. This is an asynchronous operation.
