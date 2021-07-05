@@ -1,5 +1,4 @@
 using Solnet.Rpc;
-using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
 using System;
