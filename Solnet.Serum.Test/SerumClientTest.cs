@@ -187,6 +187,13 @@ namespace Solnet.Serum.Test
             Market result = sut.GetMarket("13vjJ8pxDMmzen26bQ5UrouX8dkXYPW1p3VLVDjxXrKR", Commitment.Confirmed);
 
             Assert.IsNotNull(result);
+            Assert.AreEqual(true, result.Flags.IsInitialized);
+            Assert.AreEqual(true, result.Flags.IsMarket);
+            Assert.AreEqual(false, result.Flags.IsOpenOrders);
+            Assert.AreEqual(false, result.Flags.IsAsks);
+            Assert.AreEqual(false, result.Flags.IsBids);
+            Assert.AreEqual(false, result.Flags.IsRequestQueue);
+            Assert.AreEqual(false, result.Flags.IsEventQueue);
             Assert.AreEqual("13vjJ8pxDMmzen26bQ5UrouX8dkXYPW1p3VLVDjxXrKR", result.OwnAddress.Key);
             Assert.AreEqual("SF3oTvfWzEP3DTwGSvUXRrGTvr75pdZNnBLAH9bzMuX", result.BaseMint.Key);
             Assert.AreEqual("2ThEZPEPvwnfeS4x1a7LKdDqX6j1VjPw298HqcoQqEtp", result.BaseVault.Key);
@@ -223,10 +230,48 @@ namespace Solnet.Serum.Test
             EventQueue result = sut.GetEventQueue("3bdmcKUenYeRaEXnJEC2skJhU5KKY7JqK3aPMmxtEqTd", Commitment.Confirmed);
 
             Assert.IsNotNull(result);
+            Assert.AreEqual(true, result.Header.Flags.IsEventQueue);
+            Assert.AreEqual(true, result.Header.Flags.IsInitialized);
+            Assert.AreEqual(false, result.Header.Flags.IsOpenOrders);
+            Assert.AreEqual(false, result.Header.Flags.IsAsks);
+            Assert.AreEqual(false, result.Header.Flags.IsBids);
+            Assert.AreEqual(false, result.Header.Flags.IsRequestQueue);
+            Assert.AreEqual(false, result.Header.Flags.IsMarket);
             Assert.AreEqual(2021U, result.Header.Head);
             Assert.AreEqual(0U, result.Header.Count);
             Assert.AreEqual(4112696U, result.Header.NextSequenceNumber);
             Assert.AreEqual(11915, result.Events.Count);
+        }
+        
+        [TestMethod]
+        public void GetOpenOrdersAccountTest()
+        {
+            string getAccountInfoResponseData = File.ReadAllText("Resources/GetOpenOrdersAccountInfoResponse.json");
+            Mock<IRpcClient> rpcMock = SetupGetAccountInfo(
+                getAccountInfoResponseData,
+                "4beBRAZSVcCm7jD7yAmizqqVyi39gVrKNeEPskickzSF",
+                "https://api.mainnet-beta.solana.com",
+                Commitment.Confirmed);
+
+            SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+
+            OpenOrdersAccount result = sut.GetOpenOrdersAccount("4beBRAZSVcCm7jD7yAmizqqVyi39gVrKNeEPskickzSF", Commitment.Confirmed);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(true, result.Flags.IsInitialized);
+            Assert.AreEqual(true, result.Flags.IsOpenOrders);
+            Assert.AreEqual(false, result.Flags.IsEventQueue);
+            Assert.AreEqual(false, result.Flags.IsAsks);
+            Assert.AreEqual(false, result.Flags.IsBids);
+            Assert.AreEqual(false, result.Flags.IsRequestQueue);
+            Assert.AreEqual(false, result.Flags.IsMarket);
+            Assert.AreEqual(42945100000000UL, result.BaseTokenTotal);
+            Assert.AreEqual(2435200000000UL, result.BaseTokenFree);
+            Assert.AreEqual(2337285233400UL, result.QuoteTokenTotal);
+            Assert.AreEqual(146709860000UL, result.QuoteTokenFree);
+            Assert.AreEqual("CuieVDEDtLo7FypA9SbLM9saXFdb1dsshEkyErMqkRQq", result.Owner.Key);
+            Assert.AreEqual("9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT", result.Market.Key);
+            Assert.AreEqual(30, result.Orders.Count);
         }
     }
 }

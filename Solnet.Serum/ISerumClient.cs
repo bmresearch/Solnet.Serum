@@ -1,3 +1,4 @@
+using Solnet.Rpc;
 using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
@@ -13,25 +14,51 @@ namespace Solnet.Serum
     public interface ISerumClient
     {
         /// <summary>
+        /// The rpc client instance.
+        /// </summary>
+        IRpcClient RpcClient { get; }
+        
+        /// <summary>
+        /// The cluster the client is connected to.
+        /// </summary>
+        Uri NodeAddress { get; }
+        
+        /// <summary>
         /// Gets the available markets in the Serum DEX. This is an asynchronous operation.
+        /// <remarks>
+        /// This list of markets is hardcoded and managed by Project Serum, for more information see:
+        /// https://github.com/project-serum/serum-ts
+        /// </remarks>
         /// </summary>
         /// <returns>A task which may return a list with the market's info.</returns>
         Task<IList<MarketInfo>> GetMarketsAsync();
         
         /// <summary>
         /// Gets the available markets in the Serum DEX.
+        /// <remarks>
+        /// This list of markets is hardcoded and managed by Project Serum, for more information see:
+        /// https://github.com/project-serum/serum-ts
+        /// </remarks>
         /// </summary>
         /// <returns>A list with the market's info.</returns>
         IList<MarketInfo> GetMarkets();
         
         /// <summary>
         /// Gets the available tokens in the Serum DEX. This is an asynchronous operation.
+        /// <remarks>
+        /// This list of token mints is hardcoded and managed by Project Serum, for more information see:
+        /// https://github.com/project-serum/serum-ts
+        /// </remarks>
         /// </summary>
         /// <returns>A task which may return a list with the token's info.</returns>
         Task<IList<TokenInfo>> GetTokensAsync();
         
         /// <summary>
         /// Gets the available tokens in the Serum DEX.
+        /// <remarks>
+        /// This list of markets is hardcoded and managed by Project Serum, for more information see:
+        /// https://github.com/project-serum/serum-ts
+        /// </remarks>
         /// </summary>
         /// <returns>A list with the token's info.</returns>
         IList<TokenInfo> GetTokens();
@@ -54,36 +81,82 @@ namespace Solnet.Serum
         Market GetMarket(string address, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
-        /// Gets the account data associated with the given event queue address in the Serum DEX.
+        /// Gets the account data associated with the given Event Queue address in the Serum DEX.
         /// This is an asynchronous operation.
         /// </summary>
-        /// <param name="address">The public key of the event queue account.</param>
+        /// <param name="address">The public key of the Event Queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        /// <returns>A task which may return the event queue's account data.</returns>
+        /// <returns>A task which may return the Event Queue's account data.</returns>
         Task<EventQueue> GetEventQueueAsync(string address, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
-        /// Gets the account data associated with the given event queue address in the Serum DEX.
+        /// Gets the account data associated with the given Event Queue address in the Serum DEX.
         /// </summary>
-        /// <param name="address">The public key of the event queue account.</param>
+        /// <param name="address">The public key of the Event Queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        /// <returns>The event queue's account data.</returns>
+        /// <returns>The Event Queue's account data.</returns>
         EventQueue GetEventQueue(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Gets the account data associated with the given open orders account address in the Serum DEX.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <param name="address">The public key of the open orders account account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>A task which may return the open orders account data.</returns>
+        Task<OpenOrdersAccount> GetOpenOrdersAccountAsync(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Gets the account data associated with the given open orders account address in the Serum DEX.
+        /// </summary>
+        /// <param name="address">The public key of the open orders account account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>The open orders account data.</returns>
+        OpenOrdersAccount GetOpenOrdersAccount(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Connect to the Rpc client for data streaming. This is an asynchronous operation.
+        /// </summary>
+        /// <returns>A task which may connect to the Rpc.</returns>
+        Task ConnectAsync();
+        
+        /// <summary>
+        /// Connect to the Rpc client for data streaming.
+        /// </summary>
+        void Connect();
+
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Open Orders Account. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action which receives an Open Orders Account.</param>
+        /// <param name="openOrdersAddress">The public key of the Open Orders Account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>A task which may return a subscription for the Open Orders Account.</returns>
+        Task<Subscription> SubscribeOpenOrdersAccountAsync(Action<Subscription, OpenOrdersAccount> action, string openOrdersAddress, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Open Orders Account.
+        /// </summary>
+        /// <param name="action">An action which receives an Open Orders Account.</param>
+        /// <param name="openOrdersAddress">The public key of the Open Orders Account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>A subscription for the Open Orders Account.</returns>
+        Subscription SubscribeOpenOrdersAccount(Action<Subscription, OpenOrdersAccount> action, string openOrdersAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Event Queue. This is an asynchronous operation.
         /// </summary>
-        /// <param name="action">An action which receives an event queue.</param>
-        /// <param name="eventQueueAddress">The public key of the event queue account.</param>
+        /// <param name="action">An action which receives an Event Queue.</param>
+        /// <param name="eventQueueAddress">The public key of the Event Queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        Task<Subscription<EventQueue>> SubscribeEventQueueAsync(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        Task<Subscription> SubscribeEventQueueAsync(Action<Subscription, EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Event Queue.
         /// </summary>
-        /// <param name="action">An action which receives an event queue.</param>
-        /// <param name="eventQueueAddress">The public key of the event queue account.</param>
+        /// <param name="action">An action which receives an Event Queue.</param>
+        /// <param name="eventQueueAddress">The public key of the Event Queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        Subscription<EventQueue> SubscribeEventQueue(Action<EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        Subscription SubscribeEventQueue(Action<Subscription, EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
     }
 }

@@ -21,7 +21,7 @@ namespace Solnet.Serum.Models
             /// <summary>
             /// The size of the data for an event queue account.
             /// </summary>
-            internal const int EventSpanLength = 88;
+            internal const int SpanLength = 88;
             
             /// <summary>
             /// The offset at which the value of the Open Order Slot begins.
@@ -124,7 +124,7 @@ namespace Solnet.Serum.Models
         /// <returns>The Event Queue structure.</returns>
         public static Event Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != Layout.EventSpanLength)
+            if (data.Length != Layout.SpanLength)
                 return null;
 
             EventFlags flags = EventFlags.Deserialize(data[..1]);

@@ -22,7 +22,7 @@ namespace Solnet.Serum.Models
             /// <summary>
             /// The size of the data for a market account.
             /// </summary>
-            internal const int MarketAccountSpanLength = 388;
+            internal const int SpanLength = 388;
             
             /// <summary>
             /// The number of bytes of the padding at the beginning of the market structure.
@@ -239,7 +239,7 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static Market Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != Layout.MarketAccountSpanLength)
+            if (data.Length != Layout.SpanLength)
                 return null;
 
             ReadOnlySpan<byte> padLessData = data.Slice(
