@@ -1,5 +1,8 @@
+using Microsoft.Extensions.Logging;
 using Solnet.Rpc;
+using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Core.Sockets;
+using Solnet.Rpc.Models;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
@@ -16,7 +19,7 @@ namespace Solnet.Serum.Examples
         
         public string Name { get; set; }
 
-        public Handler(Subscription<EventQueue> sub)
+        public Handler(Subscription sub)
         {
             sub.SubscriptionState.SubscriptionChanged += SubscriptionChanged;
         }
@@ -34,6 +37,8 @@ namespace Solnet.Serum.Examples
     {
         private readonly ISerumClient _serumClient;
         
+        private List<ISerumClient> _serumClients;
+        
         /// <summary>
         /// Public key for SOL/USDC Serum Market.
         /// </summary>
@@ -43,8 +48,10 @@ namespace Solnet.Serum.Examples
 
         public SubscribeEventQueue()
         {
-            Console.WriteLine($"Initializing {ToString()}");
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
+            _serumClients = new List<ISerumClient>();
+            _serumClient.Connect();
+            Console.WriteLine($"Initializing {ToString()}");
         }
 
         public void Run()
@@ -54,6 +61,7 @@ namespace Solnet.Serum.Examples
 
         /// <summary>
         /// If you do this, the RPC will neither hate nor love you, he'll just do as asked.
+        /// This example filters events to see if they were a trade.
         /// </summary>
         public void SubscribeSingle()
         {
@@ -61,9 +69,16 @@ namespace Solnet.Serum.Examples
                 
             Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-            Subscription<EventQueue> sub = _serumClient.SubscribeEventQueue(queue =>
+            Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue) =>
             {
-                Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSequenceNumber}");
+                Console.WriteLine($"EventQueue:: Address: {subWrapper.Address.Key} Events: {evtQueue.Events.Count} Head: {evtQueue.Header.Head} Count: {evtQueue.Header.Count} Sequence: {evtQueue.Header.NextSequenceNumber}");
+                foreach (Event evt in evtQueue.Events)
+                {
+                    if (evt.Flags.IsFill && evt.NativeQuantityPaid > 0)
+                    {
+                        Console.WriteLine($"TradeEvent::\tOpenOrdersAccount: {evt.PublicKey.Key}\t\tPaid: {evt.NativeQuantityPaid}\t\tReleased: {evt.NativeQuantityReleased}\t\tFeeOrRebate: {evt.NativeFeeOrRebate}");
+                    }
+                }
             }, market.EventQueue);
             
             Console.ReadKey();
@@ -87,15 +102,14 @@ namespace Solnet.Serum.Examples
                 if(market == null) continue;
                 Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-                Subscription<EventQueue> sub = _serumClient.SubscribeEventQueue(queue =>
+                Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue) =>
                 {
-                    Console.WriteLine($"EventQueue:: Events: {queue.Events.Count} Head: {queue.Header.Head} Count: {queue.Header.Count} Sequence: {queue.Header.NextSequenceNumber}");
+                    Console.WriteLine($"EventQueue::\tAddress: {subWrapper.Address.Key}\t\tEvents: {evtQueue.Events.Count}\t\tHead: {evtQueue.Header.Head}\t\tCount: {evtQueue.Header.Count}\t\tSequence: {evtQueue.Header.NextSequenceNumber}");
                 }, market.EventQueue);
                 
                 _handlers.Add(new Handler(sub));
                 Thread.Sleep(100);
             }
-            
             Console.ReadKey();
         }
     }

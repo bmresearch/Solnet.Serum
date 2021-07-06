@@ -31,16 +31,16 @@ namespace Solnet.Serum.Models
                 QueueHeader.Layout.QueueHeaderSpanLength, 
                 data.Length - QueueHeader.Layout.QueueHeaderSpanLength);
 
-            int numElements = headLessData.Length / Event.Layout.EventSpanLength;
+            int numElements = headLessData.Length / Event.Layout.SpanLength;
             List<Event> events = new (numElements);
 
             for (int i = 0; i < numElements; i++)
             {
                 long idx = (header.Head + header.Count + numElements - 1 - i) % numElements;
-                long evtOffset = idx * Event.Layout.EventSpanLength;
+                long evtOffset = idx * Event.Layout.SpanLength;
 
                 Event evt = Event.Deserialize(
-                    headLessData.Slice((int) evtOffset, Event.Layout.EventSpanLength));
+                    headLessData.Slice((int) evtOffset, Event.Layout.SpanLength));
                 events.Add(evt);
             }
             return new EventQueue
@@ -65,7 +65,7 @@ namespace Solnet.Serum.Models
                 QueueHeader.Layout.QueueHeaderSpanLength, 
                 data.Length - QueueHeader.Layout.QueueHeaderSpanLength);
 
-            int numElements = headLessData.Length / Event.Layout.EventSpanLength;
+            int numElements = headLessData.Length / Event.Layout.SpanLength;
 
             // Calculate number of missed events
             // Account for u32 & ring buffer overflows
@@ -88,10 +88,10 @@ namespace Solnet.Serum.Models
             for (int i = 0; i < missedEvents; i++)
             {
                 long idx = (startIdx + i) % numElements;
-                long evtOffset = idx * Event.Layout.EventSpanLength;
+                long evtOffset = idx * Event.Layout.SpanLength;
 
                 Event evt = Event.Deserialize(
-                    headLessData.Slice((int) evtOffset, Event.Layout.EventSpanLength));
+                    headLessData.Slice((int) evtOffset, Event.Layout.SpanLength));
                 evt.SequenceNumber = (startSequence + i) % modulo;
                 events.Add(evt);
             }
