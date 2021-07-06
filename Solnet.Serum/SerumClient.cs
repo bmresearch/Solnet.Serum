@@ -139,6 +139,12 @@ namespace Solnet.Serum
 
         /// <inheritdoc cref="ISerumClient.ConnectAsync"/>
         public void Connect() => ConnectAsync().Wait();
+
+        /// <inheritdoc cref="ISerumClient.DisconnectAsync"/>
+        public Task DisconnectAsync() => _streamingRpcClient.DisconnectAsync();
+        
+        /// <inheritdoc cref="ISerumClient.Disconnect"/>
+        public void Disconnect() => DisconnectAsync().Wait();
         
         /// <inheritdoc cref="ISerumClient.SubscribeOpenOrdersAccountAsync"/>
         public async Task<Subscription> SubscribeOpenOrdersAccountAsync(
