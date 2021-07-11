@@ -26,7 +26,7 @@ namespace Solnet.Serum
         /// <summary>
         /// The base url to fetch the market's data from github.
         /// </summary>
-        private const string InfosBaseUrl = "https://raw.githubusercontent.com/project-serum/serum-js/master/src/";
+        private const string InfosBaseUrl = "https://raw.githubusercontent.com/project-serum/serum-ts/master/packages/serum/src/";
 
         /// <summary>
         /// The name of the file containing token mints.
