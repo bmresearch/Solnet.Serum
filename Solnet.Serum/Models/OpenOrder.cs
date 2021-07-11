@@ -1,7 +1,7 @@
 namespace Solnet.Serum.Models
 {
     /// <summary>
-    /// Represents an Open Order in a Serum Open Orders Account.
+    /// Represents an Open OpenOrder in a Serum Open Orders Account.
     /// </summary>
     public class OpenOrder : OrderBase
     {

@@ -32,7 +32,7 @@ namespace Solnet.Serum.Examples
 
             foreach (OpenOrder order in account.Orders)
             {
-                Console.WriteLine($"Order:: OrderId:\t{order.OrderId}\tClientId:\t{order.ClientId}\tIsBid:\t{order.IsBid}\tRawPrice:\t{order.RawPrice}");
+                Console.WriteLine($"OpenOrder:: IsBid: {order.IsBid} Price: {order.RawPrice}");
             }
         }
     }

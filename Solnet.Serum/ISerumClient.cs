@@ -112,6 +112,22 @@ namespace Solnet.Serum
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         /// <returns>The open orders account data.</returns>
         OpenOrdersAccount GetOpenOrdersAccount(string address, Commitment commitment = Commitment.Finalized);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="commitment"></param>
+        /// <returns></returns>
+        Task<OrderBook> GetOrderBookAsync(string address, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="commitment"></param>
+        /// <returns></returns>
+        OrderBook GetOrderBook(string address, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Connect to the Rpc client for data streaming. This is an asynchronous operation.
@@ -139,34 +155,50 @@ namespace Solnet.Serum
         /// Subscribe to a live feed of a Serum Market's Open Orders Account. This is an asynchronous operation.
         /// </summary>
         /// <param name="action">An action which receives an Open Orders Account.</param>
-        /// <param name="openOrdersAddress">The public key of the Open Orders Account.</param>
+        /// <param name="openOrdersAccountAddress">The public key of the Open Orders Account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         /// <returns>A task which may return a subscription for the Open Orders Account.</returns>
-        Task<Subscription> SubscribeOpenOrdersAccountAsync(Action<Subscription, OpenOrdersAccount> action, string openOrdersAddress, Commitment commitment = Commitment.Finalized);
+        Task<Subscription> SubscribeOpenOrdersAccountAsync(Action<Subscription, OpenOrdersAccount> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Open Orders Account.
         /// </summary>
         /// <param name="action">An action which receives an Open Orders Account.</param>
-        /// <param name="openOrdersAddress">The public key of the Open Orders Account.</param>
+        /// <param name="openOrdersAccountAddress">The public key of the Open Orders Account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         /// <returns>A subscription for the Open Orders Account.</returns>
-        Subscription SubscribeOpenOrdersAccount(Action<Subscription, OpenOrdersAccount> action, string openOrdersAddress, Commitment commitment = Commitment.Finalized);
+        Subscription SubscribeOpenOrdersAccount(Action<Subscription, OpenOrdersAccount> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Event Queue. This is an asynchronous operation.
         /// </summary>
         /// <param name="action">An action which receives an Event Queue.</param>
-        /// <param name="eventQueueAddress">The public key of the Event Queue account.</param>
+        /// <param name="eventQueueAccountAddress">The public key of the Event Queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        Task<Subscription> SubscribeEventQueueAsync(Action<Subscription, EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        Task<Subscription> SubscribeEventQueueAsync(Action<Subscription, EventQueue> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Event Queue.
         /// </summary>
         /// <param name="action">An action which receives an Event Queue.</param>
-        /// <param name="eventQueueAddress">The public key of the Event Queue account.</param>
+        /// <param name="eventQueueAccountAddress">The public key of the Event Queue account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
-        Subscription SubscribeEventQueue(Action<Subscription, EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized);
+        Subscription SubscribeEventQueue(Action<Subscription, EventQueue> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action which receives an Order Book.</param>
+        /// <param name="orderBookAccountAddress">The public key of the Order Book account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        Task<Subscription> SubscribeOrderBookAsync(Action<Subscription, OrderBook> action, string orderBookAccountAddress, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Subscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed.
+        /// </summary>
+        /// <param name="action">An action which receives an Order Book.</param>
+        /// <param name="orderBookAccountAddress">The public key of the Order Book account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        Subscription SubscribeOrderBook(Action<Subscription, OrderBook> action, string orderBookAccountAddress, Commitment commitment = Commitment.Finalized);
     }
 }

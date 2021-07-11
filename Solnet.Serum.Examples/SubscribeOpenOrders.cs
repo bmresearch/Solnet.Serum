@@ -38,9 +38,9 @@ namespace Solnet.Serum.Examples
                                   $"QuoteTotal: {account.QuoteTokenTotal} QuoteFree: {account.QuoteTokenFree}\n" +
                                   $"Total Orders: {account.Orders.Count}");
                 /*
-                 foreach (Order order in account.Orders)
+                 foreach (OpenOrder order in account.Orders)
                 {
-                    Console.WriteLine($"Order:: IsBid: {order.IsBid} Value: {order.Value}");
+                    Console.WriteLine($"OpenOrder:: IsBid: {order.IsBid} Price: {order.RawPrice}");
                 }
                 */
             }, OpenOrdersAccountAddress);

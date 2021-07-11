@@ -8,6 +8,7 @@ using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Solnet.Serum.Examples
 {
@@ -56,7 +57,7 @@ namespace Solnet.Serum.Examples
 
         public void Run()
         {
-            SubscribeSingle();
+            SubscribeToAllMarkets();
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace Solnet.Serum.Examples
                 }, market.EventQueue);
                 
                 _handlers.Add(new Handler(sub));
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
             Console.ReadKey();
         }

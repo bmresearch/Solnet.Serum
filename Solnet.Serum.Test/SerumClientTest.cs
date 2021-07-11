@@ -3,6 +3,7 @@ using Moq;
 using Moq.Protected;
 using Solnet.Rpc;
 using Solnet.Rpc.Core.Http;
+using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
@@ -25,6 +26,8 @@ namespace Solnet.Serum.Test
     {
         protected const string MainNetUrl = "https://mainnet.solana.com";
         protected static readonly Uri MainNetUri = new Uri(MainNetUrl);
+
+        private ManualResetEvent _notificationEvent;
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
         {
@@ -75,11 +78,12 @@ namespace Solnet.Serum.Test
         }
 
         /// <summary>
-        /// Setup the test with the request and response data.
+        /// Setup the JSON RPC test with the request and response data.
         /// </summary>
         /// <param name="responseContent">The response content.</param>
         /// <param name="address">The address parameter for <c>GetAccountInfo</c>.</param>
-        /// <param name="commitment">The address parameter for <c>GetAccountInfo</c>.</param>
+        /// <param name="commitment">The commitment parameter for the <c>GetAccountInfo</c>.</param>
+        /// <param name="network">The network address for the <c>GetAccountInfo</c> request.</param>
         private static Mock<IRpcClient> SetupGetAccountInfo(string responseContent, string address, string network,
             Commitment commitment = Commitment.Finalized)
         {
@@ -89,18 +93,15 @@ namespace Solnet.Serum.Test
                 .Returns(new Uri(network))
                 .Verifiable();
             rpcMock
-                .Setup(
-                    s => s.GetAccountInfoAsync(
+                .Setup(s => s.GetAccountInfoAsync(
                         It.Is<string>(s1 => s1 == address),
                         It.Is<Commitment>(c => c == commitment)))
-                .ReturnsAsync(
-                    new RequestResult<ResponseValue<AccountInfo>>(
+                .ReturnsAsync(new RequestResult<ResponseValue<AccountInfo>>(
                         new HttpResponseMessage(HttpStatusCode.OK),
-                        JsonSerializer.Deserialize<ResponseValue<AccountInfo>>(responseContent, JsonSerializerOptions))
+                        JsonSerializer.Deserialize<ResponseValue<AccountInfo>>(responseContent, JsonSerializerOptions)) 
                     {
                         WasRequestSuccessfullyHandled = true
-                    }
-                )
+                    })
                 .Verifiable();
             return rpcMock;
         }
@@ -241,6 +242,10 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(0U, result.Header.Count);
             Assert.AreEqual(4112696U, result.Header.NextSequenceNumber);
             Assert.AreEqual(11915, result.Events.Count);
+            Assert.AreEqual(false, result.Events[0].Flags.IsBid);
+            Assert.AreEqual(false, result.Events[0].Flags.IsFill);
+            Assert.AreEqual(false, result.Events[0].Flags.IsMaker);
+            Assert.AreEqual(true, result.Events[0].Flags.IsOut);
         }
         
         [TestMethod]
@@ -272,6 +277,68 @@ namespace Solnet.Serum.Test
             Assert.AreEqual("CuieVDEDtLo7FypA9SbLM9saXFdb1dsshEkyErMqkRQq", result.Owner.Key);
             Assert.AreEqual("9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT", result.Market.Key);
             Assert.AreEqual(30, result.Orders.Count);
+        }
+
+        [TestMethod]
+        public void GetBidOrderBookTest()
+        {
+            string getAccountInfoResponseData = File.ReadAllText("Resources/GetBidOrderBookAccountInfoResponse.json");
+            Mock<IRpcClient> rpcMock = SetupGetAccountInfo(
+                getAccountInfoResponseData,
+                "14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ",
+                "https://api.mainnet-beta.solana.com",
+                Commitment.Confirmed);
+
+            SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+
+            OrderBook result = sut.GetOrderBook("14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ", Commitment.Confirmed);
+            Assert.IsNotNull(result);
+            
+            List<Order> orders = result.GetOrders();
+            Assert.AreEqual(true, result.Flags.IsInitialized);
+            Assert.AreEqual(true, result.Flags.IsBids);
+            Assert.AreEqual(false, result.Flags.IsOpenOrders);
+            Assert.AreEqual(false, result.Flags.IsEventQueue);
+            Assert.AreEqual(false, result.Flags.IsAsks);
+            Assert.AreEqual(false, result.Flags.IsRequestQueue);
+            Assert.AreEqual(false, result.Flags.IsMarket);
+            Assert.AreEqual(719, result.Slab.Nodes.Count);
+            Assert.AreEqual(360, orders.Count);
+            Assert.AreEqual("9XsdpLvg5Sy2gxvApcK3vt5D3g1qS9tzDg8RCPzRE2FM", orders[0].Owner.Key);
+            Assert.AreEqual(0UL, orders[0].ClientOrderId);
+            Assert.AreEqual(16000UL, orders[0].Price);
+            Assert.AreEqual(1UL, orders[0].Quantity);
+        }
+        
+        [TestMethod]
+        public void GetAskOrderBookTest()
+        {
+            string getAccountInfoResponseData = File.ReadAllText("Resources/GetAskOrderBookAccountInfoResponse.json");
+            Mock<IRpcClient> rpcMock = SetupGetAccountInfo(
+                getAccountInfoResponseData,
+                "CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ",
+                "https://api.mainnet-beta.solana.com",
+                Commitment.Confirmed);
+
+            SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+
+            OrderBook result = sut.GetOrderBook("CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ", Commitment.Confirmed);
+            Assert.IsNotNull(result);
+            
+            List<Order> orders = result.GetOrders();
+            Assert.AreEqual(true, result.Flags.IsInitialized);
+            Assert.AreEqual(true, result.Flags.IsAsks);
+            Assert.AreEqual(false, result.Flags.IsBids);
+            Assert.AreEqual(false, result.Flags.IsOpenOrders);
+            Assert.AreEqual(false, result.Flags.IsEventQueue);
+            Assert.AreEqual(false, result.Flags.IsRequestQueue);
+            Assert.AreEqual(false, result.Flags.IsMarket);
+            Assert.AreEqual(481, result.Slab.Nodes.Count);
+            Assert.AreEqual(241, orders.Count);
+            Assert.AreEqual("7aSfSYun38WU5iYgKuH6o4UY6sTZAKfz5KbZPpSgFvWX", orders[0].Owner.Key);
+            Assert.AreEqual(0UL, orders[0].ClientOrderId);
+            Assert.AreEqual(43780UL, orders[0].Price);
+            Assert.AreEqual(500UL, orders[0].Quantity);
         }
     }
 }
