@@ -34,12 +34,12 @@ namespace Solnet.Serum.Models
             internal const int FeeTierOffset = 2;
     
             /// <summary>
-            /// The offset at which the value of the Native Quantity Released begins.
+            /// The offset at which the value of the Native Value Released begins.
             /// </summary>
             internal const int NativeQuantityReleasedOffset = 8;
     
             /// <summary>
-            /// The offset at which the value of the Native Quantity Paid begins.
+            /// The offset at which the value of the Native Value Paid begins.
             /// </summary>
             internal const int NativeQuantityPaidOffset = 16;
     
@@ -89,7 +89,7 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// The client's order id.
         /// </summary>
-        public ulong ClientOrderId;
+        public ulong ClientId;
 
         /// <summary>
         /// The native quantity released due to this order.
@@ -139,7 +139,7 @@ namespace Solnet.Serum.Models
                 NativeFeeOrRebate = data.GetU64(Layout.NativeFeeOrRebateOffset),
                 OrderId = data.GetBigInt(Layout.OrderIdOffset, 16),
                 PublicKey = data.GetPubKey(Layout.PublicKeyOffset),
-                ClientOrderId = data.GetU64(Layout.ClientOrderIdOffset)
+                ClientId = data.GetU64(Layout.ClientOrderIdOffset)
             };
         }
     }

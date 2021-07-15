@@ -67,7 +67,7 @@ namespace Solnet.Serum.Models
             /// <summary>
             /// The offset at which the value of the Is Bid Bits begins.
             /// </summary>
-            internal const int IsBidBitsOffset = 125;
+            internal const int BidBitsOffset = 125;
             
             /// <summary>
             /// The offset at which the value of the Orders begin.
@@ -125,12 +125,12 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// The bits that represent the bid orders in the open orders account.
         /// </summary>
-        public byte[] IsBidBits;
+        public byte[] BidBits;
 
         /// <summary>
         /// The orders of this open orders account.
         /// </summary>
-        public IList<Order> Orders;
+        public IList<OpenOrder> Orders;
         
         /// <summary>
         /// Deserialize a span of bytes into a <see cref="OpenOrdersAccount"/> instance.
@@ -139,29 +139,29 @@ namespace Solnet.Serum.Models
         /// <returns>The Open Orders Account structure.</returns>
         public static OpenOrdersAccount Deserialize(ReadOnlySpan<byte> data)
         {
-            List<Order> orders = new();
+            List<OpenOrder> orders = new();
             ReadOnlySpan<byte> ordersData = data.Slice(Layout.OrdersOffset, Layout.OrdersSpanLength);
-            ReadOnlySpan<byte> clientIds = data.Slice(Layout.ClientIdsOffset, 1024);
+            ReadOnlySpan<byte> clientIds = data.Slice(Layout.ClientIdsOffset, Layout.ClientIdsSpanLength);
             ReadOnlySpan<byte> freeSlotBits = data.Slice(Layout.FreeSlotBidsOffset, 16);
-            ReadOnlySpan<byte> isBidBits = data.Slice(Layout.IsBidBitsOffset, 16);
+            ReadOnlySpan<byte> isBidBits = data.Slice(Layout.BidBitsOffset, 16);
 
             for (int i = 0; i < 128; i++)
             {
                 ulong clientId = clientIds.GetU64(i * 8);
-                ulong clientOrderId = ordersData.GetU64(i * 16);
-                ulong price = ordersData.GetU64((i * 16) + 8);
+                BigInteger orderId = ordersData.GetBigInt(i * 16, 16);
+                ulong rawPrice = ordersData.GetU64((i * 16) + 8);
                 
                 bool isFreeSlot = freeSlotBits.CheckBit(i);
                 bool isBid = isBidBits.CheckBit(i);
 
                 if (!isFreeSlot)
                 {
-                    orders.Add(new Order
+                    orders.Add(new OpenOrder
                     {
                         OrderIndex = i,
                         IsBid = isBid,
-                        ClientOrderId = clientOrderId,
-                        Price = price,
+                        OrderId = orderId,
+                        RawPrice = rawPrice,
                         ClientId = clientId,
                     });
                 }
@@ -177,7 +177,7 @@ namespace Solnet.Serum.Models
                 BaseTokenTotal = data.GetU64(Layout.BaseTokenTotalOffset),
                 QuoteTokenFree = data.GetU64(Layout.QuoteTokenFreeOffset),
                 QuoteTokenTotal = data.GetU64(Layout.QuoteTokenTotalOffset),
-                IsBidBits = isBidBits.ToArray(),
+                BidBits = isBidBits.ToArray(),
                 FreeSlotBits = freeSlotBits.ToArray(),
                 Orders = orders
             };
