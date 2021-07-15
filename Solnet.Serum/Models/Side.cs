@@ -3,7 +3,7 @@ namespace Solnet.Serum.Models
     /// <summary>
     /// Represents the side of an order.
     /// </summary>
-    public enum SideLayout
+    public enum Side
     {
         /// <summary>
         /// The order is a buy order.

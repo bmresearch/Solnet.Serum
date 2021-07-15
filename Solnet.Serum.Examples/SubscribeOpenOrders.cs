@@ -40,7 +40,7 @@ namespace Solnet.Serum.Examples
                 /*
                  foreach (Order order in account.Orders)
                 {
-                    Console.WriteLine($"Order:: IsBid: {order.IsBid} Price: {order.Price}");
+                    Console.WriteLine($"Order:: IsBid: {order.IsBid} Value: {order.Value}");
                 }
                 */
             }, OpenOrdersAccountAddress);
