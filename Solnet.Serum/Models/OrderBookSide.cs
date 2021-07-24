@@ -8,10 +8,10 @@ namespace Solnet.Serum.Models
     /// <summary>
     /// Represents an OpenOrder Book in Serum.
     /// </summary>
-    public class OrderBook
+    public class OrderBookSide
     {
         /// <summary>
-        /// Represents the layout of the <see cref="OrderBook"/> data structure.
+        /// Represents the layout of the <see cref="OrderBookSide"/> data structure.
         /// </summary>
         internal static class Layout
         {
@@ -62,17 +62,17 @@ namespace Solnet.Serum.Models
         
         
         /// <summary>
-        /// Deserialize a span of bytes into a <see cref="OrderBook"/> instance.
+        /// Deserialize a span of bytes into a <see cref="OrderBookSide"/> instance.
         /// </summary>
         /// <param name="data">The data to deserialize into the structure.</param>
-        /// <returns>The OrderBook structure.</returns>
-        public static OrderBook Deserialize(ReadOnlySpan<byte> data)
+        /// <returns>The OrderBookSide structure.</returns>
+        public static OrderBookSide Deserialize(ReadOnlySpan<byte> data)
         {
             ReadOnlySpan<byte> padLessData = data.Slice(
                 Layout.StartPadding,
                 data.Length - (Layout.StartPadding + Layout.EndPadding));
 
-            return new OrderBook
+            return new OrderBookSide
             {
                 Flags = AccountFlags.Deserialize(padLessData[..8]),
                 Slab = Slab.Deserialize(padLessData[8..])

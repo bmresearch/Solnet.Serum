@@ -31,7 +31,7 @@ namespace Solnet.Serum.Examples
 
         private void SubscribeSingle()
         {
-            Subscription sub = _serumClient.SubscribeOpenOrdersAccount((subWrapper, account) =>
+            Subscription sub = _serumClient.SubscribeOpenOrdersAccount((subWrapper, account, _) =>
             {
                 Console.WriteLine($"OpenOrdersAccount:: Owner: {account.Owner.Key} Market: {account.Market.Key}\n" +
                                   $"BaseTotal: {account.BaseTokenTotal} BaseFree: {account.BaseTokenFree}\n" +

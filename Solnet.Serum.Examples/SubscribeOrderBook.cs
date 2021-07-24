@@ -48,7 +48,7 @@ namespace Solnet.Serum.Examples
                 
             Console.WriteLine($"{name} Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-            Subscription subBids = _serumClient.SubscribeOrderBook((subWrapper, orderBook) =>
+            Subscription subBids = _serumClient.SubscribeOrderBookSide((subWrapper, orderBook, _) =>
             {
                 Console.WriteLine($"{name} BidOrderBook Update:: SlabNodes: {orderBook.Slab.Nodes.Count}\n"); 
                 bidOrders = orderBook.GetOrders();
@@ -67,7 +67,7 @@ namespace Solnet.Serum.Examples
                 
             }, market.Bids);
             
-            Subscription subAsks = _serumClient.SubscribeOrderBook((subWrapper, orderBook) =>
+            Subscription subAsks = _serumClient.SubscribeOrderBookSide((subWrapper, orderBook, _) =>
             {
                 Console.WriteLine($"{name} AskOrderBook Update:: SlabNodes: {orderBook.Slab.Nodes.Count}\n"); 
                 askOrders = orderBook.GetOrders();

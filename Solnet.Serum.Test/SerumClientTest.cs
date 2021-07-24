@@ -291,7 +291,7 @@ namespace Solnet.Serum.Test
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
 
-            OrderBook result = sut.GetOrderBook("14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ", Commitment.Confirmed);
+            OrderBookSide result = sut.GetOrderBookSide("14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ", Commitment.Confirmed);
             Assert.IsNotNull(result);
             
             List<OpenOrder> orders = result.GetOrders();
@@ -322,7 +322,7 @@ namespace Solnet.Serum.Test
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
 
-            OrderBook result = sut.GetOrderBook("CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ", Commitment.Confirmed);
+            OrderBookSide result = sut.GetOrderBookSide("CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ", Commitment.Confirmed);
             Assert.IsNotNull(result);
             
             List<OpenOrder> orders = result.GetOrders();

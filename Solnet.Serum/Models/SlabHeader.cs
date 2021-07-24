@@ -5,7 +5,7 @@ using System;
 namespace Solnet.Serum.Models
 {
     /// <summary>
-    /// Represents a Slab Header in the <see cref="OrderBook"/> data structure.
+    /// Represents a Slab Header in the <see cref="OrderBookSide"/> data structure.
     /// </summary>
     public class SlabHeader
     {

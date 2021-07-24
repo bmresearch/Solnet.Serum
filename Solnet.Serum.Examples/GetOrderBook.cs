@@ -32,27 +32,27 @@ namespace Solnet.Serum.Examples
                               $"Bids: {market.Bids.Key} Asks: {market.Asks.Key}");
             
 
-            OrderBook bidOrderBook = _serumClient.GetOrderBook(market.Bids.Key);
-            Console.WriteLine($"BidOrderBook:: SlabNodes: {bidOrderBook.Slab.Nodes.Count}"); 
+            OrderBookSide bidOrderBookSide = _serumClient.GetOrderBookSide(market.Bids.Key);
+            Console.WriteLine($"BidOrderBook:: SlabNodes: {bidOrderBookSide.Slab.Nodes.Count}"); 
             
-            OrderBook askOrderBook = _serumClient.GetOrderBook(market.Asks.Key);
-            Console.WriteLine($"AskOrderBook:: SlabNodes: {askOrderBook.Slab.Nodes.Count}");
+            OrderBookSide askOrderBookSide = _serumClient.GetOrderBookSide(market.Asks.Key);
+            Console.WriteLine($"AskOrderBook:: SlabNodes: {askOrderBookSide.Slab.Nodes.Count}");
 
             /*
              FULL ORDER BOOK STRUCTURE FROM HIGHEST ASK TO LOWEST BID
-            List<Order> askOrders = askOrderBook.GetOrders();
+            List<Order> askOrders = askOrderBookSide.GetOrders();
             askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));
             askOrders.ForEach((order => Console.WriteLine($"SOL/USDC Ask:\t{order.RawPrice}\tSize:\t{order.RawQuantity}")));
             
-            List<Order> bidOrders = bidOrderBook.GetOrders();
+            List<Order> bidOrders = bidOrderBookSide.GetOrders();
             bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
             bidOrders.ForEach((order => Console.WriteLine($"SOL/USDC Bid:\t{order.RawPrice}\tSize:\t{order.RawQuantity}")));
             */
             
-            List<OpenOrder> askOrders = askOrderBook.GetOrders();
+            List<OpenOrder> askOrders = askOrderBookSide.GetOrders();
             askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));       
             
-            List<OpenOrder> bidOrders = bidOrderBook.GetOrders();
+            List<OpenOrder> bidOrders = bidOrderBookSide.GetOrders();
             bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
             for (int i = 4; i >= 0; i--)
             {

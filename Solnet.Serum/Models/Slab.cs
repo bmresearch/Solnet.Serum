@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Solnet.Serum.Models
 {
     /// <summary>
-    /// Represents the Slab structure of the Serum <see cref="OrderBook"/>. 
+    /// Represents the Slab structure of the Serum <see cref="OrderBookSide"/>. 
     /// </summary>
     public class Slab
     {

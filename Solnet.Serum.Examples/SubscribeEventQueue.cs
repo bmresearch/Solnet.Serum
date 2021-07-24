@@ -70,7 +70,7 @@ namespace Solnet.Serum.Examples
                 
             Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-            Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue) =>
+            Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue, _) =>
             {
                 Console.WriteLine($"EventQueue:: Address: {subWrapper.Address.Key} Events: {evtQueue.Events.Count} Head: {evtQueue.Header.Head} Count: {evtQueue.Header.Count} Sequence: {evtQueue.Header.NextSequenceNumber}");
                 foreach (Event evt in evtQueue.Events)
@@ -103,7 +103,7 @@ namespace Solnet.Serum.Examples
                 if(market == null) continue;
                 Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
                 
-                Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue) =>
+                Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue, _) =>
                 {
                     Console.WriteLine($"EventQueue::\tAddress: {subWrapper.Address.Key}\t\tEvents: {evtQueue.Events.Count}\t\tHead: {evtQueue.Header.Head}\t\tCount: {evtQueue.Header.Count}\t\tSequence: {evtQueue.Header.NextSequenceNumber}");
                 }, market.EventQueue);
