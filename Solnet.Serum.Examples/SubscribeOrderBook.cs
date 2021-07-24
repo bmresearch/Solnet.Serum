@@ -19,8 +19,8 @@ namespace Solnet.Serum.Examples
         };
         
 
-        private List<Order> askOrders;
-        private List<Order> bidOrders;
+        private List<OpenOrder> askOrders;
+        private List<OpenOrder> bidOrders;
 
         public SubscribeOrderBook()
         {
@@ -52,22 +52,16 @@ namespace Solnet.Serum.Examples
             {
                 Console.WriteLine($"{name} BidOrderBook Update:: SlabNodes: {orderBook.Slab.Nodes.Count}\n"); 
                 bidOrders = orderBook.GetOrders();
-                bidOrders.Sort(Comparer<Order>.Create(
-                    (order, order1) =>
-                    {
-                        if (order.Price == order1.Price) return 0;
-                        if (order.Price > order1.Price) return -1;
-                        return 1;
-                    }));
+                bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
                 
                 for (int i = 4; i >= 0; i--)
                 {
-                    Console.WriteLine($"{name} Ask:\t{askOrders[i].Price}\tSize:\t{askOrders[i].Quantity}");
+                    Console.WriteLine($"{name} Ask:\t{askOrders[i].RawPrice}\tSize:\t{askOrders[i].RawQuantity}");
                 }
                 Console.WriteLine($"---------------------");
                 for (int i = 0; i < 5; i++)
                 {
-                    Console.WriteLine($"{name} Bid:\t{bidOrders[i].Price}\tSize:\t{bidOrders[i].Quantity}");
+                    Console.WriteLine($"{name} Bid:\t{bidOrders[i].RawPrice}\tSize:\t{bidOrders[i].RawQuantity}");
                 }
                 Console.WriteLine($"---------------------\n");
                 
@@ -77,22 +71,16 @@ namespace Solnet.Serum.Examples
             {
                 Console.WriteLine($"{name} AskOrderBook Update:: SlabNodes: {orderBook.Slab.Nodes.Count}\n"); 
                 askOrders = orderBook.GetOrders();
-                askOrders.Sort(Comparer<Order>.Create(
-                    (order, order1) =>
-                    {
-                        if (order.Price == order1.Price) return 0;
-                        if (order.Price > order1.Price) return 1;
-                        return -1;
-                    }));
+                askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));
                 Console.WriteLine($"---------------------");
                 for (int i = 4; i >= 0; i--)
                 {
-                    Console.WriteLine($"{name} Ask:\t{askOrders[i].Price}\tSize:\t{askOrders[i].Quantity}");
+                    Console.WriteLine($"{name} Ask:\t{askOrders[i].RawPrice}\tSize:\t{askOrders[i].RawQuantity}");
                 }
                 Console.WriteLine($"---------------------");
                 for (int i = 0; i < 5; i++)
                 {
-                    Console.WriteLine($"{name} Bid:\t{bidOrders[i].Price}\tSize:\t{bidOrders[i].Quantity}");
+                    Console.WriteLine($"{name} Bid:\t{bidOrders[i].RawPrice}\tSize:\t{bidOrders[i].RawQuantity}");
                 }
                 Console.WriteLine($"---------------------\n");
                 

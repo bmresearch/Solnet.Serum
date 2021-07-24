@@ -41,51 +41,27 @@ namespace Solnet.Serum.Examples
             /*
              FULL ORDER BOOK STRUCTURE FROM HIGHEST ASK TO LOWEST BID
             List<Order> askOrders = askOrderBook.GetOrders();
-            askOrders.Sort(Comparer<Order>.Create(
-                (order, order1) =>
-                {
-                    if (order.Price > order1.Price) return -1;
-
-                    return 1;
-                }));
-            askOrders.ForEach((order => Console.WriteLine($"SOL/USDC Ask:\t{order.Price}\tSize:\t{order.Quantity}")));
+            askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));
+            askOrders.ForEach((order => Console.WriteLine($"SOL/USDC Ask:\t{order.RawPrice}\tSize:\t{order.RawQuantity}")));
             
             List<Order> bidOrders = bidOrderBook.GetOrders();
-            bidOrders.Sort(Comparer<Order>.Create(
-                (order, order1) =>
-                {
-                    if (order.Price > order1.Price) return -1;
-
-                    return 1;
-                }));
-            bidOrders.ForEach((order => Console.WriteLine($"SOL/USDC Bid:\t{order.Price}\tSize:\t{order.Quantity}")));
+            bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
+            bidOrders.ForEach((order => Console.WriteLine($"SOL/USDC Bid:\t{order.RawPrice}\tSize:\t{order.RawQuantity}")));
             */
             
-            List<Order> askOrders = askOrderBook.GetOrders();
-            askOrders.Sort(Comparer<Order>.Create(
-                (order, order1) =>
-                {
-                    if (order.Price == order1.Price) return 0;
-                    if (order.Price > order1.Price) return 1;
-                    return -1;
-                }));       
+            List<OpenOrder> askOrders = askOrderBook.GetOrders();
+            askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));       
             
-            List<Order> bidOrders = bidOrderBook.GetOrders();
-            bidOrders.Sort(Comparer<Order>.Create(
-                (order, order1) =>
-                {
-                    if (order.Price == order1.Price) return 0;
-                    if (order.Price > order1.Price) return -1;
-                    return 1;
-                }));
+            List<OpenOrder> bidOrders = bidOrderBook.GetOrders();
+            bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
             for (int i = 4; i >= 0; i--)
             {
-                Console.WriteLine($"SOL/USDC Ask:\t{askOrders[i].Price}\tSize:\t{askOrders[i].Quantity}");
+                Console.WriteLine($"SOL/USDC Ask:\t{askOrders[i].RawPrice}\tSize:\t{askOrders[i].RawQuantity}");
             }
             Console.WriteLine($"---------------------");
             for (int i = 0; i < 5; i++)
             {
-                Console.WriteLine($"SOL/USDC Bid:\t{bidOrders[i].Price}\tSize:\t{bidOrders[i].Quantity}");
+                Console.WriteLine($"SOL/USDC Bid:\t{bidOrders[i].RawPrice}\tSize:\t{bidOrders[i].RawQuantity}");
             }
 
         }

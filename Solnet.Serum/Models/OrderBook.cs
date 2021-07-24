@@ -45,16 +45,16 @@ namespace Solnet.Serum.Models
         /// Gets the list of orders in the order book.
         /// </summary>
         /// <returns></returns>
-        public List<Order> GetOrders()
+        public List<OpenOrder> GetOrders()
         {
             return (from slabNode in Slab.Nodes
                 where slabNode is SlabLeafNode
                 select (SlabLeafNode)slabNode
                 into slabLeafNode
-                select new Order
+                select new OpenOrder
                 {
-                    Price = slabLeafNode.Price, 
-                    Quantity = slabLeafNode.Quantity, 
+                    RawPrice = slabLeafNode.Price, 
+                    RawQuantity = slabLeafNode.Quantity, 
                     ClientOrderId = slabLeafNode.ClientOrderId, 
                     Owner = slabLeafNode.Owner,
                 }).ToList();

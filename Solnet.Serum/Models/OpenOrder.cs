@@ -1,3 +1,5 @@
+using Solnet.Wallet;
+
 namespace Solnet.Serum.Models
 {
     /// <summary>
@@ -19,5 +21,10 @@ namespace Solnet.Serum.Models
         /// Whether this order is a bit or not.
         /// </summary>
         public bool IsBid;
+        
+        /// <summary>
+        /// The owner of this order.
+        /// </summary>
+        public PublicKey Owner;
     }
 }

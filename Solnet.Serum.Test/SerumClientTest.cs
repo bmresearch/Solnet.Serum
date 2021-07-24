@@ -294,7 +294,7 @@ namespace Solnet.Serum.Test
             OrderBook result = sut.GetOrderBook("14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ", Commitment.Confirmed);
             Assert.IsNotNull(result);
             
-            List<Order> orders = result.GetOrders();
+            List<OpenOrder> orders = result.GetOrders();
             Assert.AreEqual(true, result.Flags.IsInitialized);
             Assert.AreEqual(true, result.Flags.IsBids);
             Assert.AreEqual(false, result.Flags.IsOpenOrders);
@@ -306,8 +306,8 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(360, orders.Count);
             Assert.AreEqual("9XsdpLvg5Sy2gxvApcK3vt5D3g1qS9tzDg8RCPzRE2FM", orders[0].Owner.Key);
             Assert.AreEqual(0UL, orders[0].ClientOrderId);
-            Assert.AreEqual(16000UL, orders[0].Price);
-            Assert.AreEqual(1UL, orders[0].Quantity);
+            Assert.AreEqual(16000UL, orders[0].RawPrice);
+            Assert.AreEqual(1UL, orders[0].RawQuantity);
         }
         
         [TestMethod]
@@ -325,7 +325,7 @@ namespace Solnet.Serum.Test
             OrderBook result = sut.GetOrderBook("CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ", Commitment.Confirmed);
             Assert.IsNotNull(result);
             
-            List<Order> orders = result.GetOrders();
+            List<OpenOrder> orders = result.GetOrders();
             Assert.AreEqual(true, result.Flags.IsInitialized);
             Assert.AreEqual(true, result.Flags.IsAsks);
             Assert.AreEqual(false, result.Flags.IsBids);
@@ -337,8 +337,8 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(241, orders.Count);
             Assert.AreEqual("7aSfSYun38WU5iYgKuH6o4UY6sTZAKfz5KbZPpSgFvWX", orders[0].Owner.Key);
             Assert.AreEqual(0UL, orders[0].ClientOrderId);
-            Assert.AreEqual(43780UL, orders[0].Price);
-            Assert.AreEqual(500UL, orders[0].Quantity);
+            Assert.AreEqual(43780UL, orders[0].RawPrice);
+            Assert.AreEqual(500UL, orders[0].RawQuantity);
         }
     }
 }
