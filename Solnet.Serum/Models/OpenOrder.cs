@@ -1,9 +1,9 @@
-// unset
+using Solnet.Wallet;
 
 namespace Solnet.Serum.Models
 {
     /// <summary>
-    /// Represents an Open Order in a Serum Open Orders Account.
+    /// Represents an Open OpenOrder in a Serum Open Orders Account.
     /// </summary>
     public class OpenOrder : OrderBase
     {
@@ -18,8 +18,13 @@ namespace Solnet.Serum.Models
         public bool IsFreeSlot;
 
         /// <summary>
-        /// Whether this order is a bid or not.
+        /// Whether this order is a bit or not.
         /// </summary>
         public bool IsBid;
+        
+        /// <summary>
+        /// The owner of this order.
+        /// </summary>
+        public PublicKey Owner;
     }
 }

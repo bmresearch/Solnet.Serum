@@ -20,12 +20,19 @@ namespace Solnet.Serum.Models
         public ulong ClientId;
 
         /// <summary>
-        /// The price for the order.
+        /// The client's order id.
+        /// </summary>
+        public ulong ClientOrderId;
+
+        /// <summary>
+        /// The raw value for the price of the order.
+        /// <remarks>This value needs to be converted according to decimals and lot sizes.</remarks>
         /// </summary>
         public ulong RawPrice;
 
         /// <summary>
-        /// The order's maximum base quantity.
+        /// The raw value for the quantity of the order.
+        /// <remarks>This value needs to be converted according to decimals and lot sizes.</remarks>
         /// </summary>
         public ulong RawQuantity;
     }

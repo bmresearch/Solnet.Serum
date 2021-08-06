@@ -26,7 +26,7 @@ namespace Solnet.Serum
         /// <summary>
         /// The base url to fetch the market's data from github.
         /// </summary>
-        private const string InfosBaseUrl = "https://raw.githubusercontent.com/project-serum/serum-js/master/src/";
+        private const string InfosBaseUrl = "https://raw.githubusercontent.com/project-serum/serum-ts/master/packages/serum/src/";
 
         /// <summary>
         /// The name of the file containing token mints.
@@ -72,6 +72,12 @@ namespace Solnet.Serum
         /// The list of <see cref="OpenOrdersAccount"/> subscriptions.
         /// </summary>
         private IList<SubscriptionWrapper<OpenOrdersAccount>> _openOrdersSubscriptions;
+        
+        
+        /// <summary>
+        /// The list of <see cref="OrderBookSide"/> subscriptions.
+        /// </summary>
+        private IList<SubscriptionWrapper<OrderBookSide>> _orderBookSubscriptions;
 
         /// <summary>
         /// The cluster the client is connected to.
@@ -85,10 +91,11 @@ namespace Solnet.Serum
         /// <param name="logger">The logger.</param>
         /// <param name="httpClient">An http client.</param>
         /// <param name="rpcClient">A solana rpc client.</param>
+        /// <param name="streamingRpcClient">A solana streaming rpc client.</param>
         /// <returns>The Serum Client.</returns>
         internal SerumClient(Cluster cluster, ILogger logger = null, HttpClient httpClient = default,
-            IRpcClient rpcClient = default)
-            => Init(cluster, null, logger, httpClient, rpcClient);
+            IRpcClient rpcClient = default, IStreamingRpcClient streamingRpcClient = default)
+            => Init(cluster, null, logger, httpClient, rpcClient, streamingRpcClient);
 
         /// <summary>
         /// Initialize the Serum Client.
@@ -106,9 +113,10 @@ namespace Solnet.Serum
         /// <param name="logger">The logger.</param>
         /// <param name="httpClient">An http client.</param>
         /// <param name="rpcClient">A solana rpc client.</param>
+        /// <param name="streamingRpcClient">A solana streaming rpc client.</param>
         private void Init(
             Cluster cluster = default, string url = null, ILogger logger = null, HttpClient httpClient = default,
-            IRpcClient rpcClient = default)
+            IRpcClient rpcClient = default, IStreamingRpcClient streamingRpcClient = default)
         {
             _logger = logger;
             _httpClient = httpClient ?? new HttpClient {BaseAddress = new Uri(InfosBaseUrl)};
@@ -116,11 +124,12 @@ namespace Solnet.Serum
             _rpcClient = rpcClient ?? (url != null
                 ? Solnet.Rpc.ClientFactory.GetClient(url, logger)
                 : Solnet.Rpc.ClientFactory.GetClient(cluster, logger));
-            _streamingRpcClient = url != null
+            _streamingRpcClient = streamingRpcClient ?? (url != null
                 ? Solnet.Rpc.ClientFactory.GetStreamingClient(url, logger)
-                : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger);
+                : Solnet.Rpc.ClientFactory.GetStreamingClient(cluster, logger));
             _eventQueueSubscriptions = new List<SubscriptionWrapper<EventQueue>>();
             _openOrdersSubscriptions = new List<SubscriptionWrapper<OpenOrdersAccount>>();
+            _orderBookSubscriptions = new List<SubscriptionWrapper<OrderBookSide>>();
         }
         
         /// <inheritdoc cref="ISerumClient.RpcClient"/>
@@ -132,46 +141,49 @@ namespace Solnet.Serum
         #region Streaming RPC
 
         /// <inheritdoc cref="ISerumClient.ConnectAsync"/>
-        public Task ConnectAsync()
-        {
-            return _streamingRpcClient.ConnectAsync();
-        }
+        public Task ConnectAsync() => _streamingRpcClient.ConnectAsync();
 
-        /// <inheritdoc cref="ISerumClient.ConnectAsync"/>
+        /// <inheritdoc cref="ISerumClient.Connect"/>
         public void Connect() => ConnectAsync().Wait();
 
         /// <inheritdoc cref="ISerumClient.DisconnectAsync"/>
-        public Task DisconnectAsync() => _streamingRpcClient.DisconnectAsync();
-        
+        public Task DisconnectAsync()
+        {
+            _eventQueueSubscriptions.Clear();
+            _openOrdersSubscriptions.Clear();
+            _orderBookSubscriptions.Clear();
+            return _streamingRpcClient.DisconnectAsync();
+        }
+
         /// <inheritdoc cref="ISerumClient.Disconnect"/>
         public void Disconnect() => DisconnectAsync().Wait();
         
         /// <inheritdoc cref="ISerumClient.SubscribeOpenOrdersAccountAsync"/>
         public async Task<Subscription> SubscribeOpenOrdersAccountAsync(
-            Action<Subscription, OpenOrdersAccount> action, string openOrdersAddress, Commitment commitment = Commitment.Finalized)
+            Action<Subscription, OpenOrdersAccount, ulong> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized)
         {
-            SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(openOrdersAddress,
+            SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(openOrdersAccountAddress,
                 (_, value) =>
                 {
-                    SubscriptionWrapper<OpenOrdersAccount> evtQueueSub = null;
+                    SubscriptionWrapper<OpenOrdersAccount> openOrdersSub = null;
                     foreach (SubscriptionWrapper<OpenOrdersAccount> subscription in _openOrdersSubscriptions)
                     {
-                        if (subscription.Address.Key == openOrdersAddress)
+                        if (subscription.Address.Key == openOrdersAccountAddress)
                         {
-                            evtQueueSub = subscription;
+                            openOrdersSub = subscription;
                         }
                     }
                     
                     OpenOrdersAccount openOrdersAccount = OpenOrdersAccount.Deserialize(Convert.FromBase64String(value.Value.Data[0]));
-                    if (evtQueueSub != null) evtQueueSub.Data = openOrdersAccount;
+                    if (openOrdersSub != null) openOrdersSub.Data = openOrdersAccount;
 
-                    action(evtQueueSub, openOrdersAccount);
+                    action(openOrdersSub, openOrdersAccount, value.Context.Slot);
                 }, commitment);
             
             SubscriptionWrapper<OpenOrdersAccount> subOpenOrders = new ()
             {
                 SubscriptionState = sub, 
-                Address = new PublicKey(openOrdersAddress)
+                Address = new PublicKey(openOrdersAccountAddress)
             };
             _openOrdersSubscriptions.Add(subOpenOrders);
             return subOpenOrders;
@@ -179,21 +191,55 @@ namespace Solnet.Serum
         
         /// <inheritdoc cref="ISerumClient.SubscribeOpenOrdersAccount"/>
         public Subscription SubscribeOpenOrdersAccount(
-            Action<Subscription, OpenOrdersAccount> action, string openOrdersAddress, Commitment commitment = Commitment.Finalized) 
-            => SubscribeOpenOrdersAccountAsync(action, openOrdersAddress, commitment).Result;
+            Action<Subscription, OpenOrdersAccount, ulong> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized) 
+            => SubscribeOpenOrdersAccountAsync(action, openOrdersAccountAddress, commitment).Result;
+        
+        /// <inheritdoc cref="ISerumClient.SubscribeOrderBookSideAsync"/>
+        public async Task<Subscription> SubscribeOrderBookSideAsync(
+            Action<Subscription, OrderBookSide, ulong> action, string orderBookAccountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(orderBookAccountAddress,
+                (_, value) =>
+                {
+                    SubscriptionWrapper<OrderBookSide> orderBookSub = null;
+                    foreach (SubscriptionWrapper<OrderBookSide> subscription in _orderBookSubscriptions)
+                    {
+                        if (subscription.Address.Key == orderBookAccountAddress)
+                        {
+                            orderBookSub = subscription;
+                        }
+                    }
+
+                    OrderBookSide openOrdersAccount = OrderBookSide.Deserialize(Convert.FromBase64String(value.Value.Data[0]));
+                    action(orderBookSub, openOrdersAccount, value.Context.Slot);
+                }, commitment);
+            
+            SubscriptionWrapper<OrderBookSide> subOrderBook = new ()
+            {
+                SubscriptionState = sub, 
+                Address = new PublicKey(orderBookAccountAddress)
+            };
+            _orderBookSubscriptions.Add(subOrderBook);
+            return subOrderBook;
+        }
+        
+        /// <inheritdoc cref="ISerumClient.SubscribeOrderBookSide"/>
+        public Subscription SubscribeOrderBookSide(
+            Action<Subscription, OrderBookSide, ulong> action, string orderBookAccountAddress, Commitment commitment = Commitment.Finalized) 
+            => SubscribeOrderBookSideAsync(action, orderBookAccountAddress, commitment).Result;
         
         /// <inheritdoc cref="ISerumClient.SubscribeEventQueueAsync"/>
         public async Task<Subscription> SubscribeEventQueueAsync(
-            Action<Subscription, EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized)
+            Action<Subscription, EventQueue, ulong> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized)
         {
-            SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(eventQueueAddress,
+            SubscriptionState sub = await _streamingRpcClient.SubscribeAccountInfoAsync(eventQueueAccountAddress,
                 (_, value) =>
                 {
                     SubscriptionWrapper<EventQueue> evtQueueSub = null;
                     EventQueue evtQueue;
                     foreach (SubscriptionWrapper<EventQueue> subscription in _eventQueueSubscriptions)
                     {
-                        if (subscription.Address.Key == eventQueueAddress)
+                        if (subscription.Address.Key == eventQueueAccountAddress)
                         {
                             evtQueueSub = subscription;
                         }
@@ -211,13 +257,13 @@ namespace Solnet.Serum
                         if (evtQueueSub != null) evtQueueSub.Data = evtQueue;
                     }
 
-                    action(evtQueueSub, evtQueue);
+                    action(evtQueueSub, evtQueue, value.Context.Slot);
                 }, commitment);
             
             SubscriptionWrapper<EventQueue> subEvtQueue = new ()
             {
                 SubscriptionState = sub, 
-                Address = new PublicKey(eventQueueAddress)
+                Address = new PublicKey(eventQueueAccountAddress)
             };
             _eventQueueSubscriptions.Add(subEvtQueue);
             return subEvtQueue;
@@ -225,8 +271,8 @@ namespace Solnet.Serum
         
         /// <inheritdoc cref="ISerumClient.SubscribeEventQueue"/>
         public Subscription SubscribeEventQueue(
-            Action<Subscription, EventQueue> action, string eventQueueAddress, Commitment commitment = Commitment.Finalized) 
-            => SubscribeEventQueueAsync(action, eventQueueAddress, commitment).Result;
+            Action<Subscription, EventQueue, ulong> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized) 
+            => SubscribeEventQueueAsync(action, eventQueueAccountAddress, commitment).Result;
 
         #endregion
         
@@ -243,6 +289,18 @@ namespace Solnet.Serum
         /// <inheritdoc cref="ISerumClient.GetOpenOrdersAccount(string,Commitment)"/>
         public OpenOrdersAccount GetOpenOrdersAccount(string address, Commitment commitment = Commitment.Finalized)
             => GetOpenOrdersAccountAsync(address, commitment).Result;
+
+        /// <inheritdoc cref="ISerumClient.GetOrderBookSideAsync(string,Commitment)"/>
+        public async Task<OrderBookSide> GetOrderBookSideAsync(string address, Commitment commitment = Commitment.Finalized)
+        {
+            RequestResult<ResponseValue<AccountInfo>> res =
+                await _rpcClient.GetAccountInfoAsync(address, commitment);
+            return res.WasSuccessful ? OrderBookSide.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0])) : null;
+        }
+
+        /// <inheritdoc cref="ISerumClient.GetOrderBookSide(string,Commitment)"/>
+        public OrderBookSide GetOrderBookSide(string address, Commitment commitment = Commitment.Finalized) 
+            => GetOrderBookSideAsync(address, commitment).Result;
 
         /// <inheritdoc cref="ISerumClient.GetEventQueueAsync(string,Commitment)"/>
         public async Task<EventQueue> GetEventQueueAsync(string eventQueueAddress, Commitment commitment = Commitment.Finalized)

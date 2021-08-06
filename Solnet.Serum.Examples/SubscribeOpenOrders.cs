@@ -31,16 +31,16 @@ namespace Solnet.Serum.Examples
 
         private void SubscribeSingle()
         {
-            Subscription sub = _serumClient.SubscribeOpenOrdersAccount((subWrapper, account) =>
+            Subscription sub = _serumClient.SubscribeOpenOrdersAccount((subWrapper, account, _) =>
             {
                 Console.WriteLine($"OpenOrdersAccount:: Owner: {account.Owner.Key} Market: {account.Market.Key}\n" +
                                   $"BaseTotal: {account.BaseTokenTotal} BaseFree: {account.BaseTokenFree}\n" +
                                   $"QuoteTotal: {account.QuoteTokenTotal} QuoteFree: {account.QuoteTokenFree}\n" +
                                   $"Total Orders: {account.Orders.Count}");
                 /*
-                 foreach (Order order in account.Orders)
+                 foreach (OpenOrder order in account.Orders)
                 {
-                    Console.WriteLine($"Order:: IsBid: {order.IsBid} Value: {order.Value}");
+                    Console.WriteLine($"OpenOrder:: IsBid: {order.IsBid} Price: {order.RawPrice}");
                 }
                 */
             }, OpenOrdersAccountAddress);

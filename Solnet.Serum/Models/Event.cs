@@ -24,7 +24,7 @@ namespace Solnet.Serum.Models
             internal const int SpanLength = 88;
             
             /// <summary>
-            /// The offset at which the value of the Open Order Slot begins.
+            /// The offset at which the value of the Open OpenOrder Slot begins.
             /// </summary>
             internal const int OpenOrderSlotOffset = 1;
     
@@ -49,7 +49,7 @@ namespace Solnet.Serum.Models
             internal const int NativeFeeOrRebateOffset = 24;
     
             /// <summary>
-            /// The offset at which the value of the Order Id begins.
+            /// The offset at which the value of the OpenOrder Id begins.
             /// </summary>
             internal const int OrderIdOffset = 32;
     
@@ -59,7 +59,7 @@ namespace Solnet.Serum.Models
             internal const int PublicKeyOffset = 48;
     
             /// <summary>
-            /// The offset at which the value of the Client Order Id begins.
+            /// The offset at which the value of the Client OpenOrder Id begins.
             /// </summary>
             internal const int ClientOrderIdOffset = 80;
         }

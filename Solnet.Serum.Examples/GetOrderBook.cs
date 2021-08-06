@@ -1,5 +1,8 @@
 using Solnet.Rpc;
+using Solnet.Serum.Models;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Solnet.Serum.Examples
 {
@@ -10,6 +13,8 @@ namespace Solnet.Serum.Examples
     {
         private ISerumClient _serumClient;
 
+        private const string MarketAddress = "9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT";
+        
         public GetOrderBook()
         {
             Console.WriteLine($"Initializing {ToString()}");
@@ -19,6 +24,46 @@ namespace Solnet.Serum.Examples
         public void Run()
         {
             Console.WriteLine($"Running {ToString()}");
+            
+            Market market = _serumClient.GetMarket(MarketAddress);
+            
+            Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key}\n" +
+                              $"Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}\n" +
+                              $"Bids: {market.Bids.Key} Asks: {market.Asks.Key}");
+            
+
+            OrderBookSide bidOrderBookSide = _serumClient.GetOrderBookSide(market.Bids.Key);
+            Console.WriteLine($"BidOrderBook:: SlabNodes: {bidOrderBookSide.Slab.Nodes.Count}"); 
+            
+            OrderBookSide askOrderBookSide = _serumClient.GetOrderBookSide(market.Asks.Key);
+            Console.WriteLine($"AskOrderBook:: SlabNodes: {askOrderBookSide.Slab.Nodes.Count}");
+
+            /*
+             FULL ORDER BOOK STRUCTURE FROM HIGHEST ASK TO LOWEST BID
+            List<Order> askOrders = askOrderBookSide.GetOrders();
+            askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));
+            askOrders.ForEach((order => Console.WriteLine($"SOL/USDC Ask:\t{order.RawPrice}\tSize:\t{order.RawQuantity}")));
+            
+            List<Order> bidOrders = bidOrderBookSide.GetOrders();
+            bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
+            bidOrders.ForEach((order => Console.WriteLine($"SOL/USDC Bid:\t{order.RawPrice}\tSize:\t{order.RawQuantity}")));
+            */
+            
+            List<OpenOrder> askOrders = askOrderBookSide.GetOrders();
+            askOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));       
+            
+            List<OpenOrder> bidOrders = bidOrderBookSide.GetOrders();
+            bidOrders.Sort(Comparer<OpenOrder>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
+            for (int i = 4; i >= 0; i--)
+            {
+                Console.WriteLine($"SOL/USDC Ask:\t{askOrders[i].RawPrice}\tSize:\t{askOrders[i].RawQuantity}");
+            }
+            Console.WriteLine($"---------------------");
+            for (int i = 0; i < 5; i++)
+            {
+                Console.WriteLine($"SOL/USDC Bid:\t{bidOrders[i].RawPrice}\tSize:\t{bidOrders[i].RawQuantity}");
+            }
+
         }
     }
 }

@@ -1,5 +1,3 @@
-// unset
-
 namespace Solnet.Serum.Models
 {
     /// <summary>
@@ -24,11 +22,17 @@ namespace Solnet.Serum.Models
 
         /// <summary>
         /// The order's price.
+        /// <remarks>
+        /// This value needs to be converted to a raw value according to decimals and lot sizes.
+        /// </remarks>
         /// </summary>
         public float Price;
 
         /// <summary>
         /// The order's size.
+        /// <remarks>
+        /// This value needs to be converted to a raw value according to decimals and lot sizes.
+        /// </remarks>
         /// </summary>
         public float Quantity;
 
