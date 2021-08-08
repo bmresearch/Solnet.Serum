@@ -1,6 +1,8 @@
+// ReSharper disable InconsistentNaming
+using Solnet.Programs;
 using Solnet.Programs.Abstract;
+using Solnet.Programs.Utilities;
 using System;
-using System.Buffers.Binary;
 
 namespace Solnet.Serum.Models.Flags
 {
@@ -16,7 +18,7 @@ namespace Solnet.Serum.Models.Flags
         /// <summary>
         /// The flag which specifies the event type.
         /// </summary>
-        public ByteFlag Flag;
+        private readonly LongFlag Flag;
 
         /// <summary>
         /// Whether the account is initialized or not.
@@ -52,14 +54,31 @@ namespace Solnet.Serum.Models.Flags
         /// Whether the account is an asks account or not.
         /// </summary>
         public bool IsAsks => Flag.Bit6;
+        
+        /// <summary>
+        /// Whether the account is a disabled market or not.
+        /// </summary>
+        public bool IsDisabled => Flag.Bit7;
 
+        /*
+        /// <summary>
+        /// Whether the account is a closed market or not.
+        /// </summary>
+        public bool IsClosed => Flag.Bit8;
+        
+        /// <summary>
+        /// Whether the account is a closed market or not.
+        /// </summary>
+        public bool IsPermissioned => Flag.Bit9;
+        */
+        
         /// <summary>
         /// Initialize the account flags with the given bit mask.
         /// </summary>
         /// <param name="bitmask">The bit mask.</param>
-        private AccountFlags(byte bitmask)
+        private AccountFlags(ulong bitmask)
         {
-            Flag = new ByteFlag(bitmask);
+            Flag = new LongFlag(bitmask);
         }
 
         /// <summary>
@@ -68,6 +87,6 @@ namespace Solnet.Serum.Models.Flags
         /// <param name="data">The data to deserialize into the structure.</param>
         /// <returns>The Market structure.</returns>
         internal static AccountFlags Deserialize(ReadOnlySpan<byte> data) 
-            =>  new (data[0]);
+            =>  new (data.GetU64(0));
     }
 }

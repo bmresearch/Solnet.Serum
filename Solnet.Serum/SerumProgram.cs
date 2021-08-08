@@ -13,132 +13,116 @@ namespace Solnet.Serum
     /// <summary>
     /// Implements the Serum Program methods.
     /// <remarks>
-    /// For more information see: https://github.com/project-serum/awesome-serum
+    /// For more information see:
+    /// https://github.com/project-serum/serum-dex/
+    /// https://github.com/project-serum/serum-dex/blob/master/dex/src/instruction.rs
     /// </remarks>
     /// </summary>
     public class SerumProgram
     {
         /// <summary>
-        /// The Serum Program key.
+        /// The Serum V3 Program key.
         /// </summary>
-        public static readonly PublicKey ProgramIdKey = new PublicKey("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin");
-
-        #region Layouts
+        public static readonly PublicKey ProgramIdKey = new("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin");
 
         /// <summary>
-        /// The offset at which to write the method value.
+        /// The public key of the Serum token mint.
         /// </summary>
-        private const int MethodOffset = 1;
+        public static readonly PublicKey SerumTokenMintKey = new("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt");
 
         /// <summary>
-        /// The offset at which to write the limit value for the <see cref="SerumProgramInstructions.ConsumeEvents"/> method.
+        /// The public key of the MegaSerum token mint.
         /// </summary>
-        private const int ConsumeEventsLimitOffset = 5;
+        public static readonly PublicKey MegaSerumTokenMintKey = new("MSRMcoVyrFxnSgo5uXwone5SKcGhT1KEJMFEkMEWf9L");
 
         /// <summary>
-        /// The offset at which to write the client id value for the <see cref="SerumProgramInstructions.CancelOrderByClientIdV2"/> method.
+        /// The public key of the authority for disabling markets.
         /// </summary>
-        private const int CancelOrderByClientIdV2ClientIdOffset = 5;
+        public static readonly PublicKey DisableAuthorityKey = new("5ZVJgwWxMsqXxRMYHXqMwH2hd4myX5Ef4Au2iUsuNQ7V");
 
         /// <summary>
-        /// The offset at which to write the order side value for the <see cref="SerumProgramInstructions.CancelOrderV2"/> method.
+        /// The public key of the fee sweeper.
         /// </summary>
-        private const int CancelOrderV2SideOffset = 5;
-
-        /// <summary>
-        /// The offset at which to write the order id value for the <see cref="SerumProgramInstructions.CancelOrderV2"/> method.
-        /// </summary>
-        private const int CancelOrderV2OrderIdOffset = 9;
-
-        /// <summary>
-        /// Represents the layout of the <see cref="SerumProgramInstructions.NewOrderV3"/> method encoded data structure.
-        /// </summary>
-        private static class NewOrderV3DataLayout
-        {
-            /// <summary>
-            /// The offset at which to write the order side value.
-            /// </summary>
-            internal const int SideOffset = 5;
-
-            /// <summary>
-            /// The offset at which to write the limit price value.
-            /// </summary>
-            internal const int PriceOffset = 9;
-
-            /// <summary>
-            /// The offset at which to write the max base quantity value.
-            /// </summary>
-            internal const int MaxBaseQuantityOffset = 17;
-
-            /// <summary>
-            /// The offset at which to write the max quote quantity value.
-            /// </summary>
-            internal const int MaxQuoteQuantity = 25;
-
-            /// <summary>
-            /// The offset at which to write the self trade behavior value.
-            /// </summary>
-            internal const int SelfTradeBehaviorOffset = 33;
-
-            /// <summary>
-            /// The offset at which to write the order type value.
-            /// </summary>
-            internal const int OrderTypeOffset = 37;
-
-            /// <summary>
-            /// The offset at which to write the client id value.
-            /// </summary>
-            internal const int ClientIdOffset = 41;
-
-            /// <summary>
-            /// The offset at which to write the limit value.
-            /// </summary>
-            internal const int LimitOffset = 49;
-
-            /// <summary>
-            /// The limit value (this is static).
-            /// </summary>
-            internal const ushort Limit = 65535;
-        }
-
-        #endregion
+        public static readonly PublicKey FeeSweeperKey = new("DeqYsmBd9BnrbgUwQjVH4sQWK71dEgE6eoZFw3Rp4ftE");
 
         /// <summary>
         /// Initializes an instruction to create a new Order on Serum v3.
         /// </summary>
-        /// <param name="account">The <see cref="Account"/> that owns the payer and the open orders account.</param>
-        /// <param name="payer">The token account funding the order.</param>
+        /// <param name="market">The <see cref="Market"/> that we are trading on.</param>
         /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
-        /// <param name="market">The market we are trading on.</param>
-        /// <param name="order">The order to place.</param>
+        /// <param name="orderPayer">The <see cref="PublicKey"/> of the token account funding the order.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the account that owns the payer and the open orders account.</param>
+        /// <param name="order">The <see cref="Order"/> to place.</param>
         /// <param name="serumFeeDiscount">The public key of the SRM wallet for fee discount.</param>
         /// <returns>The transaction instruction.</returns>
-        public static TransactionInstruction NewOrderV3(Account account, PublicKey payer, PublicKey openOrdersAccount,
-            Market market, Order order, PublicKey serumFeeDiscount = null)
+        public static TransactionInstruction NewOrderV3(Market market, PublicKey openOrdersAccount, 
+            PublicKey orderPayer, PublicKey openOrdersAccountOwner, Order order, PublicKey serumFeeDiscount = null)
+            => NewOrderV3(market.OwnAddress, openOrdersAccount, market.RequestQueue, market.EventQueue, market.Bids,
+                market.Asks, orderPayer, openOrdersAccountOwner, market.BaseVault, market.QuoteVault,
+                TokenProgram.ProgramIdKey, SystemProgram.SysVarRentKey, ProgramIdKey, order.Side, order.RawPrice,
+                order.RawQuantity, order.Type, order.ClientOrderId, order.SelfTradeBehavior,
+                ushort.MaxValue, order.MaxQuoteQuantity, serumFeeDiscount);
+
+        /// <summary>
+        /// Initializes an instruction to create a New Order on Serum v3.
+        /// </summary>
+        /// <param name="market">The <see cref="PublicKey"/> of the <see cref="Market"/></param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
+        /// <param name="requestQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s request queue.</param>
+        /// <param name="eventQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s event queue.</param>
+        /// <param name="marketBids">The <see cref="PublicKey"/> of the <see cref="Market"/>'s bids account.</param>
+        /// <param name="marketAsks">The <see cref="PublicKey"/> of the <see cref="Market"/>'s asks account.</param>
+        /// <param name="orderPayer">The <see cref="PublicKey"/> of the token account funding the order.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the account that owns the payer and the open orders account.</param>
+        /// <param name="coinVault">The <see cref="PublicKey"/> of the <see cref="Market"/>'s coin vault.</param>
+        /// <param name="pcVault">The <see cref="PublicKey"/> of the <see cref="Market"/>'s price coin vault.</param>
+        /// <param name="splTokenProgramId">The <see cref="PublicKey"/> of the SPL Token Program associated with the market.</param>
+        /// <param name="rentSysVarId">The <see cref="PublicKey"/> of the Rent SysVar.</param>
+        /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
+        /// <param name="side">The <see cref="Side"/> of the order.</param>
+        /// <param name="limitPrice">The limit price for the order.</param>
+        /// <param name="maxCoinQty">The maximum amount of coins to receive.</param>
+        /// <param name="orderType">The <see cref="OrderType"/>.</param>
+        /// <param name="clientOrderId">The client's <see cref="Order"/> Id.</param>
+        /// <param name="selfTradeBehaviorType">The <see cref="SelfTradeBehavior"/> associated with the order.</param>
+        /// <param name="limit">The maximum number of iterations of the Serum order matching loop.</param>
+        /// <param name="maxNativePcQtyIncludingFees">The maximum quantity of price coin, including fees, for the order.</param>
+        /// <param name="serumFeeDiscount">The public key of the SRM wallet for fee discount.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction NewOrderV3(
+            PublicKey market, PublicKey openOrdersAccount, PublicKey requestQueue, PublicKey eventQueue,
+            PublicKey marketBids, PublicKey marketAsks, PublicKey orderPayer, PublicKey openOrdersAccountOwner,
+            PublicKey coinVault, PublicKey pcVault, PublicKey splTokenProgramId, PublicKey rentSysVarId,
+            PublicKey programId, Side side, ulong limitPrice, ulong maxCoinQty, OrderType orderType,
+            ulong clientOrderId, SelfTradeBehavior selfTradeBehaviorType, ushort limit,
+            ulong maxNativePcQtyIncludingFees, PublicKey serumFeeDiscount = null)
         {
             List<AccountMeta> keys = new()
             {
-                new AccountMeta(market.OwnAddress, true),
-                new AccountMeta(openOrdersAccount, true),
-                new AccountMeta(market.RequestQueue, true),
-                new AccountMeta(market.EventQueue, true),
-                new AccountMeta(market.Bids, true),
-                new AccountMeta(market.Asks, true),
-                new AccountMeta(payer, true),
-                new AccountMeta(account, false),
-                new AccountMeta(market.BaseVault, true),
-                new AccountMeta(market.QuoteVault, true),
-                new AccountMeta(TokenProgram.ProgramIdKey, false),
-                new AccountMeta(SystemProgram.SysVarRentKey, false)
+                AccountMeta.Writable(market, false),
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.Writable(requestQueue, false),
+                AccountMeta.Writable(eventQueue, false),
+                AccountMeta.Writable(marketBids, false),
+                AccountMeta.Writable(marketAsks, false),
+                AccountMeta.Writable(orderPayer, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, true),
+                AccountMeta.Writable(coinVault, false),
+                AccountMeta.Writable(pcVault, false),
+                AccountMeta.ReadOnly(splTokenProgramId, false),
+                AccountMeta.ReadOnly(rentSysVarId, false)
             };
             if (serumFeeDiscount != null)
             {
-                keys.Add(new AccountMeta(serumFeeDiscount, false));
+                keys.Add(AccountMeta.Writable(serumFeeDiscount, false));
             }
 
             return new TransactionInstruction
             {
-                ProgramId = ProgramIdKey, Keys = keys, Data = EncodeNewOrderV3InstructionData(order)
+                ProgramId = programId,
+                Keys = keys,
+                Data = SerumProgramData.EncodeNewOrderV3Data(side, limitPrice, maxCoinQty,
+                    orderType, clientOrderId, selfTradeBehaviorType, limit, maxNativePcQtyIncludingFees)
             };
         }
 
@@ -147,214 +131,300 @@ namespace Solnet.Serum
         /// </summary>
         /// <param name="market">The market we are trading on.</param>
         /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
-        /// <param name="owner">The <see cref="Account"/> that owns the payer and the open orders account.</param>
-        /// <param name="baseWallet">The public key of the base wallet or token account.</param>
-        /// <param name="quoteWallet">The public key of the quote wallet or token account.</param>
+        /// <param name="owner">The <see cref="PublicKey"/> of the account that owns the payer and the open orders account.</param>
+        /// <param name="baseWallet">The <see cref="PublicKey"/> of the coin wallet or token account.</param>
+        /// <param name="quoteWallet">The <see cref="PublicKey"/> of the quote wallet or token account.</param>
+        /// <param name="referrerPcWallet">The <see cref="PublicKey"/> of the quote wallet or token account.</param>
         /// <returns>The transaction instruction.</returns>
-        public static TransactionInstruction SettleFunds(Market market, PublicKey openOrdersAccount, Account owner,
-            PublicKey baseWallet, PublicKey quoteWallet)
+        public static TransactionInstruction SettleFunds(Market market, PublicKey openOrdersAccount, PublicKey owner,
+            PublicKey baseWallet, PublicKey quoteWallet, PublicKey referrerPcWallet)
         {
-            byte[] vaultSignerAddress = DeriveVaultSignerAddress(market);
+            byte[] vaultSignerAddress = SerumProgramData.DeriveVaultSignerAddress(market);
 
             if (vaultSignerAddress == null)
                 return null;
 
             List<AccountMeta> keys = new()
             {
-                new AccountMeta(market.OwnAddress, true),
-                new AccountMeta(openOrdersAccount, true),
-                new AccountMeta(owner, false),
-                new AccountMeta(market.BaseVault, true),
-                new AccountMeta(market.QuoteVault, true),
-                new AccountMeta(baseWallet, true),
-                new AccountMeta(quoteWallet, true),
-                new AccountMeta(new PublicKey(vaultSignerAddress), false),
-                new AccountMeta(TokenProgram.ProgramIdKey, false)
+                AccountMeta.Writable(market.OwnAddress, false),
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.ReadOnly(owner, true),
+                AccountMeta.Writable(market.BaseVault, true),
+                AccountMeta.Writable(market.QuoteVault, true),
+                AccountMeta.Writable(baseWallet, true),
+                AccountMeta.Writable(quoteWallet, true),
+                AccountMeta.ReadOnly(new PublicKey(vaultSignerAddress), false),
+                AccountMeta.ReadOnly(TokenProgram.ProgramIdKey, false)
             };
 
             return new TransactionInstruction
             {
-                ProgramId = ProgramIdKey, Keys = keys, Data = EncodeSettleFundsInstructionData()
+                ProgramId = ProgramIdKey, Keys = keys, Data = SerumProgramData.EncodeSettleFundsData()
             };
         }
 
         /// <summary>
         /// Initializes an instruction to consume events of a list of open orders accounts in a given market on Serum.
         /// </summary>
-        /// <param name="signer">The account to sign the transaction.</param>
         /// <param name="openOrdersAccounts">A list of <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
-        /// <param name="market">The market we are trading on.</param>
-        /// <param name="baseWallet">The public key of the base wallet or token account.</param>
-        /// <param name="quoteWallet">The public key of the quote wallet or token account.</param>
+        /// <param name="market">The <see cref="Market"/> we are trading on.</param>
+        /// <param name="coinAccount">The <see cref="PublicKey"/> of the coin account.</param>
+        /// <param name="pcAccount">The <see cref="PublicKey"/> of the price coin account.</param>
         /// <param name="limit">The maximum number of events to consume.</param>
         /// <returns>The transaction instruction.</returns>
-        public static TransactionInstruction ConsumeEvents(Account signer, List<PublicKey> openOrdersAccounts,
-            Market market, PublicKey baseWallet, PublicKey quoteWallet, ushort limit)
+        public static TransactionInstruction ConsumeEvents(List<PublicKey> openOrdersAccounts,
+            Market market, PublicKey coinAccount, PublicKey pcAccount, ushort limit)
+            => ConsumeEvents(openOrdersAccounts, market.OwnAddress, market.EventQueue, coinAccount, pcAccount, limit);
+
+        /// <summary>
+        /// Initializes an instruction to consume events of a list of open orders accounts in a given market on Serum.
+        /// </summary>
+        /// <param name="openOrdersAccounts">A list of <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the <see cref="Market"/> we are consuming events on.</param>
+        /// <param name="coinAccount">The <see cref="PublicKey"/> of the coin account.</param>
+        /// <param name="pcAccount">The <see cref="PublicKey"/> of the price coin account.</param>
+        /// <param name="limit">The maximum number of events to consume.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction ConsumeEvents(List<PublicKey> openOrdersAccounts,
+            PublicKey market, PublicKey eventQueue, PublicKey coinAccount, PublicKey pcAccount, ushort limit)
         {
-            List<AccountMeta> keys = new() {new AccountMeta(signer, false)};
-            openOrdersAccounts.ForEach(pk => keys.Add(new AccountMeta(pk, true)));
-            keys.Add(new AccountMeta(market.OwnAddress, true));
-            keys.Add(new AccountMeta(market.EventQueue, true));
-            keys.Add(new AccountMeta(baseWallet, true));
-            keys.Add(new AccountMeta(quoteWallet, true));
+            List<AccountMeta> keys = new();
+            openOrdersAccounts.ForEach(pubKey => keys.Add(AccountMeta.Writable(pubKey, false)));
+            keys.Add(AccountMeta.Writable(market, true));
+            keys.Add(AccountMeta.Writable(eventQueue, true));
+            keys.Add(AccountMeta.Writable(coinAccount, true));
+            keys.Add(AccountMeta.Writable(pcAccount, true));
 
             return new TransactionInstruction
             {
-                ProgramId = ProgramIdKey, Keys = keys, Data = EncodeConsumeEventsInstructionData(limit)
+                ProgramId = ProgramIdKey, Keys = keys, Data = SerumProgramData.EncodeConsumeEventsData(limit)
             };
         }
 
         /// <summary>
         /// Initializes an instruction to cancel an order by <c>clientOrderId</c> in a given market on Serum.
         /// </summary>
-        /// <param name="market">The market we are trading on.</param>
+        /// <param name="market">The <see cref="Market"/> we are trading on.</param>
         /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
-        /// <param name="owner">The <see cref="Account"/> that owns the payer and the open orders account.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="Account"/> that owns the <see cref="OpenOrdersAccount"/>.</param>
         /// <param name="side">The side of the order.</param>
         /// <param name="orderId">The order's id, fetched from a <see cref="OpenOrdersAccount"/>.</param>
         /// <returns>The transaction instruction.</returns>
-        public static TransactionInstruction CancelOrderV2(Market market, PublicKey openOrdersAccount, PublicKey owner,
-            Side side, BigInteger orderId)
+        public static TransactionInstruction CancelOrderV2(
+            Market market, PublicKey openOrdersAccount, PublicKey openOrdersAccountOwner, Side side, BigInteger orderId) 
+            => CancelOrderV2(ProgramIdKey, market.OwnAddress, market.Bids, market.Asks, openOrdersAccount,
+                openOrdersAccountOwner, market.EventQueue, side, orderId);
+        
+        /// <summary>
+        /// Initializes an instruction to cancel orders by <c>clientId</c> in a given market on Serum.
+        /// </summary>
+        /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <param name="marketBids">The <see cref="PublicKey"/> of the <see cref="Market"/>'s bids account.</param>
+        /// <param name="marketAsks">The <see cref="PublicKey"/> of the <see cref="Market"/>'s asks account.</param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the account that owns the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="eventQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s event queue.</param>
+        /// <param name="side">The side of the order.</param>
+        /// <param name="orderId">The client's <c>orderId</c></param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction CancelOrderV2(PublicKey programId, PublicKey market,
+            PublicKey marketBids, PublicKey marketAsks, PublicKey openOrdersAccount, PublicKey openOrdersAccountOwner,
+            PublicKey eventQueue, Side side, BigInteger orderId)
         {
             List<AccountMeta> keys = new()
             {
-                new AccountMeta(market.OwnAddress, false),
-                new AccountMeta(market.Bids, true),
-                new AccountMeta(market.Asks, true),
-                new AccountMeta(openOrdersAccount, true),
-                new AccountMeta(owner, false),
-                new AccountMeta(market.EventQueue, true)
+                AccountMeta.Writable(market, false),
+                AccountMeta.Writable(marketBids, false),
+                AccountMeta.Writable(marketAsks, false),
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, true),
+                AccountMeta.Writable(eventQueue, false)
             };
 
             return new TransactionInstruction
             {
-                ProgramId = ProgramIdKey,
-                Keys = keys,
-                Data = EncodeCancelOrderV2InstructionData(side, orderId)
+                ProgramId = programId, Keys = keys, Data = SerumProgramData.EncodeCancelOrderV2Data(side, orderId)
             };
         }
 
         /// <summary>
-        /// Initializes an instruction to cancel all orders by <c>clientId</c> in a given market on Serum.
+        /// Initializes an instruction to cancel orders by <c>clientId</c> in a given market on Serum.
         /// </summary>
-        /// <param name="market">The market we are trading on.</param>
+        /// <param name="market">The <see cref="Market"/> we are trading on.</param>
         /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
-        /// <param name="owner">The <see cref="Account"/> that owns the payer and the open orders account.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the that owns the <see cref="OpenOrdersAccount"/>.</param>
         /// <param name="clientOrderId">The client's <c>orderId</c></param>
         /// <returns>The transaction instruction.</returns>
         public static TransactionInstruction CancelOrderByClientIdV2(Market market, PublicKey openOrdersAccount,
-            PublicKey owner, ulong clientOrderId)
+            PublicKey openOrdersAccountOwner, ulong clientOrderId)
+            => CancelOrderByClientIdV2(ProgramIdKey, market.OwnAddress, market.Bids, market.Asks, openOrdersAccount,
+                openOrdersAccountOwner, market.EventQueue, clientOrderId);
+        
+        /// <summary>
+        /// Initializes an instruction to cancel orders by <c>clientId</c> in a given market on Serum.
+        /// </summary>
+        /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <param name="marketBids">The <see cref="PublicKey"/> of the <see cref="Market"/>'s bids account.</param>
+        /// <param name="marketAsks">The <see cref="PublicKey"/> of the <see cref="Market"/>'s asks account.</param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the account that owns the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="eventQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s event queue.</param>
+        /// <param name="clientOrderId">The client's <c>orderId</c></param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction CancelOrderByClientIdV2(PublicKey programId, PublicKey market,
+            PublicKey marketBids, PublicKey marketAsks, PublicKey openOrdersAccount, PublicKey openOrdersAccountOwner,
+            PublicKey eventQueue, ulong clientOrderId)
         {
             List<AccountMeta> keys = new()
             {
-                new AccountMeta(market.OwnAddress, false),
-                new AccountMeta(market.Bids, true),
-                new AccountMeta(market.Asks, true),
-                new AccountMeta(openOrdersAccount, true),
-                new AccountMeta(owner, false),
-                new AccountMeta(market.EventQueue, true)
+                AccountMeta.Writable(market, false),
+                AccountMeta.Writable(marketBids, false),
+                AccountMeta.Writable(marketAsks, false),
+                AccountMeta.Writable(openOrdersAccount, true),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, false),
+                AccountMeta.Writable(eventQueue, false)
             };
 
             return new TransactionInstruction
             {
-                ProgramId = ProgramIdKey, Keys = keys, Data = EncodeCancelOrderByClientIdV2InstructionData(clientOrderId)
+                ProgramId = programId,
+                Keys = keys,
+                Data = SerumProgramData.EncodeCancelOrderByClientIdV2Data(clientOrderId)
+            };
+        }
+        
+        /// <summary>
+        /// Initializes an instruction to close an open orders account for a given Serum market.
+        /// </summary>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> owner.</param>
+        /// <param name="destination">The <see cref="PublicKey"/> of the destination account.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction CloseOpenOrders(PublicKey openOrdersAccount,
+            PublicKey openOrdersAccountOwner, PublicKey destination, PublicKey market)
+            => CloseOpenOrders(ProgramIdKey, openOrdersAccount, 
+                openOrdersAccountOwner, destination, market);
+
+        /// <summary>
+        /// Initializes an instruction to close an open orders account for a given Serum market.
+        /// </summary>
+        /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> owner.</param>
+        /// <param name="destination">The <see cref="PublicKey"/> of the destination account.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction CloseOpenOrders(PublicKey programId, PublicKey openOrdersAccount,
+            PublicKey openOrdersAccountOwner, PublicKey destination, PublicKey market)
+        {
+            List<AccountMeta> keys = new()
+            {
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, true),
+                AccountMeta.Writable(destination, false),
+                AccountMeta.ReadOnly(market, false),
+            };
+
+            return new TransactionInstruction
+            {
+                ProgramId = programId,
+                Data = SerumProgramData.EncodeCloseOpenOrdersData(),
+                Keys = keys
             };
         }
 
+        /// <summary>
+        /// Initializes an instruction to initialize an open orders account for a given Serum market.
+        /// </summary>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> owner.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <param name="marketAuthority">The <see cref="PublicKey"/> of the market authority.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction InitOpenOrders(PublicKey openOrdersAccount,
+            PublicKey openOrdersAccountOwner, PublicKey market, PublicKey marketAuthority = null)
+            => InitOpenOrders(ProgramIdKey, openOrdersAccount, openOrdersAccountOwner, market, marketAuthority);
 
         /// <summary>
-        /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.ConsumeEvents"/> method.
+        /// Initializes an instruction to initialize an open orders account for a given Serum market.
         /// </summary>
-        /// <param name="limit">The maximum number of events to consume.</param>
-        /// <returns>The encoded data.</returns>
-        private static byte[] EncodeConsumeEventsInstructionData(ushort limit)
+        /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> owner.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <param name="marketAuthority">The <see cref="PublicKey"/> of the market authority.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction InitOpenOrders(PublicKey programId, PublicKey openOrdersAccount,
+            PublicKey openOrdersAccountOwner, PublicKey market, PublicKey marketAuthority = null)
         {
-            byte[] data = new byte[7];
-            data.WriteU32((uint)SerumProgramInstructions.ConsumeEvents, MethodOffset);
-            data.WriteU16(limit, ConsumeEventsLimitOffset);
-            return data;
-        }
-
-        /// <summary>
-        /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.SettleFunds"/> method.
-        /// </summary>
-        /// <returns>The encoded data.</returns>
-        private static byte[] EncodeSettleFundsInstructionData()
-        {
-            byte[] data = new byte[5];
-            data.WriteU32((uint)SerumProgramInstructions.SettleFunds, MethodOffset);
-            return data;
-        }
-
-        /// <summary>
-        /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.NewOrderV3"/> method.
-        /// </summary>
-        /// <param name="order">The order instance to encode the data.</param>
-        /// <returns>The encoded data.</returns>
-        private static byte[] EncodeNewOrderV3InstructionData(Order order)
-        {
-            byte[] data = new byte[51];
-            data.WriteU32((uint)SerumProgramInstructions.NewOrderV3, MethodOffset);
-            data.WriteU32((uint)order.Side, NewOrderV3DataLayout.SideOffset);
-            data.WriteU64(order.RawPrice, NewOrderV3DataLayout.PriceOffset);
-            data.WriteU64(order.RawQuantity, NewOrderV3DataLayout.MaxBaseQuantityOffset);
-            data.WriteU64(order.MaxQuoteQuantity, NewOrderV3DataLayout.MaxQuoteQuantity);
-            data.WriteU32((uint)order.SelfTradeBehavior, NewOrderV3DataLayout.SelfTradeBehaviorOffset);
-            data.WriteU32((uint)order.Type, NewOrderV3DataLayout.OrderTypeOffset);
-            data.WriteU64(order.ClientId, NewOrderV3DataLayout.ClientIdOffset);
-            data.WriteU16(NewOrderV3DataLayout.Limit, NewOrderV3DataLayout.LimitOffset);
-            return data;
-        }
-
-
-        /// <summary>
-        /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.CancelOrderV2"/> method.
-        /// </summary>
-        /// <param name="side">The order's side.</param>
-        /// <param name="clientOrderId">The client's order id.</param>
-        /// <returns>The encoded data.</returns>
-        private static byte[] EncodeCancelOrderV2InstructionData(Side side, BigInteger clientOrderId)
-        {
-            byte[] data = new byte[25];
-            data.WriteU32((uint)SerumProgramInstructions.CancelOrderV2, MethodOffset);
-            data.WriteU32((uint)side, CancelOrderV2SideOffset);
-            data.WriteBigInt(clientOrderId, CancelOrderV2OrderIdOffset);
-            return data;
-        }
-
-        /// <summary>
-        /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.CancelOrderByClientIdV2"/> method.
-        /// </summary>
-        /// <param name="clientOrderId">The client's <c>orderId</c>.</param>
-        /// <returns>The encoded data.</returns>
-        private static byte[] EncodeCancelOrderByClientIdV2InstructionData(ulong clientOrderId)
-        {
-            byte[] data = new byte[13];
-            data.WriteU32((uint)SerumProgramInstructions.CancelOrderByClientIdV2, MethodOffset);
-            data.WriteU64(clientOrderId, CancelOrderByClientIdV2ClientIdOffset);
-            return data;
-        }
-
-        /// <summary>
-        /// Derive the vault signer address for the given market.
-        /// </summary>
-        /// <param name="market">The market.</param>
-        /// <returns>The vault signer address.</returns>
-        /// <exception cref="Exception">Throws exception when unable to derive the vault signer address.</exception>
-        private static byte[] DeriveVaultSignerAddress(Market market)
-        {
-            byte[] vaultSignerAddress;
-            try
+            List<AccountMeta> keys = new()
             {
-                vaultSignerAddress = AddressExtensions.CreateProgramAddress(
-                    new List<byte[]> {market.OwnAddress.KeyBytes, BitConverter.GetBytes(market.VaultSignerNonce)},
-                    ProgramIdKey.KeyBytes);
-            }
-            catch (Exception e)
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, true),
+                AccountMeta.ReadOnly(market, false),
+                AccountMeta.ReadOnly(SystemProgram.SysVarRentKey, false)
+            };
+            
+            if (marketAuthority != null)
+                keys.Add(AccountMeta.ReadOnly(marketAuthority, true));
+
+            return new TransactionInstruction
             {
-                return null;
-            }
-            return vaultSignerAddress;
+                ProgramId = programId,
+                Data = SerumProgramData.EncodeInitOpenOrdersData(),
+                Keys = keys
+            };
+        }
+
+        /// <summary>
+        /// Initializes an instruction to remove all orders for a given open orders account from the order book.
+        /// </summary>
+        /// <param name="market">The <see cref="Market"/> we are trading on.</param>
+        /// <param name="pruneAuthority">The <see cref="PublicKey"/> of the prune authority.</param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> owner.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction Prune(Market market, PublicKey pruneAuthority, PublicKey openOrdersAccount,
+            PublicKey openOrdersAccountOwner) => Prune(ProgramIdKey, market.OwnAddress, market.Bids,
+            market.Asks, pruneAuthority, openOrdersAccount, openOrdersAccountOwner, market.EventQueue, ushort.MaxValue);
+
+        /// <summary>
+        /// Initializes an instruction to remove all orders for a given open orders account from the order book.
+        /// </summary>
+        /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
+        /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
+        /// <param name="marketBids">The <see cref="PublicKey"/> of the <see cref="Market"/>'s bids account.</param>
+        /// <param name="marketAsks">The <see cref="PublicKey"/> of the <see cref="Market"/>'s asks account.</param>
+        /// <param name="pruneAuthority">The <see cref="PublicKey"/> of the <see cref="Market"/>'s pruning authority.</param>
+        /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/>.</param>
+        /// <param name="openOrdersAccountOwner">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> owner.</param>
+        /// <param name="eventQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s event queue.</param>
+        /// <param name="limit">The maximum number of iterations of the Serum order matching loop.</param>
+        /// <returns>The transaction instruction.</returns>
+        public static TransactionInstruction Prune(PublicKey programId, PublicKey market, PublicKey marketBids,
+            PublicKey marketAsks, PublicKey pruneAuthority, PublicKey openOrdersAccount, PublicKey openOrdersAccountOwner,
+            PublicKey eventQueue, ushort limit)
+        {
+            List<AccountMeta> keys = new()
+            {
+                AccountMeta.Writable(market, false),
+                AccountMeta.Writable(marketBids, false),
+                AccountMeta.Writable(marketAsks, false),
+                AccountMeta.ReadOnly(pruneAuthority, true),
+                AccountMeta.ReadOnly(openOrdersAccount, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, false),
+                AccountMeta.Writable(eventQueue, false),
+            };
+
+            return new TransactionInstruction
+            {
+                ProgramId = programId, 
+                Data = SerumProgramData.EncodePruneData(limit),
+                Keys = keys
+            };
         }
     }
 }

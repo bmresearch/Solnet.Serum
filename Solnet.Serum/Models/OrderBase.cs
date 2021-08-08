@@ -17,11 +17,6 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// The client's order id.
         /// </summary>
-        public ulong ClientId;
-
-        /// <summary>
-        /// The client's order id.
-        /// </summary>
         public ulong ClientOrderId;
 
         /// <summary>
