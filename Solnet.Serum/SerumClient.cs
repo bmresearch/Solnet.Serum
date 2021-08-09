@@ -102,8 +102,12 @@ namespace Solnet.Serum
         /// </summary>
         /// <param name="url">The url of the node to connect to.</param>
         /// <param name="logger">The logger.</param>
+        /// <param name="rpcClient">A solana rpc client.</param>
+        /// <param name="streamingRpcClient">A solana streaming rpc client.</param>
         /// <returns>The Serum Client.</returns>
-        internal SerumClient(string url, ILogger logger = null) => Init(default, url, logger);
+        internal SerumClient(string url, ILogger logger = null, IRpcClient rpcClient = default,
+            IStreamingRpcClient streamingRpcClient = default)
+            => Init(default, url, logger, default, rpcClient, streamingRpcClient);
 
         /// <summary>
         /// Initialize the client with the given arguments.

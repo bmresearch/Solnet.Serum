@@ -11,7 +11,23 @@ namespace Solnet.Serum
     public static class ClientFactory
     {
         /// <summary>
-        /// Instantiate a the serum client.
+        /// Instantiate the serum client.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        /// <param name="rpcClient">The RPC Client instance.</param>
+        /// <param name="streamingRpcClient">The Streaming RPC Client instance.</param>
+        /// <returns>The Serum Client.</returns>
+        public static ISerumClient GetClient(IRpcClient rpcClient = null, IStreamingRpcClient streamingRpcClient = null,
+            ILogger logger = null)
+        {
+#if DEBUG
+            logger ??= GetDebugLogger();
+#endif
+            return new SerumClient(null, logger, rpcClient, streamingRpcClient);
+        }
+        
+        /// <summary>
+        /// Instantiate the serum client.
         /// </summary>
         /// <param name="cluster">The network cluster.</param>
         /// <param name="logger">The logger.</param>
@@ -25,7 +41,7 @@ namespace Solnet.Serum
         }
         
         /// <summary>
-        /// Instantiate a the serum client.
+        /// Instantiate the serum client.
         /// </summary>
         /// <param name="url">The url of the node to connect to.</param>
         /// <param name="logger">The logger.</param>
