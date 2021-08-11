@@ -181,6 +181,7 @@ namespace Solnet.Serum
         /// </summary>
         /// <param name="openOrdersAccounts">A list of <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
         /// <param name="market">The <see cref="PublicKey"/> of the <see cref="Market"/> we are consuming events on.</param>
+        /// <param name="eventQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s event queue.</param>
         /// <param name="coinAccount">The <see cref="PublicKey"/> of the coin account.</param>
         /// <param name="pcAccount">The <see cref="PublicKey"/> of the price coin account.</param>
         /// <param name="limit">The maximum number of events to consume.</param>

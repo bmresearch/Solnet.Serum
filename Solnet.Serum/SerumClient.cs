@@ -198,6 +198,24 @@ namespace Solnet.Serum
             Action<Subscription, OpenOrdersAccount, ulong> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized) 
             => SubscribeOpenOrdersAccountAsync(action, openOrdersAccountAddress, commitment).Result;
         
+        /// <inheritdoc cref="ISerumClient.UnsubscribeOpenOrdersAccountAsync"/>
+        public Task UnsubscribeOpenOrdersAccountAsync(string openOrdersAccountAddress)
+        {
+            SubscriptionWrapper<OpenOrdersAccount> subscriptionWrapper = null;
+            
+            foreach (SubscriptionWrapper<OpenOrdersAccount> sub in _openOrdersSubscriptions)
+            {
+                if (sub.Address.Key == openOrdersAccountAddress)
+                    subscriptionWrapper = sub;
+            }
+
+            return subscriptionWrapper == null ? null : _streamingRpcClient.UnsubscribeAsync(subscriptionWrapper.SubscriptionState);
+        }
+
+        /// <inheritdoc cref="ISerumClient.UnsubscribeOpenOrdersAccount"/>
+        public void UnsubscribeOpenOrdersAccount(string openOrdersAccountAddress) =>
+            UnsubscribeOpenOrdersAccountAsync(openOrdersAccountAddress);
+        
         /// <inheritdoc cref="ISerumClient.SubscribeOrderBookSideAsync"/>
         public async Task<Subscription> SubscribeOrderBookSideAsync(
             Action<Subscription, OrderBookSide, ulong> action, string orderBookAccountAddress, Commitment commitment = Commitment.Finalized)
@@ -226,6 +244,24 @@ namespace Solnet.Serum
             _orderBookSubscriptions.Add(subOrderBook);
             return subOrderBook;
         }
+        
+        /// <inheritdoc cref="ISerumClient.UnsubscribeOrderBookSideAsync"/>
+        public Task UnsubscribeOrderBookSideAsync(string orderBookAccountAddress)
+        {
+            SubscriptionWrapper<OrderBookSide> subscriptionWrapper = null;
+            
+            foreach (SubscriptionWrapper<OrderBookSide> sub in _orderBookSubscriptions)
+            {
+                if (sub.Address.Key == orderBookAccountAddress)
+                    subscriptionWrapper = sub;
+            }
+
+            return subscriptionWrapper == null ? null : _streamingRpcClient.UnsubscribeAsync(subscriptionWrapper.SubscriptionState);
+        }
+        
+        /// <inheritdoc cref="ISerumClient.UnsubscribeOrderBookSide"/>
+        public void UnsubscribeOrderBookSide(string orderBookAccountAddress) =>
+            UnsubscribeOrderBookSideAsync(orderBookAccountAddress);
         
         /// <inheritdoc cref="ISerumClient.SubscribeOrderBookSide"/>
         public Subscription SubscribeOrderBookSide(
@@ -277,6 +313,24 @@ namespace Solnet.Serum
         public Subscription SubscribeEventQueue(
             Action<Subscription, EventQueue, ulong> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized) 
             => SubscribeEventQueueAsync(action, eventQueueAccountAddress, commitment).Result;
+        
+        /// <inheritdoc cref="ISerumClient.UnsubscribeEventQueueAsync"/>
+        public Task UnsubscribeEventQueueAsync(string eventQueueAccountAddress)
+        {
+            SubscriptionWrapper<EventQueue> subscriptionWrapper = null;
+            
+            foreach (SubscriptionWrapper<EventQueue> sub in _eventQueueSubscriptions)
+            {
+                if (sub.Address.Key == eventQueueAccountAddress)
+                    subscriptionWrapper = sub;
+            }
+
+            return subscriptionWrapper == null ? null : _streamingRpcClient.UnsubscribeAsync(subscriptionWrapper.SubscriptionState);
+        }
+
+        /// <inheritdoc cref="ISerumClient.UnsubscribeEventQueue"/>
+        public void UnsubscribeEventQueue(string eventQueueAccountAddress) =>
+            UnsubscribeEventQueueAsync(eventQueueAccountAddress);
 
         #endregion
         

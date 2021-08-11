@@ -168,7 +168,19 @@ namespace Solnet.Serum
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         /// <returns>A subscription for the Open Orders Account.</returns>
         Subscription SubscribeOpenOrdersAccount(Action<Subscription, OpenOrdersAccount, ulong> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized);
-        
+
+        /// <summary>
+        /// Unsubscribe to a live feed of a Serum Market's Open Orders Account. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="openOrdersAccountAddress">The public key of the Order Book account.</param>
+        Task UnsubscribeOpenOrdersAccountAsync(string openOrdersAccountAddress);
+
+        /// <summary>
+        /// Unsubscribe to a live feed of a Serum Market's Open Orders Account. This will either be a Bid or Ask account data feed.
+        /// </summary>
+        /// <param name="openOrdersAccountAddress">The public key of the Order Book account.</param>
+        void UnsubscribeOpenOrdersAccount(string openOrdersAccountAddress);
+
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Event Queue. This is an asynchronous operation.
         /// </summary>
@@ -186,6 +198,18 @@ namespace Solnet.Serum
         Subscription SubscribeEventQueue(Action<Subscription, EventQueue, ulong> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
+        /// Unsubscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="eventQueueAccountAddress">The public key of the Order Book account.</param>
+        Task UnsubscribeEventQueueAsync(string eventQueueAccountAddress);
+
+        /// <summary>
+        /// Unsubscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed.
+        /// </summary>
+        /// <param name="eventQueueAccountAddress">The public key of the Order Book account.</param>
+        void UnsubscribeEventQueue(string eventQueueAccountAddress);
+
+        /// <summary>
         /// Subscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
         /// </summary>
         /// <param name="action">An action which receives the <see cref="Subscription"/>, an <see cref="GetOrderBookSide"/> and the corresponding slot.</param>
@@ -200,5 +224,17 @@ namespace Solnet.Serum
         /// <param name="orderBookAccountAddress">The public key of the Order Book account.</param>
         /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
         Subscription SubscribeOrderBookSide(Action<Subscription, OrderBookSide, ulong> action, string orderBookAccountAddress, Commitment commitment = Commitment.Finalized);
+        
+        /// <summary>
+        /// Unsubscribe to a live feed of a Serum Market's Order Book Side. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
+        /// </summary>
+        /// <param name="orderBookAccountAddress">The public key of the Order Book account.</param>
+        Task UnsubscribeOrderBookSideAsync(string orderBookAccountAddress);
+
+        /// <summary>
+        /// Unsubscribe to a live feed of a Serum Market's Order Book Side. This will either be a Bid or Ask account data feed.
+        /// </summary>
+        /// <param name="orderBookAccountAddress">The public key of the Order Book account.</param>
+        void UnsubscribeOrderBookSide(string orderBookAccountAddress);
     }
 }
