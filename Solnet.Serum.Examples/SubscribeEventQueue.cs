@@ -1,14 +1,10 @@
-using Microsoft.Extensions.Logging;
 using Solnet.Rpc;
-using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Core.Sockets;
-using Solnet.Rpc.Models;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Solnet.Serum.Examples
 {

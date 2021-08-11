@@ -124,7 +124,7 @@ namespace Solnet.Serum
                 Type = _orderType,
                 Price = _price,
                 Quantity = _quantity,
-                ClientId = _clientOrderId,
+                ClientOrderId = _clientOrderId,
             };
         }
     }

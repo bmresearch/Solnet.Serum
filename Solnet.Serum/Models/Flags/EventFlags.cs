@@ -1,5 +1,7 @@
+// ReSharper disable InconsistentNaming
 using Solnet.Programs.Abstract;
 using System;
+
 
 namespace Solnet.Serum.Models.Flags
 {
@@ -11,7 +13,7 @@ namespace Solnet.Serum.Models.Flags
         /// <summary>
         /// The flag which specifies the event type.
         /// </summary>
-        public ByteFlag Flag;
+        private readonly ByteFlag Flag;
 
         /// <summary>
         /// Whether the event is a fill or not.
@@ -34,10 +36,15 @@ namespace Solnet.Serum.Models.Flags
         public bool IsMaker => Flag.Bit3;
 
         /// <summary>
+        /// Whether the event is a release of funds or not.
+        /// </summary>
+        public bool IsReleaseFunds => Flag.Bit4;
+
+        /// <summary>
         /// Initialize the event queue flags with the given bit mask.
         /// </summary>
         /// <param name="bitmask">The bit mask.</param>
-        public EventFlags(byte bitmask)
+        private EventFlags(byte bitmask)
         {
             Flag = new ByteFlag(bitmask);
         }

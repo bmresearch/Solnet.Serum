@@ -162,7 +162,7 @@ namespace Solnet.Serum.Models
                         IsBid = isBid,
                         OrderId = orderId,
                         RawPrice = rawPrice,
-                        ClientId = clientId,
+                        ClientOrderId = clientId,
                     });
                 }
 
