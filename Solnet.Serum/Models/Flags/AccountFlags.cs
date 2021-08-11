@@ -60,7 +60,6 @@ namespace Solnet.Serum.Models.Flags
         /// </summary>
         public bool IsDisabled => Flag.Bit7;
 
-        /*
         /// <summary>
         /// Whether the account is a closed market or not.
         /// </summary>
@@ -70,7 +69,6 @@ namespace Solnet.Serum.Models.Flags
         /// Whether the account is a closed market or not.
         /// </summary>
         public bool IsPermissioned => Flag.Bit9;
-        */
         
         /// <summary>
         /// Initialize the account flags with the given bit mask.
