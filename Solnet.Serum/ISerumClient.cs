@@ -18,6 +18,11 @@ namespace Solnet.Serum
         IRpcClient RpcClient { get; }
         
         /// <summary>
+        /// The streaming rpc client instance.
+        /// </summary>
+        IStreamingRpcClient StreamingRpcClient { get; }
+        
+        /// <summary>
         /// The statistics of the current websocket connection.
         /// </summary>
         IConnectionStatistics ConnectionStatistics { get; }

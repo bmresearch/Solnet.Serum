@@ -37,12 +37,12 @@ namespace Solnet.Serum.Examples
                                   $"BaseTotal: {account.BaseTokenTotal} BaseFree: {account.BaseTokenFree}\n" +
                                   $"QuoteTotal: {account.QuoteTokenTotal} QuoteFree: {account.QuoteTokenFree}\n" +
                                   $"Total Orders: {account.Orders.Count}");
-                /*
-                 foreach (OpenOrder order in account.Orders)
+                
+                foreach (OpenOrder order in account.Orders)
                 {
                     Console.WriteLine($"OpenOrder:: IsBid: {order.IsBid} Price: {order.RawPrice}");
                 }
-                */
+                
             }, OpenOrdersAccountAddress);
             
             Console.ReadKey();

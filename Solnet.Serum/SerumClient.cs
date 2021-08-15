@@ -139,6 +139,9 @@ namespace Solnet.Serum
         /// <inheritdoc cref="ISerumClient.RpcClient"/>
         public IRpcClient RpcClient => _rpcClient;
         
+        /// <inheritdoc cref="ISerumClient.StreamingRpcClient"/>
+        public IStreamingRpcClient StreamingRpcClient => _streamingRpcClient;
+        
         /// <inheritdoc cref="ISerumClient.ConnectionStatistics"/>
         public IConnectionStatistics ConnectionStatistics => _streamingRpcClient.Statistics;
 

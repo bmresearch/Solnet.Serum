@@ -31,7 +31,7 @@ namespace Solnet.Serum
             => Math.Pow(10, decimals);
 
         /// <summary>
-        /// Converts an order book price from a raw value to a friendly number according to the given decimals and lot sizes.
+        /// Converts price from a raw value to a friendly number according to the given decimals and lot sizes.
         /// </summary>
         /// <param name="price">The price.</param>
         /// <param name="baseDecimals">The decimals of the base token.</param>
@@ -49,14 +49,61 @@ namespace Solnet.Serum
         }
         
         /// <summary>
-        /// Converts an order book quantity from a raw value to a friendly number according to the given decimals and lot sizes.
+        /// Converts quantity from a raw value to a friendly number according to the given decimals and lot sizes.
         /// </summary>
         /// <param name="quantity">The quantity of the order.</param>
         /// <param name="baseLotSize">The lot size of the base token.</param>
         /// <param name="baseDecimals">The decimals of the base token.</param>
         /// <returns>The price as a float.</returns>
         public static float QuantityLotsToNumber(ulong quantity, ulong baseLotSize, byte baseDecimals)
-            => (float)(quantity * baseLotSize/ GetSplTokenMultiplier(baseDecimals));
+            => (float)(quantity * baseLotSize / GetSplTokenMultiplier(baseDecimals));
+        
+        /// <summary>
+        /// Converts price from a friendly number to the corresponding raw value according to the given decimals and market.
+        /// </summary>
+        /// <param name="price">The price.</param>
+        /// <param name="baseDecimals">The decimals of the base token.</param>
+        /// <param name="quoteDecimals">The decimals of the quote token.</param>
+        /// <param name="market">The market.</param>
+        /// <returns>The raw price.</returns>
+        public static ulong PriceNumberToLots(float price, byte baseDecimals, byte quoteDecimals, Market market)
+            => PriceNumberToLots(price, baseDecimals, quoteDecimals, market.BaseLotSize, market.QuoteLotSize);
+        
+        /// <summary>
+        /// Converts price from a friendly number to the corresponding raw value according to the given decimals and lot sizes.
+        /// </summary>
+        /// <param name="price">The price.</param>
+        /// <param name="baseDecimals">The decimals of the base token.</param>
+        /// <param name="quoteDecimals">The decimals of the quote token.</param>
+        /// <param name="baseLotSize">The lot size of the base token.</param>
+        /// <param name="quoteLotSize">The lot size of the quote token.</param>
+        /// <returns>The raw price.</returns>
+        public static ulong PriceNumberToLots(float price, byte baseDecimals, byte quoteDecimals, ulong baseLotSize, ulong quoteLotSize)
+        {
+            double top = price * GetSplTokenMultiplier(quoteDecimals) * baseLotSize;
+            double bottom = GetSplTokenMultiplier(baseDecimals) * quoteLotSize;
+            return (ulong) Math.Round(top / bottom);
+        }
+
+        /// <summary>
+        /// Converts quantity from a friendly number to the corresponding raw value according to the given base decimals and lot size.
+        /// </summary>
+        /// <param name="quantity">The quantity.</param>
+        /// <param name="baseLotSize">The lot size of the base token.</param>
+        /// <param name="baseDecimals">The decimals of the base token.</param>
+        /// <returns>The raw quantity.</returns>
+        public static ulong QuantityNumberToLots(float quantity, byte baseDecimals, ulong baseLotSize) 
+            => (ulong)(Math.Round(quantity * GetSplTokenMultiplier(baseDecimals)) / baseLotSize);
+
+        /// <summary>
+        /// Gets the maximum quote quantity for the given quote lot size, quantity and price as lots.
+        /// </summary>
+        /// <param name="quoteLotSize">The lot size of the quote token.</param>
+        /// <param name="quantityAsLots">The raw quantity of the order.</param>
+        /// <param name="priceAsLots">The raw price of the order.</param>
+        /// <returns>The maximum quote quantity.</returns>
+        public static ulong GetMaxQuoteQuantity(ulong quoteLotSize, ulong quantityAsLots, ulong priceAsLots)
+            => quoteLotSize * quantityAsLots * priceAsLots;
         
         /// <summary>
         /// Processes an event from a Serum <see cref="EventQueue"/> into a trade event with the raw values converted to a friendly format.
@@ -76,9 +123,9 @@ namespace Solnet.Serum
                 ulong priceBeforeFees = evt.Flags.IsMaker
                     ? evt.NativeQuantityPaid + evt.NativeFeeOrRebate
                     : evt.NativeQuantityPaid - evt.NativeFeeOrRebate;
-                price = FromRawPrice(priceBeforeFees, baseDecimals, quoteDecimals,
+                price = HumanizeRawTradePrice(priceBeforeFees, baseDecimals, quoteDecimals,
                     evt.NativeQuantityReleased);
-                quantity = FromRawQuantity(evt.NativeQuantityReleased, baseDecimals);
+                quantity = HumanizeRawTradeQuantity(evt.NativeQuantityReleased, baseDecimals);
                 side = evt.Flags.IsMaker ? Side.Sell : Side.Buy;
             }
             else
@@ -86,9 +133,9 @@ namespace Solnet.Serum
                 ulong priceBeforeFees = evt.Flags.IsMaker
                     ? evt.NativeQuantityReleased - evt.NativeFeeOrRebate
                     : evt.NativeQuantityReleased + evt.NativeFeeOrRebate;
-                price = FromRawPrice(priceBeforeFees, baseDecimals, quoteDecimals,
+                price = HumanizeRawTradePrice(priceBeforeFees, baseDecimals, quoteDecimals,
                     evt.NativeQuantityPaid);
-                quantity = FromRawQuantity(evt.NativeQuantityPaid, baseDecimals);
+                quantity = HumanizeRawTradeQuantity(evt.NativeQuantityPaid, baseDecimals);
                 side = evt.Flags.IsMaker ? Side.Buy : Side.Sell;
             }
 
@@ -102,7 +149,7 @@ namespace Solnet.Serum
         }
         
         /// <summary>
-        /// Converts the price from a raw value to a friendly number according to the given decimals
+        /// Converts the price before fees of a trade from a raw value to a friendly number according to the given decimals
         /// and the amount paid or released by the trade event.
         /// </summary>
         /// <param name="price">The price.</param>
@@ -110,7 +157,7 @@ namespace Solnet.Serum
         /// <param name="quoteDecimals">The decimals of the quote token.</param>
         /// <param name="paidOrReleased">The amount paid or released by the trade event.</param>
         /// <returns>The price as a float.</returns>
-        public static float FromRawPrice(ulong price, byte baseDecimals, byte quoteDecimals, ulong paidOrReleased)
+        public static float HumanizeRawTradePrice(ulong price, byte baseDecimals, byte quoteDecimals, ulong paidOrReleased)
         {
             double top = price * GetSplTokenMultiplier(baseDecimals);
             double bottom = GetSplTokenMultiplier(quoteDecimals) * paidOrReleased;
@@ -118,13 +165,26 @@ namespace Solnet.Serum
         }
         
         /// <summary>
-        /// Converts the quantity from a raw value to a friendly number according to the given decimals
-        /// and the amount paid or released by the trade event.
+        /// Converts the quantity released or paid by a trade from a raw value to a friendly number according to the given decimals.
         /// </summary>
         /// <param name="quantity">The quantity released or paid by the trade event.</param>
         /// <param name="baseDecimals">The decimals of the base token.</param>
         /// <returns>The price as a float.</returns>
-        public static float FromRawQuantity(ulong quantity, byte baseDecimals)
+        public static float HumanizeRawTradeQuantity(ulong quantity, byte baseDecimals)
             => (float)(quantity / GetSplTokenMultiplier(baseDecimals));
+        
+        /// <summary>
+        /// Converts all order friendly numbers to the corresponding raw value for the given decimals and market.
+        /// </summary>
+        /// <param name="order">The order.</param>
+        /// <param name="baseDecimals">The decimals of the base token.</param>
+        /// <param name="quoteDecimals">The decimals of the quote token.</param>
+        /// <param name="market">The market.</param>
+        public static void ConvertOrderValues(this Order order, byte baseDecimals, byte quoteDecimals, Market market)
+        {
+            order.RawPrice = PriceNumberToLots(order.Price, baseDecimals, quoteDecimals, market);
+            order.RawQuantity = QuantityNumberToLots(order.Quantity, baseDecimals, market.BaseLotSize);
+            order.MaxQuoteQuantity = GetMaxQuoteQuantity(market.QuoteLotSize, order.RawQuantity, order.RawPrice);
+        }
     }
 }

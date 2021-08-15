@@ -17,15 +17,20 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// Represents the layout of the <see cref="OpenOrdersAccount"/> data structure.
         /// </summary>
-        internal static class Layout
+        public static class Layout
         {
             /// <summary>
-            /// The size of the data for the orders of the open orders account.
+            /// The size of the data for the open orders account.
+            /// </summary>
+            public const int SpanLength = 3228;
+            
+            /// <summary>
+            /// The size of the data for the orders segment of the open orders account.
             /// </summary>
             internal const int OrdersSpanLength = 2048;
             
             /// <summary>
-            /// The size of the data for the client ids of the orders in this open orders account.
+            /// The size of the data for the client ids segment of the orders in this open orders account.
             /// </summary>
             internal const int ClientIdsSpanLength = 1024;
             

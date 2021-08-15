@@ -40,18 +40,27 @@ namespace Solnet.Serum
         /// <summary>
         /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.Values.NewOrderV3"/> method.
         /// </summary>
+        /// <param name="order"></param>
+        /// <returns>The encoded data.</returns>
+        public static byte[] EncodeNewOrderV3Data(Order order)
+            => EncodeNewOrderV3Data(order.Side, order.RawPrice, order.RawQuantity, order.Type, order.ClientOrderId,
+                order.SelfTradeBehavior, order.MaxQuoteQuantity, ushort.MaxValue);
+
+        /// <summary>
+        /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.Values.NewOrderV3"/> method.
+        /// </summary>
         /// <param name="side"></param>
         /// <param name="limitPrice"></param>
         /// <param name="maxCoinQty"></param>
         /// <param name="orderType"></param>
         /// <param name="clientOrderId"></param>
         /// <param name="selfTradeBehaviorType"></param>
-        /// <param name="limit">The maximum number of iterations of the Serum order matching loop.</param>
         /// <param name="maxNativePcQtyIncludingFees"></param>
+        /// <param name="limit">The maximum number of iterations of the Serum order matching loop.</param>
         /// <returns>The encoded data.</returns>
         internal static byte[] EncodeNewOrderV3Data(Side side, ulong limitPrice, ulong maxCoinQty,
-            OrderType orderType, ulong clientOrderId, SelfTradeBehavior selfTradeBehaviorType, ushort limit,
-            ulong maxNativePcQtyIncludingFees)
+            OrderType orderType, ulong clientOrderId, SelfTradeBehavior selfTradeBehaviorType,
+            ulong maxNativePcQtyIncludingFees, ushort limit)
         {
             byte[] data = new byte[51];
             data.WriteU32((uint)SerumProgramInstructions.Values.NewOrderV3, SerumProgramLayouts.MethodOffset);

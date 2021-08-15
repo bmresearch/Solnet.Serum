@@ -15,18 +15,23 @@ namespace Solnet.Serum
         /// Instantiate a new Market Manager.
         /// </summary>
         /// <param name="marketAddress">The market address.</param>
+        /// <param name="account">The <see cref="PublicKey"/> of the owner account.</param>
+        /// <param name="srmAccount">The <see cref="PublicKey"/> of the serum account to use for fee discount, not used when not provided.</param>
+        /// <param name="signatureMethod">A delegate method used to request a signature for transactions crafted by the <see cref="MarketManager"/> which will submit, cancel orders, or settle funds.</param>
         /// <param name="url">The cluster to use when not passing in a serum client instance.</param>
         /// <param name="serumClient">The Serum Client instance.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The Serum Client.</returns>
-        public static IMarketManager GetMarket(string marketAddress, string url = null, ISerumClient serumClient = null, ILogger logger = null)
+        public static IMarketManager GetMarket(PublicKey marketAddress, PublicKey account, PublicKey srmAccount = null,
+            MarketManager.RequestSignature signatureMethod = null, string url = null, ISerumClient serumClient = null,
+            ILogger logger = null)
         {
 #if DEBUG
             logger ??= GetDebugLogger();
 #endif
-            return new MarketManager(new PublicKey(marketAddress), url, logger, serumClient);
+            return new MarketManager(marketAddress, account, srmAccount, signatureMethod, url, logger, serumClient);
         }
-        
+
 #if DEBUG
         /// <summary>
         /// Get a logger instance for use in debug mode.

@@ -117,7 +117,7 @@ namespace Solnet.Serum
         /// <returns>The built <see cref="Order"/>.</returns>
         public Order Build()
         {
-            return new ()
+            return new Order()
             {
                 SelfTradeBehavior = _selfTradeBehavior,
                 Side = _side,

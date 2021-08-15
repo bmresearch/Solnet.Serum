@@ -17,12 +17,12 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// Represents the layout of the <see cref="Market"/> data structure.
         /// </summary>
-        internal static class Layout
+        public static class Layout
         {
             /// <summary>
             /// The size of the data for a market account.
             /// </summary>
-            internal const int SpanLength = 388;
+            public const int SpanLength = 388;
             
             /// <summary>
             /// The number of bytes of the padding at the beginning of the market structure.
