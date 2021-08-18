@@ -7,12 +7,15 @@ using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
+using Solnet.Rpc.Utilities;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,11 +37,6 @@ namespace Solnet.Serum
         private readonly PublicKey _marketAccount;
 
         /// <summary>
-        /// The <see cref="OpenOrdersAccount"/>'s <see cref="PublicKey"/>.
-        /// </summary>
-        private readonly PublicKey _openOrdersAccount;
-
-        /// <summary>
         /// The <see cref="PublicKey"/> of the SRM token account to use for fee discount..
         /// </summary>
         private readonly PublicKey _srmAccount;
@@ -57,6 +55,11 @@ namespace Solnet.Serum
         /// The serum client instance to use to fetch and decode Serum data.
         /// </summary>
         private readonly ISerumClient _serumClient;
+        
+        /// <summary>
+        /// The <see cref="OpenOrdersAccount"/>'s <see cref="PublicKey"/>.
+        /// </summary>
+        private PublicKey _openOrdersAccount;
 
         /// <summary>
         /// The decimals of the base token for the current <see cref="Market"/>.
@@ -67,21 +70,6 @@ namespace Solnet.Serum
         /// The decimals of the quote token for the current <see cref="Market"/>.
         /// </summary>
         private byte _quoteDecimals;
-
-        /// <summary>
-        /// The task used to get the <see cref="Market"/> data.
-        /// </summary>
-        private Task _marketTask;
-
-        /// <summary>
-        /// The task used to get the decimals for the <see cref="Market"/>'s Base Token Mint.
-        /// </summary>
-        private Task _baseDecimalsTask;
-
-        /// <summary>
-        /// The task used to get the decimals for the <see cref="Market"/>'s Quote Token Mint.
-        /// </summary>
-        private Task _quoteDecimalsTask;
 
         /// <summary>
         /// The subscription object corresponding to the <see cref="Market"/>'s <see cref="EventQueue"/>.
@@ -133,7 +121,7 @@ namespace Solnet.Serum
         /// <param name="url">The cluster to use when not passing in a serum client instance.</param>
         /// <param name="logger">The logger instance to use.</param>
         /// <param name="serumClient">The serum client instance to use.</param>
-        public MarketManager(PublicKey marketAccount, PublicKey ownerAccount, PublicKey srmAccount = null,
+        public MarketManager(PublicKey marketAccount, PublicKey ownerAccount = null, PublicKey srmAccount = null,
             RequestSignature signatureMethod = null, string url = null, ILogger logger = null,
             ISerumClient serumClient = default)
         {
@@ -160,11 +148,11 @@ namespace Solnet.Serum
                 await GetBaseDecimals();
                 await GetQuoteDecimals();
                 
-                // Get the ATAs for both
+                // Get the ATAs for both token mints, if they exist
                 BaseAccount = await GetAssociatedTokenAccount(Market.BaseMint);
                 QuoteAccount = await GetAssociatedTokenAccount(Market.QuoteMint);
 
-                // Get the open orders account, if it exists
+                // Get the open orders account for this market, if it exists
                 await GetOpenOrdersAccount();
             });
 
@@ -267,6 +255,7 @@ namespace Solnet.Serum
 
                 if (accounts.Result.Count != 0)
                 {
+                    _openOrdersAccount = (PublicKey) accounts.Result[0].PublicKey;
                     OpenOrdersAccount = 
                         OpenOrdersAccount.Deserialize(Convert.FromBase64String(accounts.Result[0].Account.Data[0]));
                     break;
@@ -287,7 +276,7 @@ namespace Solnet.Serum
             while (true)
             {
                 RequestResult<ResponseValue<List<TokenAccount>>> accounts = await
-                    _serumClient.RpcClient.GetTokenAccountsByOwnerAsync(_ownerAccount, mint, TokenProgram.ProgramIdKey);
+                    _serumClient.RpcClient.GetTokenAccountsByOwnerAsync(_ownerAccount, mint);
 
                 if (!accounts.WasRequestSuccessfullyHandled)
                 {
@@ -299,7 +288,7 @@ namespace Solnet.Serum
                     return accounts.Result.Value[0];
 
                 _logger?.Log(LogLevel.Information,
-                    $"Could not find open orders account for market {_marketAccount} and owner {_ownerAccount}");
+                    $"Could not find associated token account for mint {mint} and owner {_ownerAccount}");
                 break;
             }
 
@@ -313,7 +302,14 @@ namespace Solnet.Serum
         /// <inheritdoc cref="IMarketManager.SubscribeTrades"/>
         public async void SubscribeTrades(Action<IList<TradeEvent>, ulong> action)
         {
-            await Task.WhenAll(_baseDecimalsTask, _quoteDecimalsTask);
+            while (true)
+            {
+                if (_baseDecimals != 0 && _quoteDecimals != 0)
+                    break;
+
+                await Task.Delay(100);
+            }
+
             _eventQueueSubscription = _serumClient.SubscribeEventQueueAsync((_, queue, slot) =>
             {
                 List<TradeEvent> tradeEvents =
@@ -327,8 +323,13 @@ namespace Solnet.Serum
         /// <inheritdoc cref="IMarketManager.SubscribeOrderBook"/>
         public async void SubscribeOrderBook(Action<OrderBook, ulong> action)
         {
-            await Task.WhenAll(_baseDecimalsTask, _quoteDecimalsTask);
+            while (true)
+            {
+                if (_baseDecimals != 0 && _quoteDecimals != 0)
+                    break;
 
+                await Task.Delay(100);
+            }
             _bidSideSubscription = _serumClient.SubscribeOrderBookSideAsync((_, orderBookSide, slot) =>
             {
                 _bidSide = orderBookSide;
@@ -390,26 +391,46 @@ namespace Solnet.Serum
         #region Order Management
 
         /// <inheritdoc cref="IMarketManager.NewOrderAsync(Order)"/>
-        public Task<SignatureConfirmation> NewOrderAsync(Order order)
+        public async Task<SignatureConfirmation> NewOrderAsync(Order order)
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
+            
+            while (true)
+            {
+                if (Market != null)
+                    break;
+
+                await Task.Delay(100);
+            }
+            
+            TransactionBuilder txBuilder = new TransactionBuilder()
+                .SetRecentBlockHash(_blockHash)
+                .SetFeePayer(_ownerAccount);
+            
+            PublicKey bAta = VerifyBaseAccountExists(txBuilder);
+            PublicKey qAta = VerifyQuoteAccountExists(txBuilder);
+            PublicKey ooa = VerifyOpenOrdersExists(txBuilder);
 
             order.ConvertOrderValues(_baseDecimals, _quoteDecimals, Market);
 
-
             TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
                 Market,
-                _openOrdersAccount,
-                order.Side == Side.Buy ? new PublicKey(QuoteAccount.PublicKey) : new PublicKey(BaseAccount.PublicKey),
+                ooa,
+                order.Side == Side.Buy ? qAta : bAta,
                 _ownerAccount,
                 order,
                 _srmAccount);
 
-            byte[] txBytes = new TransactionBuilder()
-                .SetRecentBlockHash(_blockHash)
-                .SetFeePayer(_ownerAccount)
+            TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                Market,
+                ooa,
+                _ownerAccount,
+                bAta,
+                qAta);
+            byte[] txBytes = txBuilder
                 .AddInstruction(txInstruction)
+                .AddInstruction(settleIx)
                 .CompileMessage();
 
             byte[] signatureBytes = _requestSignature(txBytes);
@@ -417,20 +438,28 @@ namespace Solnet.Serum
             Transaction tx = Transaction.Populate(
                 Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
 
-            return SendTransactionAndSubscribeSignature(tx.Serialize());
+            return await SendTransactionAndSubscribeSignature(tx.Serialize());
         }
 
         /// <inheritdoc cref="IMarketManager.NewOrder(Order)"/>
         public SignatureConfirmation NewOrder(Order order) => NewOrderAsync(order).Result;
 
         /// <inheritdoc cref="IMarketManager.NewOrderAsync(Side, OrderType, SelfTradeBehavior, float, float, ulong)"/>
-        public Task<SignatureConfirmation> NewOrderAsync(
+        public async Task<SignatureConfirmation> NewOrderAsync(
             Side side, OrderType type, SelfTradeBehavior selfTradeBehavior, float size, float price,
             ulong clientId = ulong.MaxValue)
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
 
+            while (true)
+            {
+                if (Market != null)
+                    break;
+
+                await Task.Delay(100);
+            }
+            
             Order order = new OrderBuilder()
                 .SetPrice(price)
                 .SetQuantity(size)
@@ -441,22 +470,34 @@ namespace Solnet.Serum
                 .Build();
 
             order.ConvertOrderValues(_baseDecimals, _quoteDecimals, Market);
+            
+            TransactionBuilder txBuilder = new TransactionBuilder()
+                .SetRecentBlockHash(_blockHash)
+                .SetFeePayer(_ownerAccount);
+            
+            PublicKey bAta = VerifyBaseAccountExists(txBuilder);
+            PublicKey qAta = VerifyQuoteAccountExists(txBuilder);
+            PublicKey ooa = VerifyOpenOrdersExists(txBuilder);
 
             TransactionInstruction txInstruction =
                 SerumProgram.NewOrderV3(
                     Market,
-                    _openOrdersAccount,
-                    order.Side == Side.Buy
-                        ? new PublicKey(QuoteAccount.PublicKey)
-                        : new PublicKey(BaseAccount.PublicKey),
+                    ooa,
+                    order.Side == Side.Buy ? qAta : bAta,
                     _ownerAccount,
                     order,
                     _srmAccount);
 
-            byte[] txBytes = new TransactionBuilder()
-                .SetRecentBlockHash(_blockHash)
-                .SetFeePayer(_ownerAccount)
+            TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                Market,
+                ooa,
+                _ownerAccount,
+                bAta,
+                qAta);
+            
+            byte[] txBytes = txBuilder
                 .AddInstruction(txInstruction)
+                .AddInstruction(settleIx)
                 .CompileMessage();
 
             byte[] signatureBytes = _requestSignature(txBytes);
@@ -464,7 +505,7 @@ namespace Solnet.Serum
             Transaction tx = Transaction.Populate(
                 Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
 
-            return SendTransactionAndSubscribeSignature(tx.Serialize());
+            return await SendTransactionAndSubscribeSignature(tx.Serialize());
         }
 
         /// <inheritdoc cref="IMarketManager.NewOrder(Side, OrderType, SelfTradeBehavior, float, float, ulong)"/>
@@ -474,52 +515,75 @@ namespace Solnet.Serum
             NewOrderAsync(side, type, selfTradeBehavior, size, price, clientId).Result;
 
         /// <inheritdoc cref="IMarketManager.NewOrdersAsync(IList{Order})"/>
-        public Task<IList<SignatureConfirmation>> NewOrdersAsync(IList<Order> orders)
+        public async Task<IList<SignatureConfirmation>> NewOrdersAsync(IList<Order> orders)
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
 
-            return Task.Run(async () =>
+            while (true)
+            {
+                if (Market != null)
+                    break;
+
+                await Task.Delay(100);
+            }
+
+            
+            return await Task.Run(async () =>
             {
                 IList<SignatureConfirmation> signatureConfirmations = new List<SignatureConfirmation>();
 
-                while (orders.Count != 0)
+                TransactionBuilder txBuilder = new TransactionBuilder()
+                    .SetRecentBlockHash(_blockHash)
+                    .SetFeePayer(_ownerAccount);
+            
+                PublicKey bAta = VerifyBaseAccountExists(txBuilder);
+                PublicKey qAta = VerifyQuoteAccountExists(txBuilder);
+                PublicKey ooa = VerifyOpenOrdersExists(txBuilder);
+                SignatureConfirmation sigConf = null;
+
+                TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                    Market,
+                    ooa,
+                    _ownerAccount,
+                    bAta,
+                    qAta);
+                
+                for(int i = 0; i<orders.Count; i++)
                 {
-                    TransactionBuilder txBuilder = new TransactionBuilder()
-                        .SetRecentBlockHash(_blockHash)
-                        .SetFeePayer(_ownerAccount);
-                    byte[] txBytes = null;
-                    byte[] signatureBytes = null;
-                    SignatureConfirmation sigConf = null;
+                    orders[i].ConvertOrderValues(_baseDecimals, _quoteDecimals, Market);
 
-                    foreach (Order order in orders)
-                    {
-                        order.ConvertOrderValues(_baseDecimals, _quoteDecimals, Market);
+                    TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
+                        Market,
+                        ooa,
+                        orders[i].Side == Side.Buy ? qAta : bAta,
+                        _ownerAccount,
+                        orders[i],
+                        _srmAccount);
+                    txBuilder.AddInstruction(txInstruction);
+                    byte[] txBytes = txBuilder.CompileMessage();
 
-                        TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
-                            Market,
-                            _openOrdersAccount,
-                            order.Side == Side.Buy
-                                ? new PublicKey(QuoteAccount.PublicKey)
-                                : new PublicKey(BaseAccount.PublicKey),
-                            _ownerAccount,
-                            order,
-                            _srmAccount);
-                        txBuilder.AddInstruction(txInstruction);
-                        orders.Remove(order);
+                    if (txBytes.Length < 850 && i != orders.Count - 1) continue;
 
-                        txBytes = txBuilder.CompileMessage();
-                        if (txBytes.Length >= 1000)
-                            break;
-                    }
+                    txBuilder.AddInstruction(settleIx);
+                    txBytes = txBuilder.CompileMessage();
 
-                    if (txBytes != null) signatureBytes = _requestSignature(txBytes);
-                    
+                    byte[] signatureBytes = _requestSignature(txBytes);
+
                     Transaction tx = Transaction.Populate(
                         Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
 
-                    if (signatureBytes != null) sigConf = await SendTransactionAndSubscribeSignature(tx.Serialize());
-                    if (sigConf != null) signatureConfirmations.Add(sigConf);
+                    if (signatureBytes != null)
+                        sigConf = await SendTransactionAndSubscribeSignature(tx.Serialize());
+                    if (sigConf != null)
+                    {
+                        signatureConfirmations.Add(sigConf);
+                        if (sigConf.SimulationLogs != null) break;
+                    }
+
+                    txBuilder = new TransactionBuilder()
+                        .SetRecentBlockHash(_blockHash)
+                        .SetFeePayer(_ownerAccount);
                 }
 
                 return signatureConfirmations;
@@ -530,10 +594,18 @@ namespace Solnet.Serum
         public IList<SignatureConfirmation> NewOrders(IList<Order> orders) => NewOrdersAsync(orders).Result;
 
         /// <inheritdoc cref="IMarketManager.CancelOrderAsync(BigInteger)"/>
-        public Task<SignatureConfirmation> CancelOrderAsync(BigInteger orderId)
+        public async Task<SignatureConfirmation> CancelOrderAsync(BigInteger orderId)
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
+            
+            while (true)
+            {
+                if (Market != null && _openOrdersAccount != null && BaseAccount != null && QuoteAccount != null)
+                    break;
+
+                await Task.Delay(100);
+            }
 
             OpenOrder openOrder = OpenOrders.FirstOrDefault(order => order.OrderId.Equals(orderId));
             
@@ -548,10 +620,18 @@ namespace Solnet.Serum
                     openOrder.IsBid ? Side.Buy : Side.Sell,
                     openOrder.OrderId);
 
+            TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                Market,
+                _openOrdersAccount,
+                _ownerAccount,
+                new PublicKey(BaseAccount.PublicKey),
+                new PublicKey(QuoteAccount.PublicKey));
+            
             byte[] txBytes = new TransactionBuilder()
                 .SetRecentBlockHash(_blockHash)
                 .SetFeePayer(_ownerAccount)
                 .AddInstruction(txInstruction)
+                .AddInstruction(settleIx)
                 .CompileMessage();
 
             byte[] signatureBytes = _requestSignature(txBytes);
@@ -559,17 +639,25 @@ namespace Solnet.Serum
             Transaction tx = Transaction.Populate(
                 Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
 
-            return SendTransactionAndSubscribeSignature(tx.Serialize());
+            return await SendTransactionAndSubscribeSignature(tx.Serialize());
         }
 
         /// <inheritdoc cref="IMarketManager.CancelOrder(BigInteger)"/>
         public SignatureConfirmation CancelOrder(BigInteger orderId) => CancelOrderAsync(orderId).Result;
 
         /// <inheritdoc cref="IMarketManager.CancelOrderAsync(ulong)"/>
-        public Task<SignatureConfirmation> CancelOrderAsync(ulong clientId)
+        public async Task<SignatureConfirmation> CancelOrderAsync(ulong clientId)
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
+            
+            while (true)
+            {
+                if (Market != null && _openOrdersAccount != null && BaseAccount != null && QuoteAccount != null)
+                    break;
+
+                await Task.Delay(100);
+            }
 
             TransactionInstruction txInstruction =
                 SerumProgram.CancelOrderByClientIdV2(
@@ -577,10 +665,18 @@ namespace Solnet.Serum
                     _openOrdersAccount,
                     _ownerAccount, clientId);
 
+            TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                Market,
+                _openOrdersAccount,
+                _ownerAccount,
+                new PublicKey(BaseAccount.PublicKey),
+                new PublicKey(QuoteAccount.PublicKey));
+            
             byte[] txBytes = new TransactionBuilder()
                 .SetRecentBlockHash(_blockHash)
                 .SetFeePayer(_ownerAccount)
                 .AddInstruction(txInstruction)
+                .AddInstruction(settleIx)
                 .CompileMessage();
 
             byte[] signatureBytes = _requestSignature(txBytes);
@@ -588,26 +684,41 @@ namespace Solnet.Serum
             Transaction tx = Transaction.Populate(
                 Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
 
-            return SendTransactionAndSubscribeSignature(tx.Serialize());
+            return await SendTransactionAndSubscribeSignature(tx.Serialize());
         }
 
         /// <inheritdoc cref="IMarketManager.CancelOrder(ulong)"/>
         public SignatureConfirmation CancelOrder(ulong clientId) => CancelOrderAsync(clientId).Result;
 
         /// <inheritdoc cref="IMarketManager.CancelAllOrdersAsync"/>
-        public Task<IList<SignatureConfirmation>> CancelAllOrdersAsync()
+        public async Task<IList<SignatureConfirmation>> CancelAllOrdersAsync()
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
+            
+            while (true)
+            {
+                if (Market != null && _openOrdersAccount != null && BaseAccount != null && QuoteAccount != null)
+                    break;
 
-            return Task.Run(async () =>
+                await Task.Delay(100);
+            }
+
+            return await Task.Run(async () =>
             {
                 IList<SignatureConfirmation> signatureConfirmations = new List<SignatureConfirmation>();
                 TransactionBuilder txBuilder = new TransactionBuilder()
                     .SetRecentBlockHash(_blockHash)
                     .SetFeePayer(_ownerAccount);
+                
+                TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                    Market,
+                    _openOrdersAccount,
+                    _ownerAccount,
+                    new PublicKey(BaseAccount.PublicKey),
+                    new PublicKey(QuoteAccount.PublicKey));
 
-                foreach (OpenOrder openOrder in OpenOrders)
+                for(int i = 0; i < OpenOrders.Count; i++)
                 {
                     SignatureConfirmation sigConf = null;
                     
@@ -616,13 +727,16 @@ namespace Solnet.Serum
                             Market,
                             _openOrdersAccount,
                             _ownerAccount,
-                            openOrder.IsBid ? Side.Buy : Side.Sell,
-                            openOrder.OrderId);
+                            OpenOrders[i].IsBid ? Side.Buy : Side.Sell,
+                            OpenOrders[i].OrderId);
                     
                     txBuilder.AddInstruction(txInstruction);
                     byte[] txBytes = txBuilder.CompileMessage();
                     
-                    if (txBytes.Length < 1000) continue;
+                    if (txBytes.Length < 850 && i != OpenOrders.Count - 1) continue;
+                    
+                    txBuilder.AddInstruction(settleIx);
+                    txBytes = txBuilder.CompileMessage();
 
                     byte[] signatureBytes = _requestSignature(txBytes);
                         
@@ -630,7 +744,11 @@ namespace Solnet.Serum
                         Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
 
                     if (signatureBytes != null) sigConf = await SendTransactionAndSubscribeSignature(tx.Serialize());
-                    if (sigConf != null) signatureConfirmations.Add(sigConf);
+                    if (sigConf != null)
+                    {
+                        signatureConfirmations.Add(sigConf);
+                        if (sigConf.SimulationLogs != null) break;
+                    }
                     
                     txBuilder = new TransactionBuilder()
                         .SetRecentBlockHash(_blockHash)
@@ -644,6 +762,100 @@ namespace Solnet.Serum
         /// <inheritdoc cref="IMarketManager.CancelAllOrders"/>
         public IList<SignatureConfirmation> CancelAllOrders() => CancelAllOrdersAsync().Result;
 
+        /// <inheritdoc cref="IMarketManager.SettleFundsAsync"/>
+        public async Task<SignatureConfirmation> SettleFundsAsync(PublicKey referrer = null)
+        {
+            if (_requestSignature == null)
+                throw new Exception("signature request method hasn't been set");
+
+            while (true)
+            {
+                if (Market != null && _openOrdersAccount != null && QuoteAccount != null && BaseAccount != null)
+                    break;
+
+                await Task.Delay(100);
+            }
+            
+            TransactionInstruction txInstruction = SerumProgram.SettleFunds(
+                Market,
+                _openOrdersAccount,
+                _ownerAccount,
+                new PublicKey(BaseAccount.PublicKey),
+                new PublicKey(QuoteAccount.PublicKey));
+
+            byte[] txBytes = new TransactionBuilder()
+                .SetRecentBlockHash(_blockHash)
+                .SetFeePayer(_ownerAccount)
+                .AddInstruction(txInstruction)
+                .CompileMessage();
+
+            byte[] signatureBytes = _requestSignature(txBytes);
+
+            Transaction tx = Transaction.Populate(
+                Message.Deserialize(txBytes), new List<byte[]> { signatureBytes });
+
+            return await SendTransactionAndSubscribeSignature(tx.Serialize());
+        }
+
+        /// <inheritdoc cref="IMarketManager.SettleFundsAsync"/>
+        public SignatureConfirmation SettleFunds(PublicKey referrer = null) => SettleFundsAsync(referrer).Result;
+        
+        /// <summary>
+        /// Checks if the open orders account actually exists, in a case it does not, in a case it does not, adds an instruction to the transaction builder
+        /// instance to initialize one.
+        /// </summary>
+        /// <param name="txBuilder">The transaction builder instance to add the CreateAssociatedTokenAccount instruction to.</param>
+        /// <returns>The associated token account <see cref="PublicKey"/> of the quote token mint.</returns>
+        private PublicKey VerifyQuoteAccountExists(TransactionBuilder txBuilder)
+        {
+            if (QuoteAccount != null)
+                return new PublicKey(QuoteAccount.PublicKey);
+
+            PublicKey associatedTokenAccount = 
+                AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(_ownerAccount, Market.QuoteMint);
+            TransactionInstruction txInstruction = 
+                AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(_ownerAccount, _ownerAccount, Market.QuoteMint);
+            txBuilder.AddInstruction(txInstruction);
+            return associatedTokenAccount;
+        }
+        
+        /// <summary>
+        /// Checks if the base token associated token account actually exists, in a case it does not, adds an instruction to the transaction builder
+        /// instance to initialize one.
+        /// </summary>
+        /// <param name="txBuilder">The transaction builder instance to add the CreateAssociatedTokenAccount instruction to.</param>
+        /// <returns>The associated token account <see cref="PublicKey"/> of the base token mint.</returns>
+        private PublicKey VerifyBaseAccountExists(TransactionBuilder txBuilder)
+        {
+            if (BaseAccount != null)
+                return new PublicKey(BaseAccount.PublicKey);
+            
+            PublicKey associatedTokenAccount = 
+                AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(_ownerAccount, Market.BaseMint);
+            TransactionInstruction txInstruction = 
+                AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(_ownerAccount, _ownerAccount, Market.BaseMint);
+            txBuilder.AddInstruction(txInstruction);
+            return associatedTokenAccount;
+        }
+
+        /// <summary>
+        /// Checks if the open orders account actually exists, in a case it does not, adds an instruction to the transaction builder
+        /// instance to initialize one.
+        /// </summary>
+        /// <param name="txBuilder">The transaction builder instance to add the InitOpenOrders instruction to.</param>
+        /// <returns>The open orders account <see cref="PublicKey"/>.</returns>
+        private PublicKey VerifyOpenOrdersExists(TransactionBuilder txBuilder)
+        {
+            if (OpenOrdersAccount != null)
+                return _openOrdersAccount;
+            
+            Account account = new ();
+            TransactionInstruction txInstruction =
+                SerumProgram.InitOpenOrders(account, _ownerAccount, _marketAccount);
+            txBuilder.AddInstruction(txInstruction);
+            return account;
+        }
+
         /// <summary>
         /// Submits a transaction to the cluster and subscribes to its confirmation.
         /// </summary>
@@ -653,6 +865,23 @@ namespace Solnet.Serum
         {
             RequestResult<string> req = await SubmitTransaction(transaction);
             SignatureConfirmation sigConf = new() { Signature = req.Result, Result = req };
+
+            if (req.ServerErrorCode != 0)
+            {
+                bool exists = req.ErrorData.TryGetValue("data", out object value);
+                if (!exists) return sigConf;
+                string elem = ((JsonElement) value).ToString();
+                if (elem == null) return sigConf;
+                SimulationLogs simulationLogs = JsonSerializer.Deserialize<SimulationLogs>(elem,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+                    });
+                sigConf.ChangeState(simulationLogs);
+                
+                return sigConf;
+            }
 
             SubscriptionState sub = await _serumClient.StreamingRpcClient.SubscribeSignatureAsync(req.Result,
                 (state, value) =>
@@ -669,7 +898,7 @@ namespace Solnet.Serum
         /// Attempts to submit a transaction to the cluster.
         /// </summary>
         /// <param name="transaction">The signed transaction bytes.</param>
-        /// <returns>A task which may return a <see cref="RequestResult{string}"/>.</returns>
+        /// <returns>A task which may return a <see cref="RequestResult{IEnumerable}"/>.</returns>
         private async Task<RequestResult<string>> SubmitTransaction(byte[] transaction)
         {
             while (true)
@@ -678,6 +907,9 @@ namespace Solnet.Serum
                     await _serumClient.RpcClient.SendTransactionAsync(transaction, false, Commitment.Confirmed);
 
                 if (req.WasRequestSuccessfullyHandled)
+                    return req;
+
+                if (req.ServerErrorCode != 0)
                     return req;
 
                 await Task.Delay(250);

@@ -64,7 +64,10 @@ separate repository so it is contained, as the goal for [Solnet](https://github.
 
 ## Examples
 
-- TO DO
+The [Solnet.Serum.Examples]() project features some examples on how to use both the [IMarketManager]() and the [ISerumClient](), these examples include:
+- Streaming market data directly into user-friendly values using the `IMarketManager` interface
+- Submitting new orders and cancelling existing ones
+- A very simple market making algorithm
 
 ## Contribution
 

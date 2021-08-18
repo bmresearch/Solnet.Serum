@@ -199,10 +199,10 @@ namespace Solnet.Serum
         {
             List<AccountMeta> keys = new();
             openOrdersAccounts.ForEach(pubKey => keys.Add(AccountMeta.Writable(pubKey, false)));
-            keys.Add(AccountMeta.Writable(market, true));
-            keys.Add(AccountMeta.Writable(eventQueue, true));
-            keys.Add(AccountMeta.Writable(coinAccount, true));
-            keys.Add(AccountMeta.Writable(pcAccount, true));
+            keys.Add(AccountMeta.Writable(market, false));
+            keys.Add(AccountMeta.Writable(eventQueue, false));
+            keys.Add(AccountMeta.Writable(coinAccount, false));
+            keys.Add(AccountMeta.Writable(pcAccount, false));
 
             return new TransactionInstruction
             {
@@ -462,44 +462,29 @@ namespace Solnet.Serum
             switch (instructionValue)
             {
                     case SerumProgramInstructions.Values.InitOpenOrders:
-                        /*
-                        SerumProgramData.DecodeCreateAccountData(decodedInstruction, data, keys, keyIndices);
-                        */
-                        break;
-                    case SerumProgramInstructions.Values.InitializeMarket:
-                        break;
-                    case SerumProgramInstructions.Values.NewOrder:
-                        break;
-                    case SerumProgramInstructions.Values.MatchOrders:
+                        SerumProgramData.DecodeInitOpenOrders(decodedInstruction, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.ConsumeEvents:
-                        break;
-                    case SerumProgramInstructions.Values.CancelOrder:
+                        SerumProgramData.DecodeConsumeEvents(decodedInstruction, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.SettleFunds:
-                        break;
-                    case SerumProgramInstructions.Values.CancelOrderByClientId:
-                        break;
-                    case SerumProgramInstructions.Values.DisableMarket:
-                        break;
-                    case SerumProgramInstructions.Values.SweepFees:
-                        break;
-                    case SerumProgramInstructions.Values.NewOrderV2:
+                        SerumProgramData.DecodeSettleFunds(decodedInstruction, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.NewOrderV3:
+                        SerumProgramData.DecodeNewOrderV3(decodedInstruction, data, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.CancelOrderV2:
+                        SerumProgramData.DecodeCancelOrderV2(decodedInstruction, data, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.CancelOrderByClientIdV2:
-                        break;
-                    case SerumProgramInstructions.Values.SendTake:
+                        SerumProgramData.DecodeCancelOrderByClientIdV2(decodedInstruction, data, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.CloseOpenOrders:
+                        SerumProgramData.DecodeCloseOpenOrders(decodedInstruction, keys, keyIndices);
                         break;
                     case SerumProgramInstructions.Values.Prune:
+                        SerumProgramData.DecodePrune(decodedInstruction, keys, keyIndices);
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
             }
 
             return decodedInstruction;

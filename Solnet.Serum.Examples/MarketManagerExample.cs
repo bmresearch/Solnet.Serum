@@ -17,12 +17,10 @@ namespace Solnet.Serum.Examples
     /// </summary>
     public class MarketManagerExample : IRunnableExample
     {
-        private readonly PublicKey _marketAddress = new("65HCcVzCVLDLEUHVfQrvE5TmHAUKgnCnbii9dojxE7wV");
+        private readonly PublicKey _marketAddress = new("HXBi8YBwbh4TXF6PjVw81m8Z3Cc4WBofvauj5SBFdgUs");
         private readonly ISerumClient _serumClient;
         private readonly IMarketManager _marketManager;
         private readonly List<TradeEvent> _trades;
-        private readonly Wallet.Wallet _wallet;
-        private readonly SolanaKeyStoreService _keyStore;
         private OrderBook _orderBook;
         private float _cumulativeVolume;
         private int _numTrades;
@@ -32,27 +30,14 @@ namespace Solnet.Serum.Examples
         {
             Console.WriteLine($"Initializing {ToString()}");
             InstructionDecoder.Register(SerumProgram.ProgramIdKey, SerumProgram.Decode);
-            // init stuff
-            _keyStore = new SolanaKeyStoreService();
             _trades = new List<TradeEvent>();
             
-            // get the wallet
-            _wallet = _keyStore.RestoreKeystoreFromFile("/path/to/solana-keygen-wallet.json");
-
             // serum client
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
             _serumClient.ConnectAsync().Wait();
             
             // initialize market manager
-            _marketManager = MarketFactory.GetMarket(_marketAddress, _wallet.Account, _marketAddress, SignRequest, serumClient: _serumClient);
-        }
-
-        private byte[] SignRequest(ReadOnlySpan<byte> messageData)
-        {
-            List<DecodedInstruction> instruction =
-                InstructionDecoder.DecodeInstructions(Message.Deserialize(messageData));
-            
-            return _wallet.Account.Sign(messageData.ToArray());
+            _marketManager = MarketFactory.GetMarket(_marketAddress, serumClient: _serumClient);
         }
 
         public void Run()
@@ -61,7 +46,9 @@ namespace Solnet.Serum.Examples
             _marketManager.SubscribeOrderBook(OrderBookHandler);
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
+            
             CancellationTokenSource cts = new ();
+            
             RT(() =>
             {
                 Console.Clear();
@@ -95,15 +82,14 @@ namespace Solnet.Serum.Examples
                             $"Bid: Owner: {bids[i].Owner.Key} Cum:\t{cumulativeBid:N2}\t(~{cumulativeBidUsd:C2})\tPrice:\t{bids[i].Price:C5}\tSize:\t{bids[i].Quantity:N2}");
                     }
                     Console.WriteLine($"---------------------------------------------------------------------------------------------------");
-                        
-                }
+                    
                 Console.WriteLine(
                     $"------------------------------------------- STATS        -----------------------------------------");
                 Console.WriteLine(
                     $"Connection Statistics: {_serumClient.ConnectionStatistics.AverageThroughput60Seconds / 1024} KB/s last 60 seconds " +
                     $" - {_serumClient.ConnectionStatistics.AverageThroughput10Seconds / 1024} KB/s last 10 seconds " +
                     $" - {_serumClient.ConnectionStatistics.TotalReceivedBytes / 1024} KB");
-
+                }
                 if (_trades.Count == 0) return;
 
                 Console.WriteLine(
@@ -117,7 +103,7 @@ namespace Solnet.Serum.Examples
                 }
                 if (_trades.Count > 25) _trades.Clear();
                 
-            }, 1, cts.Token);
+            }, 5, cts.Token);
 
             Console.ReadKey();
             cts.Cancel();

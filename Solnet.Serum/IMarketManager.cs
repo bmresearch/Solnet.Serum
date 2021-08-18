@@ -1,6 +1,7 @@
 using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Models;
 using Solnet.Serum.Models;
+using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -169,5 +170,21 @@ namespace Solnet.Serum
         /// </summary>
         /// <returns>A task which may return a list of <see cref="SignatureConfirmation"/> objects, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
         Task<IList<SignatureConfirmation>> CancelAllOrdersAsync();
+        
+        /// <summary>
+        /// Submits a transaction to settle funds associated with the accounts pertaining to this <see cref="Market"/>.
+        /// </summary>
+        /// <param name="referrer">The <see cref="PublicKey"/> of the referrer's quote token account.</param>
+        /// <returns>A task which may return a list of <see cref="SignatureConfirmation"/> objects, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
+
+        SignatureConfirmation SettleFunds(PublicKey referrer = null);
+
+        /// <summary>
+        /// Submits a transaction to settle funds associated with the accounts pertaining to this <see cref="Market"/>.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <param name="referrer">The <see cref="PublicKey"/> of the referrer's quote token account.</param>
+        /// <returns>A task which may return a list of <see cref="SignatureConfirmation"/> objects, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
+        Task<SignatureConfirmation> SettleFundsAsync(PublicKey referrer = null);
     }
 }
