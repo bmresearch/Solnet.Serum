@@ -1,6 +1,7 @@
 using Solnet.KeyStore;
 using Solnet.Programs;
 using Solnet.Rpc;
+using Solnet.Rpc.Builders;
 using Solnet.Rpc.Models;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
@@ -13,7 +14,7 @@ namespace Solnet.Serum.Examples
 {
     public class MarketManagerOrdersExample : IRunnableExample
     {
-        private readonly PublicKey _marketAddress = new("HXBi8YBwbh4TXF6PjVw81m8Z3Cc4WBofvauj5SBFdgUs");
+        private readonly PublicKey _marketAddress = new("4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ");
         private readonly ISerumClient _serumClient;
         private readonly IMarketManager _marketManager;
         private readonly Wallet.Wallet _wallet;
@@ -32,7 +33,7 @@ namespace Solnet.Serum.Examples
             _keyStore = new SolanaKeyStoreService();
             
             // get the wallet
-            _wallet = _keyStore.RestoreKeystoreFromFile("/path/to/wallet.json");
+            _wallet = _keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
 
             // serum client
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
@@ -44,6 +45,8 @@ namespace Solnet.Serum.Examples
 
         private byte[] SignRequest(ReadOnlySpan<byte> messageData)
         {
+            Console.WriteLine(Convert.ToBase64String(messageData));
+            
             List<DecodedInstruction> ix =
                 InstructionDecoder.DecodeInstructions(Message.Deserialize(messageData));
             
@@ -65,6 +68,7 @@ namespace Solnet.Serum.Examples
         
         public async void Run()
         {
+            
             _marketManager.SubscribeOrderBook(OrderBookHandler);
 
             while (_bestBid == null || _bestAsk == null)
@@ -73,8 +77,7 @@ namespace Solnet.Serum.Examples
             }
             Console.WriteLine($"Best Bid Price: {_bestBid.Price} Size: {_bestBid.Quantity}\tBest Ask Price: {_bestAsk.Price} Size: {_bestAsk.Quantity} ");
             
-            var buyOrders = BuildBuyOrders(5, _bestBid.Price, 0.01f, 25, 1.25f);
-            var sellOrders = BuildSellOrders(5, _bestAsk.Price, 0.01f, 25, 1.25f);
+            var buyOrders = BuildBuyOrders(5, _bestBid.Price, 0.01f, 1, 1.25f);
             
             var newOrdersRes = await _marketManager.NewOrdersAsync(buyOrders);
             foreach (var tx in newOrdersRes)
@@ -85,6 +88,9 @@ namespace Solnet.Serum.Examples
                 };
             }
             
+            
+            /*#1#
+            var sellOrders = BuildSellOrders(5, _bestAsk.Price, 0.01f, 25, 1.25f);
             newOrdersRes = await _marketManager.NewOrdersAsync(sellOrders);
             foreach (var tx in newOrdersRes)
             {
@@ -92,7 +98,7 @@ namespace Solnet.Serum.Examples
                 {
                     Console.WriteLine($"Confirmation for {tx.Signature} changed.\nTxErr: {status.TransactionError?.Type}\tIxErr: {status.InstructionError?.CustomError}\tSerumErr: {status.Error}");
                 };
-            }
+            }*/
             
             Console.ReadKey();
 
@@ -135,7 +141,7 @@ namespace Solnet.Serum.Examples
             {
                 orders.Add(new OrderBuilder()
                         .SetPrice(bestBid * (1 - (i * orderSpread)))
-                        .SetSide(Side.Sell)
+                        .SetSide(Side.Buy)
                         .SetQuantity(firstBidSize + (i * sizeIncrement))
                         .SetOrderType(OrderType.Limit)
                         .SetSelfTradeBehavior(SelfTradeBehavior.CancelProvide)

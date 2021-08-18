@@ -6,6 +6,7 @@ using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Solnet.Serum
@@ -314,9 +315,14 @@ namespace Solnet.Serum
         /// <exception cref="Exception">Throws exception when unable to derive the vault signer address.</exception>
         internal static byte[] DeriveVaultSignerAddress(Market market)
         {
-            bool success = AddressExtensions.TryCreateProgramAddress(
-                new List<byte[]> { market.OwnAddress.KeyBytes, BitConverter.GetBytes(market.VaultSignerNonce) },
+            byte[] buffer = new byte[8];
+            buffer.WriteU64(market.VaultSignerNonce, 0);
+            
+            List<byte[]> seeds = new () { market.OwnAddress.KeyBytes, BitConverter.GetBytes(market.VaultSignerNonce) };
+            
+            bool success = AddressExtensions.TryCreateProgramAddress(seeds,
                 SerumProgram.ProgramIdKey.KeyBytes, out byte[] vaultSignerAddress);
+
             return !success ? null : vaultSignerAddress;
         }
     }

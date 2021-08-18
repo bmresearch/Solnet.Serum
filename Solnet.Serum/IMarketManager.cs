@@ -23,6 +23,11 @@ namespace Solnet.Serum
         /// The decoded data of the underlying <see cref="OpenOrdersAccount"/>.
         /// </summary>
         OpenOrdersAccount OpenOrdersAccount { get; }
+        
+        /// <summary>
+        /// The public key of the underlying <see cref="OpenOrdersAccount"/>.
+        /// </summary>
+        PublicKey OpenOrdersAddress { get; }
 
         /// <summary>
         /// The <see cref="TokenAccount"/> of the base token.

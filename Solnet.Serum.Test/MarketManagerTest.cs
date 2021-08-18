@@ -13,7 +13,7 @@ namespace Solnet.Serum.Test
         private static readonly PublicKey _account = new ("hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh");
         
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(AggregateException))]
         public void MarketManagerNewOrderExceptionTest()
         {
             var c = MarketFactory.GetMarket(_marketAddress, _account);
@@ -31,7 +31,7 @@ namespace Solnet.Serum.Test
         }
         
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(AggregateException))]
         public void MarketManagerCancelOrderByOrderIdExceptionTest()
         {
             var c = MarketFactory.GetMarket(_marketAddress, _account);
@@ -40,7 +40,7 @@ namespace Solnet.Serum.Test
         }
         
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(AggregateException))]
         public void MarketManagerCancelOrderByClientIdExceptionTest()
         {
             var c = MarketFactory.GetMarket(_marketAddress, _account);

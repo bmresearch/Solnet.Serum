@@ -42,7 +42,7 @@ namespace Solnet.Serum.Models
             /// <summary>
             /// The offset at which the vault signer's nonce begins.
             /// </summary>
-            internal const int VaultSignerOffset = 10;
+            internal const int VaultSignerOffset = 40;
 
             /// <summary>
             /// The offset at which the public key of the market's base mint begins.

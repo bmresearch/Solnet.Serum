@@ -213,7 +213,7 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(3328336UL, result.QuoteFeesAccrued);
             Assert.AreEqual(100UL, result.QuoteLotSize);
             Assert.AreEqual(0UL, result.ReferrerRebateAccrued);
-            Assert.AreEqual(17329972132752316649UL, result.VaultSignerNonce);
+            Assert.AreEqual(0UL, result.VaultSignerNonce);
         }
         
         [TestMethod]
