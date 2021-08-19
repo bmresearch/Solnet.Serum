@@ -239,9 +239,6 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static Market Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != Layout.SpanLength)
-                return null;
-
             ReadOnlySpan<byte> padLessData = data.Slice(
                 Layout.StartPadding,
                 data.Length - (Layout.StartPadding + Layout.EndPadding));

@@ -16,7 +16,7 @@ namespace Solnet.Serum.Test
             "route clerk disease box emerge airport loud waste attitude film army tray " +
             "forward deal onion eight catalog surface unit card window walnut wealth medal";
 
-        private static byte[] ExpectedNewOrderV3Data =
+        private static readonly byte[] ExpectedNewOrderV3Data =
         {
             0, 10, 0, 0, 0, 1, 0, 0, 0, 16, 39, 0, 0, 0,
             0, 0, 0, 16, 39, 0, 0, 0, 0, 0, 0, 16, 39, 0,
@@ -24,7 +24,7 @@ namespace Solnet.Serum.Test
             91, 7, 0, 0, 0, 0, 255, 255
         };
         
-        private static byte[] ExpectedNewOrderV3SerumFeeData =
+        private static readonly byte[] ExpectedNewOrderV3SerumFeeData =
         {
             0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 16, 39, 0, 0, 0, 0, 0, 0, 16, 39, 0,
@@ -32,32 +32,32 @@ namespace Solnet.Serum.Test
             91, 7, 0, 0, 0, 0, 255, 255
         };
 
-        private static byte[] ExpectedSettleFundsData =
+        private static readonly byte[] ExpectedSettleFundsData =
         {
             0, 5, 0, 0, 0
         };
 
-        private static byte[] ExpectedConsumeEventsData =
+        private static readonly byte[] ExpectedConsumeEventsData =
         {
             0, 3, 0, 0, 0, 10, 0
         };
 
-        private static byte[] ExpectedCancelOrderV2Data =
+        private static readonly byte[] ExpectedCancelOrderV2Data =
         {
             0, 11, 0, 0, 0, 1, 0, 0, 0, 212, 212, 174, 255,
             255, 255, 255, 255, 112, 98, 0, 0, 0, 0, 0, 0
         };
         
-        private static byte[] ExpectedCancelOrderByClientIdV2Data =
+        private static readonly byte[] ExpectedCancelOrderByClientIdV2Data =
         {
             0, 12, 0, 0, 0, 197, 190, 91, 7, 0, 0, 0, 0
         };
 
-        private static byte[] ExpectedCloseOpenOrdersData = { 0, 14, 0, 0, 0 };
+        private static readonly byte[] ExpectedCloseOpenOrdersData = { 0, 14, 0, 0, 0 };
         
-        private static byte[] ExpectedInitOpenOrdersData = { 0, 15, 0, 0, 0 };
+        private static readonly byte[] ExpectedInitOpenOrdersData = { 0, 15, 0, 0, 0 };
 
-        private static byte[] ExpectedPruneData = { 0, 16, 0, 0, 0, 255, 255 };
+        private static readonly byte[] ExpectedPruneData = { 0, 16, 0, 0, 0, 255, 255 };
 
         private static OpenOrdersAccount GetOpenOrdersAccount()
         {
@@ -69,6 +69,12 @@ namespace Solnet.Serum.Test
         private static Market GetMarketAccount()
         {
             string bytes = File.ReadAllText("Resources/MarketAccountData");
+            
+            return Market.Deserialize(Convert.FromBase64String(bytes));
+        }
+        private static Market GetMarketV3Account()
+        {
+            string bytes = File.ReadAllText("Resources/MarketV3AccountData.txt");
             
             return Market.Deserialize(Convert.FromBase64String(bytes));
         }
@@ -107,6 +113,35 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(12, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedNewOrderV3Data, txInstruction.Data);
             CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+        }
+        
+        
+        [TestMethod]
+        public void EncodeNewOrderV3Test()
+        {
+            var market = GetMarketAccount();
+            var wallet = new Wallet.Wallet(MnemonicWords);
+            var ownerAccount = wallet.GetAccount(1);
+            var payer = wallet.GetAccount(2);
+            var openOrders = wallet.GetAccount(3);
+
+            var order = new OrderBuilder()
+                .SetPrice(33.3f)
+                .SetQuantity(1f)
+                .SetSide(Side.Sell)
+                .SetOrderType(OrderType.PostOnly)
+                .SetClientOrderId(123453125UL)
+                .SetSelfTradeBehavior(SelfTradeBehavior.AbortTransaction)
+                .Build();
+            
+            //enforce these as they'll be calculated by the MarketManager class
+            order.RawPrice = 10000UL;
+            order.RawQuantity = 10000UL;
+            order.MaxQuoteQuantity = 10000UL;
+
+            var bytes = SerumProgramData.EncodeNewOrderV3Data(order);
+            
+            CollectionAssert.AreEqual(ExpectedNewOrderV3Data, bytes);
         }
         
         [TestMethod]
@@ -173,10 +208,26 @@ namespace Solnet.Serum.Test
         [TestMethod]
         public void SettleFundsTest()
         {
-            var market = GetMarketAccount();
+            var market = GetMarketV3Account();
             var wallet = new Wallet.Wallet(MnemonicWords);
+            var ownerAccount = wallet.GetAccount(1);
+            var baseW = wallet.GetAccount(2);
+            var openOrders = wallet.GetAccount(3);
+            var quoteW = wallet.GetAccount(4);
+            var referrerPcWallet = wallet.GetAccount(4);
             
-            // TODO: go get actual data so createPDA doesn't blow up in your face and you don't leak secret serum alpha on stream
+            TransactionInstruction txInstruction = SerumProgram.SettleFunds(
+                market,
+                openOrders,
+                ownerAccount, 
+                baseW, 
+                quoteW,
+                referrerPcWallet);
+            
+            Assert.IsNotNull(txInstruction);
+            Assert.AreEqual(10, txInstruction.Keys.Count);
+            CollectionAssert.AreEqual(ExpectedSettleFundsData, txInstruction.Data);
+            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]

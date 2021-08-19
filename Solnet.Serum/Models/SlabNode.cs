@@ -16,11 +16,6 @@ namespace Solnet.Serum.Models
         internal static class Layout
         {
             /// <summary>
-            /// The size of the data for the slab node.
-            /// </summary>
-            internal const int SpanLength = 72;
-
-            /// <summary>
             /// The offset at which the slab node's blob starts.
             /// <remarks>
             /// This value is valid before reading the Tag property of the <see cref="SlabNode"/>.
@@ -67,27 +62,17 @@ namespace Solnet.Serum.Models
         /// <returns>The SlabNode structure.</returns>
         public static SlabNode Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != Layout.SpanLength)
-                return null;
-
             uint tag = data.GetU32(0);
             if (tag is (byte)NodeType.Uninitialized or (byte)NodeType.LastFreeNode or (byte)NodeType.FreeNode)
                 return null;
 
             Span<byte> blob = data.GetSpan(Layout.BlobOffset, Layout.BlobSpanLength);
-            SlabNode slabNode;
 
-            switch (tag)
+            return tag switch
             {
-                case (byte)NodeType.InnerNode:
-                    slabNode = SlabInnerNode.Deserialize(blob);
-                    return slabNode;
-                case (byte)NodeType.LeafNode:
-                    slabNode = SlabLeafNode.Deserialize(blob);
-                    return slabNode;
-            }
-
-            return null;
+                (byte)NodeType.InnerNode => SlabInnerNode.Deserialize(blob),
+                (byte)NodeType.LeafNode => SlabLeafNode.Deserialize(blob),
+            };
         }
     }
 }

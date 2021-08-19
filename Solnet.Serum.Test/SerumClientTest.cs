@@ -35,7 +35,7 @@ namespace Solnet.Serum.Test
             Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)}
         };
 
-        private const string GitHubUrl = "https://raw.githubusercontent.com/project-serum/serum-js/master/src/";
+        private const string GitHubUrl = "https://raw.githubusercontent.com/project-serum/serum-ts/master/packages/serum/src/";
         private static readonly Uri GitHubUri = new Uri(GitHubUrl);
 
         /// <summary>
@@ -105,6 +105,31 @@ namespace Solnet.Serum.Test
                 .Verifiable();
             return rpcMock;
         }
+
+        /*
+        private static Mock<IStreamingRpcClient> SetupStreamClient(out Action<string responseContent, string address, string network,
+            Commitment commitment = Commitment.Finalized)
+        {
+            var streamingRpcMock = new Mock<IStreamingRpcClient>(MockBehavior.Strict);
+            streamingRpcMock
+                .Setup(s => s.NodeAddress)
+                .Returns(new Uri(network))
+                .Verifiable();
+            
+            streamingRpcMock
+                .Setup(s => s.SubscribeAccountInfoAsync(
+                    It.Is<string>(s1 => s1 == address),
+                    It.Is<SubscriptionState, ResponseValue<AccountInfo>>( ),
+                    It.Is<Commitment>(c => c == commitment)))
+                .ReturnsAsync(
+                    new SubscriptionState
+                    {
+                        
+                    })
+            
+            return streamingRpcMock;
+        }
+        */
 
         [TestMethod]
         public void PublicKeyConverterTest()
@@ -339,6 +364,12 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(0UL, orders[0].ClientOrderId);
             Assert.AreEqual(43780UL, orders[0].RawPrice);
             Assert.AreEqual(500UL, orders[0].RawQuantity);
+        }
+
+        [TestMethod]
+        public void SubscribeTradesTest()
+        {
+            
         }
     }
 }

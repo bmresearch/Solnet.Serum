@@ -107,11 +107,6 @@ namespace Solnet.Serum
         private string _blockHash;
 
         /// <summary>
-        /// The cancellation token source for the blockhash periodic request.
-        /// </summary>
-        private CancellationTokenSource _blockHashCancellationToken;
-
-        /// <summary>
         /// Signers that may be necessary for transactions in which it is needed to create either an ATA or an OOA.
         /// </summary>
         private IList<Account> _signers;
@@ -139,7 +134,6 @@ namespace Solnet.Serum
             _ownerAccount = ownerAccount;
             _srmAccount = srmAccount;
             _requestSignature = signatureMethod;
-            _blockHashCancellationToken = new CancellationTokenSource();
             _signers = new List<Account>();
             _logger = logger;
 
@@ -152,25 +146,12 @@ namespace Solnet.Serum
                 _serumClient = serumClient ?? ClientFactory.GetClient(Cluster.MainNet, logger);
             }
 
-            // Instantly request the market data in order to build the market later
-            Task.Run(GetMarket).ContinueWith(async _ =>
-            {
-                // Get decimals for the market's tokens
-                await GetBaseDecimals();
-                await GetQuoteDecimals();
-
-                // Get the ATAs for both token mints, if they exist
-                BaseAccount = await GetAssociatedTokenAccount(Market.BaseMint);
-                QuoteAccount = await GetAssociatedTokenAccount(Market.QuoteMint);
-
-                // Get the open orders account for this market, if it exists
-                await GetOpenOrdersAccount();
-                _ready = true;
-            });
-
+            if (_requestSignature == null)
+                return;
+            
             // If the user passed in a RequestSignature delegate method then we'll auto-update the most recent blockhash
-            if (_requestSignature != null)
-                Task.Run(async () => { await UpdateBlockHash(_blockHashCancellationToken.Token); });
+            CancellationTokenSource blockHashCancellationToken = new();
+            Task.Run(async () => { await UpdateBlockHashAsync(blockHashCancellationToken.Token); });
         }
 
         #region Manager Setup
@@ -178,25 +159,25 @@ namespace Solnet.Serum
         /// <summary>
         /// Get the decimals for the quote token.
         /// </summary>
-        private async Task GetQuoteDecimals()
+        private async Task GetQuoteDecimalsAsync()
         {
-            _quoteDecimals = await GetTokenDecimals(Market.QuoteMint);
+            _quoteDecimals = await GetTokenDecimalsAsync(Market.QuoteMint);
             _logger?.Log(LogLevel.Information, $"Decimals for Quote Token: {_quoteDecimals}");
         }
 
         /// <summary>
         /// Get the decimals for the base token.
         /// </summary>
-        private async Task GetBaseDecimals()
+        private async Task GetBaseDecimalsAsync()
         {
-            _baseDecimals = await GetTokenDecimals(Market.BaseMint);
+            _baseDecimals = await GetTokenDecimalsAsync(Market.BaseMint);
             _logger?.Log(LogLevel.Information, $"Decimals for Base Token: {_baseDecimals}");
         }
 
         /// <summary>
         /// Get the market data.
         /// </summary>
-        private async Task GetMarket()
+        private async Task GetMarketAsync()
         {
             Market = await _serumClient.GetMarketAsync(_marketAccount);
             _logger?.Log(LogLevel.Information,
@@ -208,7 +189,7 @@ namespace Solnet.Serum
         /// Gets the decimals for the given token mint.
         /// </summary>
         /// <param name="tokenMint">The public key of the token mint.</param>
-        private async Task<byte> GetTokenDecimals(PublicKey tokenMint)
+        private async Task<byte> GetTokenDecimalsAsync(PublicKey tokenMint)
         {
             while (true)
             {
@@ -226,7 +207,7 @@ namespace Solnet.Serum
         /// Updates the stored blockhash every 15s.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token which stops this task from happening periodically.</param>
-        private async Task UpdateBlockHash(CancellationToken cancellationToken)
+        private async Task UpdateBlockHashAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -246,7 +227,7 @@ namespace Solnet.Serum
         /// <summary>
         /// Gets the <see cref="OpenOrdersAccount"/> for the given <see cref="Market"/> and owner address.
         /// </summary>
-        private async Task GetOpenOrdersAccount()
+        private async Task GetOpenOrdersAccountAsync()
         {
             List<MemCmp> filters = new()
             {
@@ -283,7 +264,7 @@ namespace Solnet.Serum
         /// Gets the associated token account for the given mint and the owner address,
         /// </summary>
         /// <param name="mint">The <see cref="PublicKey"/> of the token mint</param>
-        private async Task<TokenAccount> GetAssociatedTokenAccount(PublicKey mint)
+        private async Task<TokenAccount> GetAssociatedTokenAccountAsync(PublicKey mint)
         {
             while (true)
             {
@@ -309,41 +290,50 @@ namespace Solnet.Serum
 
         #endregion
 
-        #region Data Retriaval
+        #region Data Retrieval
 
-        /// <inheritdoc cref="IMarketManager.SubscribeTrades"/>
-        public async void SubscribeTrades(Action<IList<TradeEvent>, ulong> action)
+        /// <inheritdoc cref="IMarketManager.InitAsync"/>
+        public async Task InitAsync()
         {
-            while (true)
+            await GetMarketAsync().ContinueWith(async _ =>
             {
-                if (_baseDecimals != 0 && _quoteDecimals != 0)
-                    break;
+                // Get decimals for the market's tokens
+                await GetBaseDecimalsAsync();
+                await GetQuoteDecimalsAsync();
 
-                await Task.Delay(100);
-            }
+                // Get the ATAs for both token mints, if they exist
+                BaseAccount = await GetAssociatedTokenAccountAsync(Market.BaseMint);
+                QuoteAccount = await GetAssociatedTokenAccountAsync(Market.QuoteMint);
 
-            _eventQueueSubscription = _serumClient.SubscribeEventQueueAsync((_, queue, slot) =>
+                // Get the open orders account for this market, if it exists
+                await GetOpenOrdersAccountAsync();
+                _ready = true;
+            });
+        }
+
+        /// <inheritdoc cref="IMarketManager.Init"/>
+        public void Init() => InitAsync().Wait();
+        
+        /// <inheritdoc cref="IMarketManager.SubscribeTradesAsync"/>
+        public async Task SubscribeTradesAsync(Action<IList<TradeEvent>, ulong> action)
+        {
+            _eventQueueSubscription = await _serumClient.SubscribeEventQueueAsync((_, queue, slot) =>
             {
                 List<TradeEvent> tradeEvents =
                     (from evt in queue.Events
                         where evt.Flags.IsFill && evt.NativeQuantityPaid > 0
                         select MarketUtils.ProcessTradeEvent(evt, _baseDecimals, _quoteDecimals)).ToList();
                 action(tradeEvents, slot);
-            }, Market.EventQueue, Commitment.Confirmed).Result;
+            }, Market.EventQueue, Commitment.Confirmed);
         }
 
-        /// <inheritdoc cref="IMarketManager.SubscribeOrderBook"/>
-        public async void SubscribeOrderBook(Action<OrderBook, ulong> action)
+        /// <inheritdoc cref="IMarketManager.SubscribeTrades"/>
+        public void SubscribeTrades(Action<IList<TradeEvent>, ulong> action) => SubscribeTradesAsync(action).Wait();
+
+        /// <inheritdoc cref="IMarketManager.SubscribeOrderBookAsync"/>
+        public async Task SubscribeOrderBookAsync(Action<OrderBook, ulong> action)
         {
-            while (true)
-            {
-                if (_baseDecimals != 0 && _quoteDecimals != 0)
-                    break;
-
-                await Task.Delay(100);
-            }
-
-            _bidSideSubscription = _serumClient.SubscribeOrderBookSideAsync((_, orderBookSide, slot) =>
+            _bidSideSubscription = await _serumClient.SubscribeOrderBookSideAsync((_, orderBookSide, slot) =>
             {
                 _bidSide = orderBookSide;
                 OrderBook ob = new()
@@ -356,9 +346,9 @@ namespace Solnet.Serum
                     QuoteLotSize = Market.QuoteLotSize,
                 };
                 action(ob, slot);
-            }, Market.Bids, Commitment.Confirmed).Result;
+            }, Market.Bids, Commitment.Confirmed);
 
-            _askSideSubscription = _serumClient.SubscribeOrderBookSideAsync((_, orderBookSide, slot) =>
+            _askSideSubscription = await _serumClient.SubscribeOrderBookSideAsync((_, orderBookSide, slot) =>
             {
                 _askSide = orderBookSide;
                 OrderBook ob = new()
@@ -371,33 +361,50 @@ namespace Solnet.Serum
                     QuoteLotSize = Market.QuoteLotSize,
                 };
                 action(ob, slot);
-            }, Market.Asks, Commitment.Confirmed).Result;
+            }, Market.Asks, Commitment.Confirmed);
         }
+        
+        /// <inheritdoc cref="IMarketManager.SubscribeOrderBook"/>
+        public void SubscribeOrderBook(Action<OrderBook, ulong> action) => SubscribeOrderBookAsync(action).Wait();
 
-        /// <inheritdoc cref="IMarketManager.SubscribeOpenOrders"/>
-        public void SubscribeOpenOrders(Action<IList<OpenOrder>, ulong> action)
+        /// <inheritdoc cref="IMarketManager.SubscribeOpenOrdersAsync"/>
+        public async Task SubscribeOpenOrdersAsync(Action<IList<OpenOrder>, ulong> action)
         {
-            _openOrdersSubscription = _serumClient.SubscribeOpenOrdersAccountAsync((_, account, slot) =>
+            _openOrdersSubscription = await _serumClient.SubscribeOpenOrdersAccountAsync((_, account, slot) =>
             {
                 OpenOrdersAccount = account;
                 action(account.Orders, slot);
-            }, _openOrdersAccount).Result;
+            }, _openOrdersAccount);
         }
+        
+        /// <inheritdoc cref="IMarketManager.SubscribeOpenOrders"/>
+        public void SubscribeOpenOrders(Action<IList<OpenOrder>, ulong> action) => SubscribeOpenOrdersAsync(action).Wait();
 
+        /// <inheritdoc cref="IMarketManager.UnsubscribeTradesAsync"/>
+        public async Task UnsubscribeTradesAsync()
+            => await _serumClient.UnsubscribeEventQueueAsync(_eventQueueSubscription.Address);
+        
         /// <inheritdoc cref="IMarketManager.UnsubscribeTrades"/>
         public void UnsubscribeTrades()
-            => _serumClient.UnsubscribeEventQueueAsync(_eventQueueSubscription.Address);
+            => UnsubscribeTradesAsync().Wait();
 
-        /// <inheritdoc cref="IMarketManager.UnsubscribeOrderBook"/>
-        public void UnsubscribeOrderBook()
+        /// <inheritdoc cref="IMarketManager.UnsubscribeOrderBookAsync"/>
+        public async Task UnsubscribeOrderBookAsync()
         {
-            _serumClient.UnsubscribeOrderBookSideAsync(_bidSideSubscription.Address);
-            _serumClient.UnsubscribeOrderBookSideAsync(_askSideSubscription.Address);
+            await _serumClient.UnsubscribeOrderBookSideAsync(_bidSideSubscription.Address);
+            await _serumClient.UnsubscribeOrderBookSideAsync(_askSideSubscription.Address);
         }
+        
+        /// <inheritdoc cref="IMarketManager.UnsubscribeOrderBook"/>
+        public void UnsubscribeOrderBook() => UnsubscribeOrderBookAsync().Wait();
 
+        /// <inheritdoc cref="IMarketManager.UnsubscribeOpenOrdersAsync"/>
+        public async Task UnsubscribeOpenOrdersAsync()
+            => await _serumClient.UnsubscribeOpenOrdersAccountAsync(_openOrdersSubscription.Address);
+        
         /// <inheritdoc cref="IMarketManager.UnsubscribeOpenOrders"/>
-        public void UnsubscribeOpenOrders()
-            => _serumClient.UnsubscribeOpenOrdersAccountAsync(_openOrdersSubscription.Address);
+        public void UnsubscribeOpenOrders() => UnsubscribeOpenOrdersAsync().Wait();
+        
 
         #endregion
 
@@ -408,14 +415,6 @@ namespace Solnet.Serum
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
-
-            while (true)
-            {
-                if (Market != null && _ready)
-                    break;
-
-                await Task.Delay(100);
-            }
 
             TransactionBuilder txBuilder = new TransactionBuilder()
                 .SetRecentBlockHash(_blockHash)
@@ -469,14 +468,6 @@ namespace Solnet.Serum
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
-
-            while (true)
-            {
-                if (Market != null && _ready)
-                    break;
-
-                await Task.Delay(100);
-            }
 
             Order order = new OrderBuilder()
                 .SetPrice(price)
@@ -541,15 +532,6 @@ namespace Solnet.Serum
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
-
-            while (true)
-            {
-                if (Market != null && _ready)
-                    break;
-
-                await Task.Delay(100);
-            }
-
 
             return await Task.Run(async () =>
             {
@@ -625,14 +607,6 @@ namespace Solnet.Serum
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
 
-            while (true)
-            {
-                if (Market != null && _openOrdersAccount != null && BaseAccount != null && QuoteAccount != null)
-                    break;
-
-                await Task.Delay(100);
-            }
-
             OpenOrder openOrder = OpenOrders.FirstOrDefault(order => order.OrderId.Equals(orderId));
 
             if (openOrder == null)
@@ -677,14 +651,6 @@ namespace Solnet.Serum
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
 
-            while (true)
-            {
-                if (Market != null && _openOrdersAccount != null && BaseAccount != null && QuoteAccount != null)
-                    break;
-
-                await Task.Delay(100);
-            }
-
             TransactionInstruction txInstruction =
                 SerumProgram.CancelOrderByClientIdV2(
                     Market,
@@ -721,14 +687,6 @@ namespace Solnet.Serum
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
-
-            while (true)
-            {
-                if (Market != null && _openOrdersAccount != null && BaseAccount != null && QuoteAccount != null)
-                    break;
-
-                await Task.Delay(100);
-            }
 
             return await Task.Run(async () =>
             {
@@ -793,14 +751,6 @@ namespace Solnet.Serum
         {
             if (_requestSignature == null)
                 throw new Exception("signature request method hasn't been set");
-
-            while (true)
-            {
-                if (Market != null && _openOrdersAccount != null && QuoteAccount != null && BaseAccount != null)
-                    break;
-
-                await Task.Delay(100);
-            }
 
             TransactionInstruction txInstruction = SerumProgram.SettleFunds(
                 Market,

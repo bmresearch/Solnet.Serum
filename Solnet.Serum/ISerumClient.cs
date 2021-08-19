@@ -3,6 +3,7 @@ using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
 using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 
 namespace Solnet.Serum
@@ -12,6 +13,11 @@ namespace Solnet.Serum
     /// </summary>
     public interface ISerumClient
     {
+        /// <summary>
+        /// The websocket connection state.
+        /// </summary>
+        WebSocketState State { get; }
+        
         /// <summary>
         /// The rpc client instance.
         /// </summary>

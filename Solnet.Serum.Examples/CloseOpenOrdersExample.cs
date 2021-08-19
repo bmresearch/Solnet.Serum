@@ -19,11 +19,6 @@ namespace Solnet.Serum.Examples
         private readonly IMarketManager _marketManager;
         private readonly Wallet.Wallet _wallet;
         private readonly SolanaKeyStoreService _keyStore;
-        private OrderBook _orderBook;
-        private List<Order> _bids;
-        private List<Order> _asks;
-        private Order _bestBid;
-        private Order _bestAsk;
 
         public CloseOpenOrdersExample()
         {
@@ -41,6 +36,7 @@ namespace Solnet.Serum.Examples
             
             // initialize market manager
             _marketManager = MarketFactory.GetMarket(_marketAddress, _wallet.Account, signatureMethod: SignRequest, serumClient: _serumClient);
+            _marketManager.Init();
         }
 
         private byte[] SignRequest(ReadOnlySpan<byte> messageData)

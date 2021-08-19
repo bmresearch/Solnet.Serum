@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -152,6 +153,9 @@ namespace Solnet.Serum
 
         /// <inheritdoc cref="ISerumClient.Connect"/>
         public void Connect() => ConnectAsync().Wait();
+
+        /// <inheritdoc cref="ISerumClient.State"/>
+        public WebSocketState State => _streamingRpcClient.State;
 
         /// <inheritdoc cref="ISerumClient.DisconnectAsync"/>
         public Task DisconnectAsync()

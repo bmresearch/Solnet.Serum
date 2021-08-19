@@ -45,37 +45,93 @@ namespace Solnet.Serum
         IList<OpenOrder> OpenOrders { get; }
 
         /// <summary>
+        /// Initializes the market manager.
+        /// </summary>
+        void Init();
+        
+        /// <summary>
+        /// Initializes the market manager.
+        /// This is an asynchronous operation.
+        /// </summary>
+        Task InitAsync();
+
+        /// <summary>
         /// Subscribe to the live <see cref="TradeEvent"/> feed of this market.
         /// </summary>
         /// <param name="action">An action used to receive the list of occurred trade events and the respective slot.</param>
         void SubscribeTrades(Action<IList<TradeEvent>, ulong> action);
+        
+        /// <summary>
+        /// Subscribe to the live <see cref="TradeEvent"/> feed of this market.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action used to receive the list of occurred trade events and the respective slot.</param>
+        /// <returns>A task which performs the operation.</returns>
+        Task SubscribeTradesAsync(Action<IList<TradeEvent>, ulong> action);
 
         /// <summary>
         /// Unsubscribe to the live <see cref="TradeEvent"/> feed of this market.
         /// </summary>
         void UnsubscribeTrades();
+        
+        /// <summary>
+        /// Unsubscribe to the live <see cref="TradeEvent"/> feed of this market.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <returns>A task which performs the operation.</returns>
+        Task UnsubscribeTradesAsync();
 
         /// <summary>
         /// Subscribe to the <see cref="OrderBook"/> of this market.
         /// </summary>
         /// <param name="action">An action used to receive the order book and the respective slot.</param>
         void SubscribeOrderBook(Action<OrderBook, ulong> action);
+        
+        /// <summary>
+        /// Subscribe to the <see cref="OrderBook"/> of this market.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action used to receive the order book and the respective slot.</param>
+        /// <returns>A task which performs the operation.</returns>
+        Task SubscribeOrderBookAsync(Action<OrderBook, ulong> action);
 
         /// <summary>
         /// Unsubscribe to the <see cref="OrderBook"/> of this market.
         /// </summary>
         void UnsubscribeOrderBook();
+        
+        /// <summary>
+        /// Unsubscribe to the <see cref="OrderBook"/> of this market.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <returns>A task which performs the operation.</returns>
+        Task UnsubscribeOrderBookAsync();
 
         /// <summary>
         /// Subscribe to the <see cref="OpenOrdersAccount"/> of this market.
         /// </summary>
         /// <param name="action">An action used to receive the open orders account and the respective slot.</param>
         void SubscribeOpenOrders(Action<IList<OpenOrder>, ulong> action);
+        
+        /// <summary>
+        /// Subscribe to the <see cref="OpenOrdersAccount"/> of this market.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <param name="action">An action used to receive the open orders account and the respective slot.</param>
+        /// <returns>A task which performs the operation.</returns>
+        Task SubscribeOpenOrdersAsync(Action<IList<OpenOrder>, ulong> action);
 
         /// <summary>
         /// Unsubscribe to the order book of this market.
         /// </summary>
         void UnsubscribeOpenOrders();
+        
+        /// <summary>
+        /// Unsubscribe to the order book of this market.
+        /// This is an asynchronous operation.
+        /// </summary>
+        /// <returns>A task which performs the operation.</returns>
+        Task UnsubscribeOpenOrdersAsync();
 
         /// <summary>
         /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.

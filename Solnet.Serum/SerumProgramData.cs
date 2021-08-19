@@ -171,7 +171,7 @@ namespace Solnet.Serum
             decodedInstruction.Values.Add("Owner", keys[keyIndices[1]]);
             decodedInstruction.Values.Add("Market", keys[keyIndices[2]]);
 
-            if (keys.Count == 5)
+            if (keyIndices.Length == 5)
                 decodedInstruction.Values.Add("Market Authority", keys[keyIndices[4]]);
         }
         
@@ -216,14 +216,14 @@ namespace Solnet.Serum
         /// <param name="keyIndices">The indices of the account keys for the instruction as they appear in the transaction.</param>
         internal static void DecodeConsumeEvents(DecodedInstruction decodedInstruction, IList<PublicKey> keys, byte[] keyIndices)
         {
-            for (int i = 0; i < keys.Count - 4; i++)
+            decodedInstruction.Values.Add("Market", keys[keyIndices[^4]]);
+            decodedInstruction.Values.Add("Event Queue", keys[keyIndices[^3]]);
+            decodedInstruction.Values.Add("Base Account", keys[keyIndices[^2]]);
+            decodedInstruction.Values.Add("Quote Account", keys[keyIndices[^1]]);
+            for (int i = 0; i < keyIndices.Length - 4; i++)
             {
-                decodedInstruction.Values.Add($"Open Orders {i}", keys[keyIndices[i]]);
+                decodedInstruction.Values.Add($"Open Orders Account {i + 1}", keys[keyIndices[i]]);
             }
-            decodedInstruction.Values.Add("Market", keys[keyIndices[keys.Count - 4]]);
-            decodedInstruction.Values.Add("Event Queue", keys[keyIndices[keys.Count - 3]]);
-            decodedInstruction.Values.Add("Asks", keys[keyIndices[keys.Count - 2]]);
-            decodedInstruction.Values.Add("Open Orders Account", keys[keyIndices[keys.Count - 1]]);
         }
         
         /// <summary>
