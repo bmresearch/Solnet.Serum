@@ -35,7 +35,7 @@ jobs:
           tag: ${{ github.ref }}
       - name: Publish on version change
         id: publish_nuget
-        uses: rohith/publish-nuget@v2
+        uses: Elskom/publish-nuget@main
         with:
           PROJECT_FILE_PATH: Solnet.Serum/Solnet.Serum.csproj
           PACKAGE_NAME: Solnet.Serum
