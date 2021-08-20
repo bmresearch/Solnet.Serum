@@ -1,0 +1,35 @@
+name: Build, Pack & Publish
+
+on:
+  push:
+    branches:
+      - master # Default release branch
+jobs:
+  publish:
+    name: build, pack & publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the sources
+        uses: actions/checkout@v1
+      - name: Run the build script
+        uses: cake-build/cake-action@v1
+        with:
+          script-path: build.cake
+          target: Pack
+          cake-bootstrap: true
+      - name: Publish coverage report to coveralls.io
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.github_token }}
+          path-to-lcov: code_coverage/results.info
+      - name: Publish on version change
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Solnet.Serum/Solnet.Serum.csproj
+          PACKAGE_NAME: Solnet.Serum
+          VERSION_FILE_PATH: SharedBuildProperties.props
+          VERSION_REGEX: ^\s*<Version>(.*)<\/Version>\s*$
+          TAG_FORMAT: v*
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true

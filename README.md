@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/bmresearch/Solnet.Serum/master/assets/solnet-serum-icon.png" margin="auto" height="175"/>
+    <img src="https://raw.githubusercontent.com/bmresearch/Solnet.Serum/master/assets/icon.png" margin="auto" height="175"/>
 </p>
 
 <p align="center">
