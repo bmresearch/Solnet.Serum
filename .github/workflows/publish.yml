@@ -22,6 +22,17 @@ jobs:
         with:
           github-token: ${{ secrets.github_token }}
           path-to-lcov: code_coverage/results.info
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: solnet-serum-${{ github.sha }}
+          path: Solnet.Serum/bin/Release/net5.0/ref/
+      - name: Upload release assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.ACCESS_TOKEN }}
+          file: Solnet.Serum/bin/Release/net5.0/ref/Solnet.Serum.dll
+          tag: ${{ github.ref }}
       - name: Publish on version change
         id: publish_nuget
         uses: rohith/publish-nuget@v2
