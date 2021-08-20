@@ -33,14 +33,14 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Solnet-Serum-$BUILD_VERSION-${{ github.sha }}
+          name: Solnet-Serum-${{ env.BUILD_VERSION }}-${{ github.sha }}
           path: Solnet.Serum/bin/Release/net5.0/ref/
       - name: Upload release assets
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.ACCESS_TOKEN }}
           file: Solnet.Serum/bin/Release/net5.0/ref/Solnet.Serum.dll
-          tag: $BUILD_VERSION
+          tag: ${{ env.BUILD_VERSION }}
       - name: Publish on version change
         id: publish_nuget
         uses: Elskom/publish-nuget@main
@@ -51,4 +51,4 @@ jobs:
           VERSION_FILE_PATH: SharedBuildProperties.props
           VERSION_REGEX: ^\s*<Version>(.*)<\/Version>\s*$
           TAG_FORMAT: v*
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
