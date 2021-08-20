@@ -40,6 +40,16 @@ namespace Solnet.Serum
         TokenAccount QuoteAccount { get; }
 
         /// <summary>
+        /// The decimals of the base token for the associated <see cref="Market"/>.
+        /// </summary>
+        byte BaseDecimals { get; }
+        
+        /// <summary>
+        /// The decimals of the quote token for the associated <see cref="Market"/>.
+        /// </summary>
+        byte QuoteDecimals { get; }
+        
+        /// <summary>
         /// The currently open orders for the associated <see cref="Market"/>.
         /// </summary>
         IList<OpenOrder> OpenOrders { get; }
@@ -54,6 +64,12 @@ namespace Solnet.Serum
         /// This is an asynchronous operation.
         /// </summary>
         Task InitAsync();
+        
+        /// <summary>
+        /// Reloads the associated token accounts and open orders accounts. Useful when an order creates either accounts.
+        /// This is an asynchronous operation.
+        /// </summary>
+        Task ReloadAsync();
 
         /// <summary>
         /// Subscribe to the live <see cref="TradeEvent"/> feed of this market.
@@ -69,11 +85,6 @@ namespace Solnet.Serum
         /// <returns>A task which performs the operation.</returns>
         Task SubscribeTradesAsync(Action<IList<TradeEvent>, ulong> action);
 
-        /// <summary>
-        /// Unsubscribe to the live <see cref="TradeEvent"/> feed of this market.
-        /// </summary>
-        void UnsubscribeTrades();
-        
         /// <summary>
         /// Unsubscribe to the live <see cref="TradeEvent"/> feed of this market.
         /// This is an asynchronous operation.
@@ -97,11 +108,6 @@ namespace Solnet.Serum
 
         /// <summary>
         /// Unsubscribe to the <see cref="OrderBook"/> of this market.
-        /// </summary>
-        void UnsubscribeOrderBook();
-        
-        /// <summary>
-        /// Unsubscribe to the <see cref="OrderBook"/> of this market.
         /// This is an asynchronous operation.
         /// </summary>
         /// <returns>A task which performs the operation.</returns>
@@ -123,11 +129,6 @@ namespace Solnet.Serum
 
         /// <summary>
         /// Unsubscribe to the order book of this market.
-        /// </summary>
-        void UnsubscribeOpenOrders();
-        
-        /// <summary>
-        /// Unsubscribe to the order book of this market.
         /// This is an asynchronous operation.
         /// </summary>
         /// <returns>A task which performs the operation.</returns>
@@ -135,6 +136,7 @@ namespace Solnet.Serum
 
         /// <summary>
         /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.
+        /// If a needed token account or open orders account does not exist, it is created in this same transaction.
         /// </summary>
         /// <param name="order">The order object created by the <see cref="OrderBuilder"/>.</param>
         /// <returns>A <see cref="SignatureConfirmation"/> object, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
@@ -142,6 +144,7 @@ namespace Solnet.Serum
 
         /// <summary>
         /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.
+        /// If a needed token account or open orders account does not exist, it is created in this same transaction.
         /// This is an asynchronous operation.
         /// </summary>
         /// <param name="order">The order object created by the <see cref="OrderBuilder"/>.</param>
@@ -150,6 +153,7 @@ namespace Solnet.Serum
 
         /// <summary>
         /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.
+        /// If a needed token account or open orders account does not exist, it is created in this same transaction.
         /// </summary>
         /// <param name="side">The side of the order.</param>
         /// <param name="type">The type of the order.</param>
@@ -163,6 +167,7 @@ namespace Solnet.Serum
 
         /// <summary>
         /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.
+        /// If a needed token account or open orders account does not exist, it is created in this same transaction.
         /// This is an asynchronous operation.
         /// </summary>
         /// <param name="side">The side of the order.</param>
@@ -174,21 +179,6 @@ namespace Solnet.Serum
         /// <returns>A task which may return a <see cref="SignatureConfirmation"/> object, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
         Task<SignatureConfirmation> NewOrderAsync(Side side, OrderType type, SelfTradeBehavior selfTradeBehavior,
             float size, float price, ulong clientId = ulong.MaxValue);
-
-        /// <summary>
-        /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.
-        /// </summary>
-        /// <param name="orders">The order object created by the <see cref="OrderBuilder"/>.</param>
-        /// <returns>A <see cref="SignatureConfirmation"/> object, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
-        IList<SignatureConfirmation> NewOrders(IList<Order> orders);
-
-        /// <summary>
-        /// Crafts, requests a signature and submits a transaction with the given order data, awaiting it's confirmation and notifying the user via an event in the response object.
-        /// This is an asynchronous operation.
-        /// </summary>
-        /// <param name="order">The order object created by the <see cref="OrderBuilder"/>.</param>
-        /// <returns>A task which may return a <see cref="SignatureConfirmation"/> object, wrapping the requests made to submit the transaction and subscription of it's confirmation.</returns>
-        Task<IList<SignatureConfirmation>> NewOrdersAsync(IList<Order> order);
 
         /// <summary>
         /// Crafts, requests a signature and submits a transaction to cancel an order with the given order id.

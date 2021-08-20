@@ -147,20 +147,10 @@ namespace Solnet.Serum
         Task ConnectAsync();
         
         /// <summary>
-        /// Connect to the Rpc client for data streaming.
-        /// </summary>
-        void Connect();
-        
-        /// <summary>
         /// Disconnects from the Rpc client for data streaming. This is an asynchronous operation.
         /// </summary>
         /// <returns>A task which may connect to the Rpc.</returns>
         Task DisconnectAsync();
-        
-        /// <summary>
-        /// Disconnects from the Rpc client for data streaming.
-        /// </summary>
-        void Disconnect();
 
         /// <summary>
         /// Subscribe to a live feed of a Serum Market's Open Orders Account. This is an asynchronous operation.

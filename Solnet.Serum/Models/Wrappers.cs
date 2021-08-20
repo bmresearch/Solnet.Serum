@@ -35,6 +35,8 @@ namespace Solnet.Serum.Models
         /// The underlying data.
         /// </summary>
         public T Data;
+
+        public bool TestData;
     }
 
     /// <summary>
@@ -93,7 +95,7 @@ namespace Solnet.Serum.Models
         /// </summary>
         /// <param name="subscriptionState">The newest subscription state.</param>
         /// <param name="confirmationResult">The transaction's confirmation result.</param>
-        internal void ChangeState(SubscriptionState subscriptionState, ResponseValue<ErrorResult> confirmationResult)
+        public void ChangeState(SubscriptionState subscriptionState, ResponseValue<ErrorResult> confirmationResult)
         {
             Subscription = subscriptionState;
             ParseErrorAndInvoke(confirmationResult.Value.Error);
@@ -103,7 +105,7 @@ namespace Solnet.Serum.Models
         /// Changes the state of the given signature confirmation according to the cluster's notification.
         /// </summary>
         /// <param name="simLogs">The transaction's simulation logs.</param>
-        internal void ChangeState(SimulationLogs simLogs)
+        public void ChangeState(SimulationLogs simLogs)
         {
             SimulationLogs = simLogs;
             ParseErrorAndInvoke(simLogs.Error);

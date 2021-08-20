@@ -2,12 +2,18 @@ using Solnet.KeyStore;
 using Solnet.Programs;
 using Solnet.Rpc;
 using Solnet.Rpc.Builders;
+using Solnet.Rpc.Core.Http;
+using Solnet.Rpc.Core.Sockets;
+using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
+using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Solnet.Serum.Examples
@@ -18,7 +24,6 @@ namespace Solnet.Serum.Examples
         private readonly ISerumClient _serumClient;
         private readonly IMarketManager _marketManager;
         private readonly Wallet.Wallet _wallet;
-        private readonly SolanaKeyStoreService _keyStore;
         private OrderBook _orderBook;
         private List<Order> _bids;
         private List<Order> _asks;
@@ -30,10 +35,10 @@ namespace Solnet.Serum.Examples
             Console.WriteLine($"Initializing {ToString()}");
             InstructionDecoder.Register(SerumProgram.ProgramIdKey, SerumProgram.Decode);
             // init stuff
-            _keyStore = new SolanaKeyStoreService();
+            SolanaKeyStoreService keyStore = new ();
             
             // get the wallet
-            _wallet = _keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
+            _wallet = keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
 
             // serum client
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
@@ -68,8 +73,7 @@ namespace Solnet.Serum.Examples
         
         public async void Run()
         {
-            
-            _marketManager.SubscribeOrderBook(OrderBookHandler);
+            await _marketManager.SubscribeOrderBookAsync(OrderBookHandler);
 
             while (_bestBid == null || _bestAsk == null)
             {
@@ -77,35 +81,23 @@ namespace Solnet.Serum.Examples
             }
             Console.WriteLine($"Best Bid Price: {_bestBid.Price} Size: {_bestBid.Quantity}\tBest Ask Price: {_bestAsk.Price} Size: {_bestAsk.Quantity} ");
             
-            var buyOrders = BuildBuyOrders(5, _bestBid.Price, 0.01f, 1, 1.25f);
+            List<Order> buyOrders = BuildBuyOrders(5, _bestBid.Price, 0.01f, 1, 1.25f);
             
-            var newOrdersRes = await _marketManager.NewOrdersAsync(buyOrders);
-            foreach (var tx in newOrdersRes)
+            IList<SignatureConfirmation> newOrdersRes = await NewOrdersAsync(buyOrders);
+            foreach (SignatureConfirmation tx in newOrdersRes)
             {
-                tx.ConfirmationChanged += (sender, status) =>
+                tx.ConfirmationChanged += (_, status) =>
                 {
                     Console.WriteLine($"Confirmation for {tx.Signature} changed.\nTxErr: {status.TransactionError?.Type}\tIxErr: {status.InstructionError?.CustomError}\tSerumErr: {status.Error}");
                 };
             }
             
-            
-            /*#1#
-            var sellOrders = BuildSellOrders(5, _bestAsk.Price, 0.01f, 25, 1.25f);
-            newOrdersRes = await _marketManager.NewOrdersAsync(sellOrders);
-            foreach (var tx in newOrdersRes)
-            {
-                tx.ConfirmationChanged += (sender, status) =>
-                {
-                    Console.WriteLine($"Confirmation for {tx.Signature} changed.\nTxErr: {status.TransactionError?.Type}\tIxErr: {status.InstructionError?.CustomError}\tSerumErr: {status.Error}");
-                };
-            }*/
-            
             Console.ReadKey();
 
-            var cancelRes = await _marketManager.CancelAllOrdersAsync();
-            foreach (var tx in cancelRes)
+            IList<SignatureConfirmation> cancelRes = await _marketManager.CancelAllOrdersAsync();
+            foreach (SignatureConfirmation tx in cancelRes)
             {
-                tx.ConfirmationChanged += (sender, status) =>
+                tx.ConfirmationChanged += (_, status) =>
                 {
                     Console.WriteLine($"Confirmation for {tx.Signature} changed.\nTxErr: {status.TransactionError?.Type}\tIxErr: {status.InstructionError?.CustomError}\tSerumErr: {status.Error}");
                 };
@@ -125,6 +117,141 @@ namespace Solnet.Serum.Examples
         }
 
         /// <summary>
+        /// Packs as many orders as possible into a single instruction, adding a <see cref="SerumProgramInstructions.Values.SettleFunds"/> instruction at the end.
+        /// </summary>
+        /// <param name="orders">The orders to pack.</param>
+        /// <returns>A task which may return a list of signature confirmations.</returns>
+        private async Task<IList<SignatureConfirmation>> NewOrdersAsync(IList<Order> orders)
+        {
+            IList<SignatureConfirmation> signatureConfirmations = new List<SignatureConfirmation>();
+            string blockHash = await GetBlockHash();
+            TransactionBuilder txBuilder = new TransactionBuilder()
+                .SetRecentBlockHash(blockHash)
+                .SetFeePayer(_wallet.Account);
+
+            SignatureConfirmation sigConf = null;
+
+            TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                _marketManager.Market,
+                _marketManager.OpenOrdersAddress,
+                _wallet.Account,
+                new PublicKey(_marketManager.BaseAccount.PublicKey),
+                new PublicKey(_marketManager.QuoteAccount.PublicKey));
+
+            for (int i = 0; i < orders.Count; i++)
+            {
+                orders[i].ConvertOrderValues(_marketManager.BaseDecimals, _marketManager.QuoteDecimals, _marketManager.Market);
+
+                TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
+                    _marketManager.Market,
+                    _marketManager.OpenOrdersAddress,
+                    orders[i].Side == Side.Buy ? 
+                        new PublicKey(_marketManager.QuoteAccount.PublicKey) : 
+                        new PublicKey(_marketManager.BaseAccount.PublicKey),
+                    _wallet.Account,
+                    orders[i]);
+                txBuilder.AddInstruction(txInstruction);
+                byte[] txBytes = txBuilder.CompileMessage();
+
+                if (txBytes.Length < 850 && i != orders.Count - 1) continue;
+
+                txBuilder.AddInstruction(settleIx);
+                txBytes = txBuilder.CompileMessage();
+
+                byte[] signatureBytes = SignRequest(txBytes);
+
+                Transaction tx = Transaction.Populate(
+                    Message.Deserialize(txBytes), new List<byte[]> {signatureBytes });
+
+                if (signatureBytes != null)
+                    sigConf = await SendTransactionAndSubscribeSignature(tx.Serialize());
+                if (sigConf != null)
+                {
+                    signatureConfirmations.Add(sigConf);
+                    if (sigConf.SimulationLogs != null) break;
+                }
+                
+                blockHash = await GetBlockHash();
+                
+                txBuilder = new TransactionBuilder()
+                    .SetRecentBlockHash(blockHash)
+                    .SetFeePayer(_wallet.Account);
+            }
+
+            return signatureConfirmations;
+        }
+        
+        /// <summary>
+        /// Attempts to submit a transaction to the cluster.
+        /// </summary>
+        /// <param name="transaction">The signed transaction bytes.</param>
+        /// <returns>A task which may return a <see cref="RequestResult{IEnumerable}"/>.</returns>
+        private async Task<RequestResult<string>> SubmitTransaction(byte[] transaction)
+        {
+            while (true)
+            {
+                RequestResult<string> req =
+                    await _serumClient.RpcClient.SendTransactionAsync(transaction, false, Commitment.Confirmed);
+
+                if (req.WasRequestSuccessfullyHandled)
+                    return req;
+
+                if (req.ServerErrorCode != 0)
+                    return req;
+
+                await Task.Delay(250);
+            }
+        }
+        
+        /// <summary>
+        /// Submits a transaction to the cluster and subscribes to its confirmation.
+        /// </summary>
+        /// <param name="transaction">The signed transaction bytes.</param>
+        /// <returns>A task which may return a <see cref="SubscriptionState"/>.</returns>
+        private async Task<SignatureConfirmation> SendTransactionAndSubscribeSignature(byte[] transaction)
+        {
+            RequestResult<string> req = await SubmitTransaction(transaction);
+            SignatureConfirmation sigConf = new() { Signature = req.Result, Result = req };
+
+            if (req.ServerErrorCode != 0)
+            {
+                bool exists = req.ErrorData.TryGetValue("data", out object value);
+                if (!exists) return sigConf;
+                string elem = ((JsonElement)value).ToString();
+                if (elem == null) return sigConf;
+                SimulationLogs simulationLogs = JsonSerializer.Deserialize<SimulationLogs>(elem,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+                    });
+                sigConf.ChangeState(simulationLogs);
+
+                return sigConf;
+            }
+
+            SubscriptionState sub = await _serumClient.StreamingRpcClient.SubscribeSignatureAsync(req.Result,
+                (state, value) =>
+                {
+                    sigConf.ChangeState(state, value);
+                }, Commitment.Confirmed);
+
+            sigConf.Subscription = sub;
+
+            return sigConf;
+        }
+
+        /// <summary>
+        /// Gets a recent block hash.
+        /// </summary>
+        /// <returns>A task which may return the block hash.</returns>
+        private async Task<string> GetBlockHash()
+        {
+            RequestResult<ResponseValue<BlockHash>> blockHash = await _serumClient.RpcClient.GetRecentBlockHashAsync();
+            return blockHash.Result.Value.Blockhash;
+        }
+        
+        /// <summary>
         /// Builds a list of buy orders up to a limit of m given orders.
         /// </summary>
         /// <param name="m">The maximum of orders.</param>
@@ -133,7 +260,7 @@ namespace Solnet.Serum.Examples
         /// <param name="firstBidSize">The best bid size.</param>
         /// <param name="sizeIncrement">The size increment multiplier.</param>
         /// <returns>The list of orders.</returns>
-        private List<Order> BuildBuyOrders(int m, float bestBid, float orderSpread, float firstBidSize, float sizeIncrement)
+        private static List<Order> BuildBuyOrders(int m, float bestBid, float orderSpread, float firstBidSize, float sizeIncrement)
         {
             List<Order> orders = new ();
             
@@ -161,7 +288,7 @@ namespace Solnet.Serum.Examples
         /// <param name="firstAskSize">The best ask size.</param>
         /// <param name="sizeIncrement">The size increment multiplier.</param>
         /// <returns>The list of orders.</returns>
-        private List<Order> BuildSellOrders(int m, float bestAsk, float orderSpread, float firstAskSize, float sizeIncrement)
+        private static List<Order> BuildSellOrders(int m, float bestAsk, float orderSpread, float firstAskSize, float sizeIncrement)
         {
             List<Order> orders = new ();
             

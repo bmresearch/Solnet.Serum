@@ -20,7 +20,7 @@ namespace Solnet.Serum.Examples
         {
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
             _serumClients = new List<ISerumClient>();
-            _serumClient.Connect();
+            _serumClient.ConnectAsync();
             Console.WriteLine($"Initializing {ToString()}");
         }
 
