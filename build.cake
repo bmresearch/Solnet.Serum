@@ -100,13 +100,10 @@ Task("Pack")
             NoBuild = true,
             NoRestore = true,
             IncludeSymbols = true,
-            OutputDirectory = packagesDir,
+            OutputDirectory = packagesDir
         };
 
-
-        GetFiles("./src/*/*.csproj")
-            .ToList()
-            .ForEach(f => DotNetCorePack(f.FullPath, settings));
+        DotNetCorePack("./Solnet.Serum/", settings);
     });
 
 RunTarget(target);
