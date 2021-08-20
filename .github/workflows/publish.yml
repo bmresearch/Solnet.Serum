@@ -1,16 +1,24 @@
 name: Build, Pack & Publish
 
 on:
-  push:
+  create:
     branches:
-      - master # Default release branch
+      - release/**
 jobs:
   publish:
     name: build, pack & publish
+    if: startsWith(github.ref, 'refs/heads/release')
     runs-on: ubuntu-latest
     steps:
       - name: Get the sources
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
+      - name: Get Build Version
+        run: |
+            Import-Module ./build/GetBuildVersion.psm1
+            Write-Host $Env:GITHUB_REF
+            $version = GetBuildVersion -VersionString $Env:GITHUB_REF
+            echo "BUILD_VERSION=$version" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        shell: pwsh
       - name: Run the build script
         uses: cake-build/cake-action@v1
         with:
@@ -25,14 +33,14 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: solnet-serum-${{ github.sha }}
+          name: Solnet-Serum-$BUILD_VERSION-${{ github.sha }}
           path: Solnet.Serum/bin/Release/net5.0/ref/
       - name: Upload release assets
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.ACCESS_TOKEN }}
           file: Solnet.Serum/bin/Release/net5.0/ref/Solnet.Serum.dll
-          tag: ${{ github.ref }}
+          tag: $BUILD_VERSION
       - name: Publish on version change
         id: publish_nuget
         uses: Elskom/publish-nuget@main
