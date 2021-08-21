@@ -48,7 +48,6 @@ jobs:
           PROJECT_FILE_PATH: '**/*.csproj'
           PACKAGE_PATH: artifacts/
           PACKAGE_NAME: Solnet.Serum
-          VERSION_FILE_PATH: SharedBuildProperties.props
-          VERSION_REGEX: ^\s*<Version>(.*)<\/Version>\s*$
+          VERSION_STATIC: ${{ env.BUILD_VERSION }}
           TAG_FORMAT: v*
           NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
