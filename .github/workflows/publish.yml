@@ -43,7 +43,7 @@ jobs:
         uses: actions/create-release@v1
         with:
           tag_name: ${{ steps.publish_nuget.outputs.VERSION }}
-          release_name: v${{ steps.publish_nuget.outputs.VERSION }}
+          release_name: ${{ steps.publish_nuget.outputs.VERSION }}
           body: ${{ steps.build_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -52,4 +52,5 @@ jobs:
         with:
           repo_token: ${{ secrets.ACCESS_TOKEN }}
           file: Solnet.Serum/bin/Release/net5.0/ref/Solnet.Serum.dll
+          tag: ${{ steps.publish_nuget.outputs.VERSION }}
           upload_url: ${{ steps.create_release.outputs.upload_url }}
