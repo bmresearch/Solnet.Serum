@@ -7,7 +7,6 @@ on:
 jobs:
   publish:
     name: build, pack & publish
-    if: startsWith(github.ref, 'refs/heads/release')
     runs-on: ubuntu-latest
     steps:
       - name: Get the sources
@@ -43,11 +42,11 @@ jobs:
           tag: ${{ env.BUILD_VERSION }}
       - name: Publish on version change
         id: publish_nuget
-        uses: Elskom/publish-nuget@main
+        uses: bmresearch/publish-nuget@master
         with:
-          PROJECT_FILE_PATH: '**/*.csproj'
-          PACKAGE_PATH: artifacts/
+          PROJECT_FILE_PATH: Solnet.Serum/Solnet.Serum.csproj
           PACKAGE_NAME: Solnet.Serum
           VERSION_STATIC: ${{ env.BUILD_VERSION }}
           TAG_FORMAT: v*
-          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true 
