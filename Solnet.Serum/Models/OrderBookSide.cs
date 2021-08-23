@@ -57,6 +57,7 @@ namespace Solnet.Serum.Models
                     RawQuantity = slabLeafNode.Quantity, 
                     ClientOrderId = slabLeafNode.ClientOrderId, 
                     Owner = slabLeafNode.Owner,
+                    OrderIndex = slabLeafNode.OwnerSlot
                 }).ToList();
         }
         

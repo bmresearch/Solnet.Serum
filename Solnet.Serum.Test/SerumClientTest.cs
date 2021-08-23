@@ -35,8 +35,8 @@ namespace Solnet.Serum.Test
         /// <summary>
         /// Finish the test by asserting the http request went as expected.
         /// </summary>
-        /// <param name="expectedUri">The request uri.</param>
-        private static void FinishHttpClientTest(Mock<HttpMessageHandler> mockHandler, Uri expectedUri)
+        /// <param name="mockHandler">The mocked http message handler.</param>
+        private static void FinishHttpClientTest(Mock<HttpMessageHandler> mockHandler)
         {
             mockHandler.Protected().Verify(
                 "SendAsync",
@@ -75,7 +75,6 @@ namespace Solnet.Serum.Test
         /// <summary>
         /// Setup the test with the request and response data.
         /// </summary>
-        /// <param name="responseContent">The response content.</param>
         private static Mock<HttpMessageHandler> SetupHttpClientUnsuccessfulTest()
         {
             var messageHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
@@ -166,7 +165,7 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(new PublicKey("9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"), result[0].Address.Key);
             Assert.AreEqual("BTC", result[0].Name);
 
-            FinishHttpClientTest(messageHandlerMock, new Uri(GitHubUrl + "token-mints.json"));
+            FinishHttpClientTest(messageHandlerMock);
         }
         
         [TestMethod]
@@ -182,7 +181,7 @@ namespace Solnet.Serum.Test
             IList<TokenInfo> result = sut.GetTokens();
 
             Assert.IsNull(result);
-            FinishHttpClientTest(messageHandlerMock, new Uri(GitHubUrl + "token-mints.json"));
+            FinishHttpClientTest(messageHandlerMock);
         }
 
         [TestMethod]
@@ -206,7 +205,7 @@ namespace Solnet.Serum.Test
             Assert.AreEqual("4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn", result[0].ProgramId.Key);
             Assert.AreEqual(false, result[^1].Deprecated);
 
-            FinishHttpClientTest(messageHandlerMock, new Uri(GitHubUrl + "markets.json"));
+            FinishHttpClientTest(messageHandlerMock);
         }
         
         [TestMethod]
@@ -222,7 +221,7 @@ namespace Solnet.Serum.Test
             IList<MarketInfo> result = sut.GetMarkets();
 
             Assert.IsNull(result);
-            FinishHttpClientTest(messageHandlerMock, new Uri(GitHubUrl + "markets.json"));
+            FinishHttpClientTest(messageHandlerMock);
         }
 
         [TestMethod]

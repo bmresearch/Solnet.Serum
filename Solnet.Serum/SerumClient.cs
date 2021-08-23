@@ -268,18 +268,12 @@ namespace Solnet.Serum
 
                     if (evtQueueSub?.Data != null)
                     {
-                        if (!evtQueueSub.TestData)
-                        {
-                            File.WriteAllText("secondInfo.txt", JsonSerializer.Serialize(value,_jsonSerializerOptions));
-                            evtQueueSub.TestData = true;
-                        }
                         evtQueue = EventQueue.DeserializeSince(
                             Convert.FromBase64String(value.Value.Data[0]), evtQueueSub.Data.Header.NextSequenceNumber);
                         evtQueueSub.Data = evtQueue;
                     }
                     else
                     {
-                        File.WriteAllText("firstInfo.txt", JsonSerializer.Serialize(value,_jsonSerializerOptions));
                         evtQueue = EventQueue.Deserialize(Convert.FromBase64String(value.Value.Data[0]));
                         if (evtQueueSub != null) evtQueueSub.Data = evtQueue;
                     }

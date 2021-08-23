@@ -35,8 +35,6 @@ namespace Solnet.Serum.Models
         /// The underlying data.
         /// </summary>
         public T Data;
-
-        public bool TestData;
     }
 
     /// <summary>

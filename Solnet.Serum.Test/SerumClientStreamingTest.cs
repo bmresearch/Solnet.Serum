@@ -442,7 +442,7 @@ namespace Solnet.Serum.Test
         }
         
         [TestMethod]
-        public void UnsubscribEventQueueTest()
+        public void UnsubscribeEventQueueTest()
         {
             string firstAccountInfoNotification =
                 File.ReadAllText("Resources/SubscribeEventQueueFirstAccountInfoNotification.json");
@@ -509,6 +509,31 @@ namespace Solnet.Serum.Test
             streamingRpcMock.Verify(
                 s => s.UnsubscribeAsync(
                     It.Is<SubscriptionState>(ss => ss.Channel == sub2.SubscriptionState.Channel)), Times.Once);
+        }
+
+        [TestMethod]
+        public void DisconnectTest()
+        {
+            string accountInfoNotification =
+                File.ReadAllText("Resources/SubscribeOrderBookAccountInfoNotification.json");
+            OrderBookSide resultNotification = null;
+            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientStreamingTestSetup(
+                out Action<Subscription, OrderBookSide, ulong> action,
+                (x) => resultNotification = x,
+                accountInfoNotification,
+                "nkNzrV3ZtkWCft6ykeNGXXCbNSemqcauYKiZdf5JcKQ",
+                "https://api.mainnet-beta.solana.com");
+
+            SerumClient sut = new(Cluster.MainNet, streamingRpcClient: streamingRpcMock.Object);
+            Assert.IsNotNull(sut.StreamingRpcClient);
+            Assert.AreEqual(MainNetUrl, sut.NodeAddress.ToString());
+            sut.ConnectAsync();
+            
+            Assert.AreEqual(WebSocketState.Open, sut.State);
+
+            sut.DisconnectAsync();
+
+            Assert.AreEqual(WebSocketState.Closed, sut.State);
         }
     }
 }
