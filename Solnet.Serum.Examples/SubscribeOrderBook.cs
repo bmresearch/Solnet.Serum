@@ -14,8 +14,10 @@ namespace Solnet.Serum.Examples
 
         private static Dictionary<string, string> Markets = new Dictionary<string, string>()
         {
+            {"SXP/USDC", "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ"}
+            /*
             {"SOL/USDC", "9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT"},
-            {"SRM/USDT", "AtNnsY1AyRERWJ8xCskfz38YdvruWVJQUVXgScC1iPb"},
+            {"SRM/USDT", "AtNnsY1AyRERWJ8xCskfz38YdvruWVJQUVXgScC1iPb"},*/
         };
 
         private Dictionary<string, List<OpenOrder>> allAskOrders;
@@ -23,8 +25,10 @@ namespace Solnet.Serum.Examples
 
         public SubscribeOrderBook()
         {
-            _serumClient = ClientFactory.GetClient(Cluster.MainNet);
-            _serumClient.ConnectAsync();
+            var rpcClient = Solnet.Rpc.ClientFactory.GetClient("https://solana-api.projectserum.com");
+            var streamingRpcClient = Solnet.Rpc.ClientFactory.GetStreamingClient("wss://solana-api.projectserum.com");
+            _serumClient = ClientFactory.GetClient(rpcClient, streamingRpcClient);
+            _serumClient.ConnectAsync().Wait();
             allAskOrders = new Dictionary<string, List<OpenOrder>>();
             allBidOrders = new Dictionary<string, List<OpenOrder>>();
             Console.WriteLine($"Initializing {ToString()}");

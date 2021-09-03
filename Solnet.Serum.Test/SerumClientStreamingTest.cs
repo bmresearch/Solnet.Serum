@@ -28,12 +28,11 @@ namespace Solnet.Serum.Test
         };
 
         private WebSocketState _wsState;
-        private bool _firstNotification;
         private ManualResetEvent _event;
         private Mock<SubscriptionState> _subscriptionStateMock;
         private Action<SubscriptionState, ResponseValue<AccountInfo>> _action;
 
-        private Mock<IStreamingRpcClient> SerumClientStreamingTestSetup<T>(
+        private Mock<IStreamingRpcClient> StreamingClientTestSetup<T>(
             out Action<Subscription, T, ulong> action,
             Action<T> resultCaptureCallback,
             string responseContent, string address, string network, Commitment commitment = Commitment.Finalized)
@@ -97,9 +96,9 @@ namespace Solnet.Serum.Test
             return streamingRpcMock;
         }
         
-        private Mock<IStreamingRpcClient> SerumClientMultipleNotificationsStreamingTestSetup<T>(
-            out Action<Subscription, T, ulong> action, Action<T> resultCaptureCallback, string firstResponseContent,
-            string secondResponseContent, string address, string network, Commitment commitment = Commitment.Finalized)
+        private Mock<IStreamingRpcClient> MultipleNotificationsStreamingClientTestSetup<T>(
+            out Action<Subscription, T, ulong> action, Action<T> resultCaptureCallback,
+            string network, Commitment commitment = Commitment.Finalized)
         {
             Mock<Action<Subscription, T, ulong>> actionMock = new();
             actionMock
@@ -158,7 +157,6 @@ namespace Solnet.Serum.Test
         public void Setup()
         {
             _wsState = WebSocketState.None;
-            _firstNotification = false;
         }
 
         [TestMethod]
@@ -167,7 +165,7 @@ namespace Solnet.Serum.Test
             string accountInfoNotification =
                 File.ReadAllText("Resources/SubscribeOpenOrdersAccountInfoNotification.json");
             OpenOrdersAccount resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = StreamingClientTestSetup(
                 out Action<Subscription, OpenOrdersAccount, ulong> action,
                 (x) => resultNotification = x,
                 accountInfoNotification,
@@ -209,15 +207,12 @@ namespace Solnet.Serum.Test
             string secondAccountInfoNotification =
                 File.ReadAllText("Resources/SubscribeEventQueueSecondAccountInfoNotification.json");
             EventQueue resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientMultipleNotificationsStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = MultipleNotificationsStreamingClientTestSetup(
                 out Action<Subscription, EventQueue, ulong> action,
                 (x) =>
                 {
                     resultNotification = x;
                 },
-                firstAccountInfoNotification,
-                secondAccountInfoNotification,
-                "5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht",
                 "https://api.mainnet-beta.solana.com");
             
             SerumClient sut = new(Cluster.MainNet, streamingRpcClient: streamingRpcMock.Object);
@@ -254,8 +249,7 @@ namespace Solnet.Serum.Test
             Assert.IsTrue(resultNotification.Header.Flags.IsInitialized);
             Assert.IsTrue(resultNotification.Header.Flags.IsEventQueue);
         }
-        
-        
+
         [TestMethod]
         public void SubscribeEventQueueNewEventsTest()
         {
@@ -264,15 +258,12 @@ namespace Solnet.Serum.Test
             string secondAccountInfoNotification =
                 File.ReadAllText("Resources/SubscribeEventQueueSecondAccountInfoNotificationNewEvents.json");
             EventQueue resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientMultipleNotificationsStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = MultipleNotificationsStreamingClientTestSetup(
                 out Action<Subscription, EventQueue, ulong> action,
                 (x) =>
                 {
                     resultNotification = x;
                 },
-                firstAccountInfoNotification,
-                secondAccountInfoNotification,
-                "5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht",
                 "https://api.mainnet-beta.solana.com");
             
             SerumClient sut = new(Cluster.MainNet, streamingRpcClient: streamingRpcMock.Object);
@@ -316,7 +307,7 @@ namespace Solnet.Serum.Test
             string accountInfoNotification =
                 File.ReadAllText("Resources/SubscribeOrderBookAccountInfoNotification.json");
             OrderBookSide resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = StreamingClientTestSetup(
                 out Action<Subscription, OrderBookSide, ulong> action,
                 (x) => resultNotification = x,
                 accountInfoNotification,
@@ -346,7 +337,7 @@ namespace Solnet.Serum.Test
             string accountInfoNotification =
                 File.ReadAllText("Resources/SubscribeOrderBookAccountInfoNotification.json");
             OrderBookSide resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = StreamingClientTestSetup(
                 out Action<Subscription, OrderBookSide, ulong> action,
                 (x) => resultNotification = x,
                 accountInfoNotification,
@@ -391,7 +382,7 @@ namespace Solnet.Serum.Test
             string accountInfoNotification =
                 File.ReadAllText("Resources/SubscribeOpenOrdersAccountInfoNotification.json");
             OpenOrdersAccount resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = StreamingClientTestSetup(
                 out Action<Subscription, OpenOrdersAccount, ulong> action,
                 (x) => resultNotification = x,
                 accountInfoNotification,
@@ -449,16 +440,12 @@ namespace Solnet.Serum.Test
             string secondAccountInfoNotification =
                 File.ReadAllText("Resources/SubscribeEventQueueSecondAccountInfoNotification.json");
             EventQueue resultNotification = null;
-            EventQueue secondResultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientMultipleNotificationsStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = MultipleNotificationsStreamingClientTestSetup(
                 out Action<Subscription, EventQueue, ulong> action,
                 (x) =>
                 {
                     resultNotification = x;
                 },
-                firstAccountInfoNotification,
-                secondAccountInfoNotification,
-                "5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht",
                 "https://api.mainnet-beta.solana.com");
             
             SerumClient sut = new(Cluster.MainNet, streamingRpcClient: streamingRpcMock.Object);
@@ -484,7 +471,7 @@ namespace Solnet.Serum.Test
             Assert.IsTrue(resultNotification.Header.Flags.IsInitialized);
             Assert.IsTrue(resultNotification.Header.Flags.IsEventQueue);
             notificationContent =
-                JsonSerializer.Deserialize<ResponseValue<AccountInfo>>(firstAccountInfoNotification,
+                JsonSerializer.Deserialize<ResponseValue<AccountInfo>>(secondAccountInfoNotification,
                     JsonSerializerOptions);
             _action(_subscriptionStateMock.Object, notificationContent);
             Assert.IsNotNull(resultNotification);
@@ -517,7 +504,7 @@ namespace Solnet.Serum.Test
             string accountInfoNotification =
                 File.ReadAllText("Resources/SubscribeOrderBookAccountInfoNotification.json");
             OrderBookSide resultNotification = null;
-            Mock<IStreamingRpcClient> streamingRpcMock = SerumClientStreamingTestSetup(
+            Mock<IStreamingRpcClient> streamingRpcMock = StreamingClientTestSetup(
                 out Action<Subscription, OrderBookSide, ulong> action,
                 (x) => resultNotification = x,
                 accountInfoNotification,

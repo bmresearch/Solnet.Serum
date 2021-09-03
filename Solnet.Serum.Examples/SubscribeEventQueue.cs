@@ -45,9 +45,11 @@ namespace Solnet.Serum.Examples
 
         public SubscribeEventQueue()
         {
-            _serumClient = ClientFactory.GetClient(Cluster.MainNet);
+            var rpcClient = Solnet.Rpc.ClientFactory.GetClient("https://solana-api.projectserum.com");
+            var streamingRpcClient = Solnet.Rpc.ClientFactory.GetStreamingClient("wss://solana-api.projectserum.com");
+            _serumClient = ClientFactory.GetClient(rpcClient, streamingRpcClient);
             _serumClients = new List<ISerumClient>();
-            _serumClient.ConnectAsync();
+            _serumClient.ConnectAsync().Wait();
             Console.WriteLine($"Initializing {ToString()}");
         }
 

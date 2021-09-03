@@ -29,7 +29,6 @@ namespace Solnet.Serum.Examples
         public MarketManagerExample()
         {
             Console.WriteLine($"Initializing {ToString()}");
-            InstructionDecoder.Register(SerumProgram.ProgramIdKey, SerumProgram.Decode);
             _trades = new List<TradeEvent>();
             
             // serum client
@@ -38,6 +37,7 @@ namespace Solnet.Serum.Examples
             
             // initialize market manager
             _marketManager = MarketFactory.GetMarket(_marketAddress, serumClient: _serumClient);
+            _marketManager.InitAsync().Wait();
         }
 
         public void Run()

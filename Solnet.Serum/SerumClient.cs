@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using Solnet.Programs;
 using Solnet.Rpc;
 using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Core.Sockets;

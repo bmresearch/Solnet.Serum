@@ -1,44 +1,43 @@
 using Solnet.KeyStore;
 using Solnet.Programs;
 using Solnet.Rpc;
-using Solnet.Rpc.Builders;
 using Solnet.Rpc.Models;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Solnet.Serum.Examples
 {
-    public class CloseOpenOrdersExample : IRunnableExample
+    public class MarketManagerNewOrderExample : IRunnableExample
     {
         private readonly PublicKey _marketAddress = new("4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ");
         private readonly ISerumClient _serumClient;
         private readonly IMarketManager _marketManager;
         private readonly Wallet.Wallet _wallet;
-        private readonly SolanaKeyStoreService _keyStore;
+        private bool _newOrderConfirmed;
+        private bool _cancelOrderConfirmed;
 
-        public CloseOpenOrdersExample()
+        public MarketManagerNewOrderExample()
         {
             Console.WriteLine($"Initializing {ToString()}");
             // init stuff
-            _keyStore = new SolanaKeyStoreService();
+            SolanaKeyStoreService keyStore = new ();
             
             // get the wallet
-            _wallet = _keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
+            _wallet = keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
 
             // serum client
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
             _serumClient.ConnectAsync().Wait();
             
             // initialize market manager
-            _marketManager = MarketFactory.GetMarket(_marketAddress, _wallet.Account, signatureMethod: SignRequest, serumClient: _serumClient);
+            _marketManager = MarketFactory.GetMarket(_marketAddress, _wallet.Account, SignRequest, serumClient: _serumClient);
             _marketManager.InitAsync().Wait();
         }
-
+        
         private byte[] SignRequest(ReadOnlySpan<byte> messageData)
         {
             Console.WriteLine("Message Data: " + Convert.ToBase64String(messageData));
@@ -57,52 +56,54 @@ namespace Solnet.Serum.Examples
                             current + $"\t\t\t\t{entry.Key} - {Convert.ChangeType(entry.Value, entry.Value.GetType())}\n");
                 });
             Console.WriteLine(aggregate);
-
             byte[] signature = _wallet.Account.Sign(messageData.ToArray());
             Console.WriteLine("Message Signature: " + Convert.ToBase64String(signature));
 
             return signature;
         }
-
         
-        public async void Run()
+        public void Run()
         {
-            var blockhash = await _serumClient.RpcClient.GetRecentBlockHashAsync();
+            Order order = new OrderBuilder()
+                .SetPrice(3.5f)
+                .SetQuantity(10_000)
+                .SetSide(Side.Buy)
+                .SetOrderType(OrderType.Limit)
+                .SetSelfTradeBehavior(SelfTradeBehavior.DecrementTake)
+                .SetClientOrderId(1_000_000UL)
+                .Build();
 
-            while (_marketManager.OpenOrdersAddress == null)
+            SignatureConfirmation sigConf = _marketManager.NewOrder(order);
+            sigConf.ConfirmationChanged += NewOrderSignatureConfirmationOnConfirmationChanged;
+
+            while (!_newOrderConfirmed)
             {
-                await Task.Delay(100);
+                Task.Delay(250);
             }
             
-            var cancelRes = await _marketManager.CancelAllOrdersAsync();
-            foreach (var sig in cancelRes)
+            /*
+            SignatureConfirmation cancelSigConf = _marketManager.CancelOrder(1_000_000UL);
+            cancelSigConf.ConfirmationChanged += CancelOrderSignatureConfirmationOnConfirmationChanged;
+            
+            while (!_cancelOrderConfirmed)
             {
-                sig.ConfirmationChanged += (sender, status) =>
-                {
-                    Console.WriteLine($"Confirmation for {sig.Signature} changed.\nTxErr: {status.TransactionError?.Type}\tIxErr: {status.InstructionError?.CustomError}\tSerumErr: {status.Error}");
-                };
+                Task.Delay(250);
             }
-
-            while (cancelRes.Any(confirmation => confirmation.ConfirmationResult == null))
-            {
-                await Task.Delay(100);
-            }
-
-            var txBytes = new TransactionBuilder()
-                .SetFeePayer(_wallet.Account)
-                .SetRecentBlockHash(blockhash.Result.Value.Blockhash)
-                .AddInstruction(SerumProgram.CloseOpenOrders(
-                    _marketManager.OpenOrdersAddress, _wallet.Account, _wallet.Account, _marketAddress))
-                .CompileMessage();
-
-            var signature = SignRequest(txBytes);
-
-            var tx = Transaction.Populate(
-                Message.Deserialize(txBytes), new List<byte[]> { signature });
-
-            var res = await _serumClient.RpcClient.SendTransactionAsync(tx.Serialize());
+            */
             
             Console.ReadKey();
+        }
+        
+        private void CancelOrderSignatureConfirmationOnConfirmationChanged(object sender, SignatureConfirmationStatus e)
+        {
+            Console.WriteLine($"TxErr: {e.TransactionError?.Type}\n\tIxErr: {e.InstructionError?.CustomError}\n\t\tSerumErr: {e.Error}");
+            _cancelOrderConfirmed = true;
+        }
+
+        private void NewOrderSignatureConfirmationOnConfirmationChanged(object sender, SignatureConfirmationStatus e)
+        {
+            Console.WriteLine($"TxErr: {e.TransactionError?.Type}\n\tIxErr: {e.InstructionError?.CustomError}\n\t\tSerumErr: {e.Error}");
+            _newOrderConfirmed = true;
         }
     }
 }

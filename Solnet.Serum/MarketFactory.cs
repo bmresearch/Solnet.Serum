@@ -22,14 +22,14 @@ namespace Solnet.Serum
         /// <param name="serumClient">The Serum Client instance.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The Serum Client.</returns>
-        public static IMarketManager GetMarket(PublicKey marketAddress, PublicKey account = null, PublicKey srmAccount = null,
-            MarketManager.RequestSignature signatureMethod = null, string url = null, ISerumClient serumClient = null,
+        public static IMarketManager GetMarket(PublicKey marketAddress, PublicKey account = null, MarketManager.RequestSignature signatureMethod = null,
+             PublicKey srmAccount = null, string url = null, ISerumClient serumClient = null,
             ILogger logger = null)
         {
 #if DEBUG
             logger ??= GetDebugLogger();
 #endif
-            return new MarketManager(marketAddress, account, srmAccount, signatureMethod, url, logger, serumClient);
+            return new MarketManager(marketAddress, account, signatureMethod, srmAccount, url, logger, serumClient);
         }
 
 #if DEBUG

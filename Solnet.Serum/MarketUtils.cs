@@ -1,5 +1,6 @@
 using Solnet.Programs.Utilities;
 using Solnet.Serum.Models;
+using Solnet.Wallet;
 using System;
 
 namespace Solnet.Serum
@@ -9,6 +10,16 @@ namespace Solnet.Serum
     /// </summary>
     public static class MarketUtils
     {
+        /// <summary>
+        /// The <see cref="PublicKey"/> of the Wrapped SOL token mint.
+        /// </summary>
+        public static PublicKey WrappedSolMint = new ("So11111111111111111111111111111111111111112");
+
+        /// <summary>
+        /// The number of lamports in each SOL.
+        /// </summary>
+        public const int LamportsPerSol = 1_000_000_000;
+        
         /// <summary>
         /// The offset at which the token mint decimals value begins.
         /// </summary>
@@ -186,5 +197,24 @@ namespace Solnet.Serum
             order.RawQuantity = QuantityNumberToLots(order.Quantity, baseDecimals, market.BaseLotSize);
             order.MaxQuoteQuantity = GetMaxQuoteQuantity(market.QuoteLotSize, order.RawQuantity, order.RawPrice);
         }
+
+        /// <summary>
+        /// Gets the minimum number of lamports necessary to wrap in order to submit an order in a market where either
+        /// the base or the quote token are the <see cref="MarketUtils.WrappedSolMint"/>.
+        /// </summary>
+        /// <param name="price">The price of the order.</param>
+        /// <param name="size">The size of the order.</param>
+        /// <param name="side">The side of the order.</param>
+        /// <param name="openOrdersAccount">The associated open orders account.</param>
+        /// <returns>The minimum number of lamports necessary to perform the trade.</returns>
+        public static ulong GetMinimumLamportsForWrapping(float price, float size, Side side,
+            OpenOrdersAccount openOrdersAccount)
+            => side switch
+            {
+                Side.Buy => (ulong)Math.Round(price * size * 1.01 * LamportsPerSol) -
+                            (openOrdersAccount?.QuoteTokenFree ?? 0),
+                Side.Sell => (ulong)Math.Round(size * LamportsPerSol) - 
+                             (openOrdersAccount?.BaseTokenFree ?? 0),
+            };
     }
 }

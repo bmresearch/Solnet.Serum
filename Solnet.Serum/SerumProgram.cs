@@ -291,8 +291,8 @@ namespace Solnet.Serum
                 AccountMeta.Writable(market, false),
                 AccountMeta.Writable(marketBids, false),
                 AccountMeta.Writable(marketAsks, false),
-                AccountMeta.Writable(openOrdersAccount, true),
-                AccountMeta.ReadOnly(openOrdersAccountOwner, false),
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, true),
                 AccountMeta.Writable(eventQueue, false)
             };
 

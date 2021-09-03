@@ -21,6 +21,10 @@ namespace Solnet.Serum
 
         /// <summary>
         /// The decoded data of the underlying <see cref="OpenOrdersAccount"/>.
+        /// <remarks>
+        /// If this value is <c>null</c>, the <see cref="IMarketManager"/> may need to be refreshed by calling <see cref="IMarketManager.ReloadAsync"/>.
+        /// The default implementation of <see cref="IMarketManager"/>, <see cref="MarketManager"/>, does not automatically and/or periodically update this structure, it will be up to the user to do so.
+        /// </remarks>
         /// </summary>
         OpenOrdersAccount OpenOrdersAccount { get; }
         
@@ -31,13 +35,31 @@ namespace Solnet.Serum
 
         /// <summary>
         /// The <see cref="TokenAccount"/> of the base token.
+        /// <remarks>
+        /// If this value is <c>null</c>, the <see cref="IMarketManager"/> may need to be refreshed by calling <see cref="IMarketManager.ReloadAsync"/>.
+        /// The default implementation of <see cref="IMarketManager"/>, <see cref="MarketManager"/>, does not automatically and/or periodically update this structure, it will be up to the user to do so.
+        /// </remarks>
         /// </summary>
         TokenAccount BaseAccount { get; }
+        
+        /// <summary>
+        /// The public key of the underlying base <see cref="TokenAccount"/>.
+        /// </summary>
+        PublicKey BaseTokenAccountAddress { get; }
 
         /// <summary>
         /// The <see cref="TokenAccount"/> of the quote token.
+        /// <remarks>
+        /// If this value is <c>null</c>, the <see cref="IMarketManager"/> may need to be refreshed by calling <see cref="IMarketManager.ReloadAsync"/>.
+        /// The default implementation of <see cref="IMarketManager"/>, <see cref="MarketManager"/>, does not automatically and/or periodically update this structure, it will be up to the user to do so.
+        /// </remarks>
         /// </summary>
         TokenAccount QuoteAccount { get; }
+        
+        /// <summary>
+        /// The public key of the underlying quote <see cref="TokenAccount"/>.
+        /// </summary>
+        PublicKey QuoteTokenAccountAddress { get; }
 
         /// <summary>
         /// The decimals of the base token for the associated <see cref="Market"/>.
@@ -70,6 +92,11 @@ namespace Solnet.Serum
         /// This is an asynchronous operation.
         /// </summary>
         Task ReloadAsync();
+        
+        /// <summary>
+        /// Reloads the associated token accounts and open orders accounts. Useful when an order creates either accounts.
+        /// </summary>
+        void Reload();
 
         /// <summary>
         /// Subscribe to the live <see cref="TradeEvent"/> feed of this market.

@@ -71,7 +71,7 @@ namespace Solnet.Serum.Models
             return tag switch
             {
                 (byte)NodeType.InnerNode => SlabInnerNode.Deserialize(blob),
-                (byte)NodeType.LeafNode => SlabLeafNode.Deserialize(blob),
+                (byte)NodeType.LeafNode => SlabLeafNode.Deserialize(blob)
             };
         }
     }

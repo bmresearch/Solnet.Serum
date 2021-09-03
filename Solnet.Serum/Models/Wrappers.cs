@@ -76,7 +76,7 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// The error which may have occurred during request submission and instruction execution.
         /// </summary>
-        public SerumProgramError Error;
+        public SerumProgramError? Error;
 
         /// <summary>
         /// The result of the transaction simulation.
@@ -113,22 +113,28 @@ namespace Solnet.Serum.Models
         /// Parse existing errors into the the <see cref="SerumProgramError"/> structure and invoke the event.
         /// This is done for cases where the error occurs before the user has a chance to add a listener to the event.
         /// </summary>
-        private void ParseErrorAndInvoke(TransactionError errorResult = default)
+        private void ParseErrorAndInvoke(TransactionError errorResult = null)
         {
             if (errorResult == null)
+            {
+                ConfirmationChanged?.Invoke(this, new SignatureConfirmationStatus());
                 return;
-
-            if (errorResult.InstructionError?.CustomError.HasValue == false)
-                return;
-
-            SerumProgramError serumError =
-                (SerumProgramError)Enum.Parse(typeof(SerumProgramError),
-                    errorResult.InstructionError?.CustomError.ToString() ?? string.Empty);
+            }
             
-            Error = serumError;
+            switch (errorResult.InstructionError?.CustomError.HasValue)
+            {
+                case false:
+                    ConfirmationChanged?.Invoke(this, new SignatureConfirmationStatus(errorResult));
+                    return;
+                case true:
+                    Error = (SerumProgramError)Enum.Parse(typeof(SerumProgramError),
+                        errorResult.InstructionError?.CustomError.ToString());
+                    break;
+            }
+
             TransactionError = errorResult;
-            InstructionError = errorResult?.InstructionError;
-            ConfirmationChanged?.Invoke(this, new SignatureConfirmationStatus(errorResult, serumError));
+            InstructionError = errorResult.InstructionError;
+            ConfirmationChanged?.Invoke(this, new SignatureConfirmationStatus(errorResult));
         }
     }
 
@@ -157,7 +163,7 @@ namespace Solnet.Serum.Models
         /// </summary>
         /// <param name="errorResult">The error result that may have occurred processing the transaction.</param>
         /// <param name="serumError">The serum error that may have occurred.</param>
-        internal SignatureConfirmationStatus(TransactionError errorResult = default, SerumProgramError serumError = default)
+        internal SignatureConfirmationStatus(TransactionError errorResult = null, SerumProgramError? serumError = null)
         {
             Error = serumError;
             TransactionError = errorResult;

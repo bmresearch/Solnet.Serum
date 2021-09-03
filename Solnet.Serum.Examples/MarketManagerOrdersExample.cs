@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Solnet.Serum.Examples
 {
-    public class MarketManagerOrdersExample : IRunnableExample
+    public class MarketManagerMultipleOrdersExample : IRunnableExample
     {
         private readonly PublicKey _marketAddress = new("4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ");
         private readonly ISerumClient _serumClient;
@@ -30,10 +30,9 @@ namespace Solnet.Serum.Examples
         private Order _bestBid;
         private Order _bestAsk;
 
-        public MarketManagerOrdersExample()
+        public MarketManagerMultipleOrdersExample()
         {
             Console.WriteLine($"Initializing {ToString()}");
-            InstructionDecoder.Register(SerumProgram.ProgramIdKey, SerumProgram.Decode);
             // init stuff
             SolanaKeyStoreService keyStore = new ();
             
@@ -45,12 +44,13 @@ namespace Solnet.Serum.Examples
             _serumClient.ConnectAsync().Wait();
             
             // initialize market manager
-            _marketManager = MarketFactory.GetMarket(_marketAddress, _wallet.Account, signatureMethod: SignRequest, serumClient: _serumClient);
+            _marketManager = MarketFactory.GetMarket(_marketAddress, _wallet.Account, SignRequest, serumClient: _serumClient);
+            _marketManager.InitAsync().Wait();
         }
-
+        
         private byte[] SignRequest(ReadOnlySpan<byte> messageData)
         {
-            Console.WriteLine(Convert.ToBase64String(messageData));
+            Console.WriteLine("Message Data: " + Convert.ToBase64String(messageData));
             
             List<DecodedInstruction> ix =
                 InstructionDecoder.DecodeInstructions(Message.Deserialize(messageData));
@@ -66,13 +66,15 @@ namespace Solnet.Serum.Examples
                             current + $"\t\t\t\t{entry.Key} - {Convert.ChangeType(entry.Value, entry.Value.GetType())}\n");
                 });
             Console.WriteLine(aggregate);
+            byte[] signature = _wallet.Account.Sign(messageData.ToArray());
+            Console.WriteLine("Message Signature: " + Convert.ToBase64String(signature));
 
-            return _wallet.Account.Sign(messageData.ToArray());
+            return signature;
         }
 
-        
         public async void Run()
         {
+            Console.ReadKey();
             await _marketManager.SubscribeOrderBookAsync(OrderBookHandler);
 
             while (_bestBid == null || _bestAsk == null)
@@ -188,19 +190,10 @@ namespace Solnet.Serum.Examples
         /// <returns>A task which may return a <see cref="RequestResult{IEnumerable}"/>.</returns>
         private async Task<RequestResult<string>> SubmitTransaction(byte[] transaction)
         {
-            while (true)
-            {
-                RequestResult<string> req =
-                    await _serumClient.RpcClient.SendTransactionAsync(transaction, false, Commitment.Confirmed);
+            RequestResult<string> req =
+                await _serumClient.RpcClient.SendTransactionAsync(transaction, false, Commitment.Confirmed);
 
-                if (req.WasRequestSuccessfullyHandled)
-                    return req;
-
-                if (req.ServerErrorCode != 0)
-                    return req;
-
-                await Task.Delay(250);
-            }
+            return req;
         }
         
         /// <summary>
