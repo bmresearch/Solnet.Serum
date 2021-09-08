@@ -2,9 +2,9 @@
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <Product>Solnet.Serum</Product>
-        <Version>0.0.10</Version>
+        <Version>1.0.0</Version>
         <Copyright>Copyright 2021 &#169; Solnet</Copyright>
-        <Authors>Tiago Carvalho &amp; Hugo Carvalho</Authors>
+        <Authors>blockmountain</Authors>
         <PublisherName>blockmountain</PublisherName>
         <RepositoryUrl>https://github.com/bmresearch/Solnet.Serum</RepositoryUrl>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -12,7 +12,7 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageIcon>icon.png</PackageIcon>
         <PackageDescription>Solnet.Serum is a .Net integration library for Project Serum.</PackageDescription>
-        <PackageTags>solana;solnet;sol;net5</PackageTags>
+        <PackageTags>solana;serum;solnet;sol;srm;net5</PackageTags>
         <PackageReleaseNotes>https://github.com/bmresearch/Solnet.Serum/releases</PackageReleaseNotes>
         <RepositoryType>git</RepositoryType>
     </PropertyGroup>

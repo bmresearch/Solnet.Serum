@@ -17,12 +17,12 @@ namespace Solnet.Serum.Models
         /// <summary>
         /// Represents the layout of the <see cref="Market"/> data structure.
         /// </summary>
-        internal static class Layout
+        public static class Layout
         {
             /// <summary>
             /// The size of the data for a market account.
             /// </summary>
-            internal const int SpanLength = 388;
+            public const int SpanLength = 388;
             
             /// <summary>
             /// The number of bytes of the padding at the beginning of the market structure.
@@ -42,7 +42,7 @@ namespace Solnet.Serum.Models
             /// <summary>
             /// The offset at which the vault signer's nonce begins.
             /// </summary>
-            internal const int VaultSignerOffset = 10;
+            internal const int VaultSignerOffset = 40;
 
             /// <summary>
             /// The offset at which the public key of the market's base mint begins.
@@ -239,9 +239,6 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static Market Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != Layout.SpanLength)
-                return null;
-
             ReadOnlySpan<byte> padLessData = data.Slice(
                 Layout.StartPadding,
                 data.Length - (Layout.StartPadding + Layout.EndPadding));

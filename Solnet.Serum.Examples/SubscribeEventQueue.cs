@@ -45,15 +45,17 @@ namespace Solnet.Serum.Examples
 
         public SubscribeEventQueue()
         {
-            _serumClient = ClientFactory.GetClient(Cluster.MainNet);
+            var rpcClient = Solnet.Rpc.ClientFactory.GetClient("https://solana-api.projectserum.com");
+            var streamingRpcClient = Solnet.Rpc.ClientFactory.GetStreamingClient("wss://solana-api.projectserum.com");
+            _serumClient = ClientFactory.GetClient(rpcClient, streamingRpcClient);
             _serumClients = new List<ISerumClient>();
-            _serumClient.Connect();
+            _serumClient.ConnectAsync().Wait();
             Console.WriteLine($"Initializing {ToString()}");
         }
 
         public void Run()
         {
-            SubscribeToAllMarkets();
+            SubscribeSingle();
         }
 
         /// <summary>
@@ -65,17 +67,10 @@ namespace Solnet.Serum.Examples
             Market market = _serumClient.GetMarket(MarketAddress);
                 
             Console.WriteLine($"Market:: Own Address: {market.OwnAddress.Key} Base Mint: {market.BaseMint.Key} Quote Mint: {market.QuoteMint.Key}");
-                
             Subscription sub = _serumClient.SubscribeEventQueue((subWrapper, evtQueue, _) =>
             {
                 Console.WriteLine($"EventQueue:: Address: {subWrapper.Address.Key} Events: {evtQueue.Events.Count} Head: {evtQueue.Header.Head} Count: {evtQueue.Header.Count} Sequence: {evtQueue.Header.NextSequenceNumber}");
-                foreach (Event evt in evtQueue.Events)
-                {
-                    if (evt.Flags.IsFill && evt.NativeQuantityPaid > 0)
-                    {
-                        Console.WriteLine($"TradeEvent::\tOpenOrdersAccount: {evt.PublicKey.Key}\t\tPaid: {evt.NativeQuantityPaid}\t\tReleased: {evt.NativeQuantityReleased}\t\tFeeOrRebate: {evt.NativeFeeOrRebate}");
-                    }
-                }
+
             }, market.EventQueue);
             
             Console.ReadKey();

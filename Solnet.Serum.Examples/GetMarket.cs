@@ -14,7 +14,7 @@ namespace Solnet.Serum.Examples
         /// <summary>
         /// Public key for SXP/USDC Serum Market.
         /// </summary>
-        private const string MarketAddress = "13vjJ8pxDMmzen26bQ5UrouX8dkXYPW1p3VLVDjxXrKR";
+        private const string MarketAddress = "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ";
 
         public GetMarket()
         {

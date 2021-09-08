@@ -3,7 +3,6 @@ using Moq;
 using Moq.Protected;
 using Solnet.Rpc;
 using Solnet.Rpc.Core.Http;
-using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
@@ -24,25 +23,20 @@ namespace Solnet.Serum.Test
     [TestClass]
     public class SerumClientTest
     {
-        protected const string MainNetUrl = "https://mainnet.solana.com";
-        protected static readonly Uri MainNetUri = new Uri(MainNetUrl);
-
-        private ManualResetEvent _notificationEvent;
-
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)}
         };
 
-        private const string GitHubUrl = "https://raw.githubusercontent.com/project-serum/serum-js/master/src/";
-        private static readonly Uri GitHubUri = new Uri(GitHubUrl);
+        private const string GitHubUrl = "https://raw.githubusercontent.com/project-serum/serum-ts/master/packages/serum/src/";
+        private static readonly Uri GitHubUri = new (GitHubUrl);
 
         /// <summary>
         /// Finish the test by asserting the http request went as expected.
         /// </summary>
-        /// <param name="expectedUri">The request uri.</param>
-        private static void FinishHttpClientTest(Mock<HttpMessageHandler> mockHandler, Uri expectedUri)
+        /// <param name="mockHandler">The mocked http message handler.</param>
+        private static void FinishHttpClientTest(Mock<HttpMessageHandler> mockHandler)
         {
             mockHandler.Protected().Verify(
                 "SendAsync",
@@ -71,7 +65,30 @@ namespace Solnet.Serum.Test
                 )
                 .ReturnsAsync(new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.OK, Content = new StringContent(responseContent),
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(responseContent),
+                })
+                .Verifiable();
+            return messageHandlerMock;
+        }
+        
+        /// <summary>
+        /// Setup the test with the request and response data.
+        /// </summary>
+        private static Mock<HttpMessageHandler> SetupHttpClientUnsuccessfulTest()
+        {
+            var messageHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            messageHandlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(
+                        message => message.Method == HttpMethod.Get),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
                 })
                 .Verifiable();
             return messageHandlerMock;
@@ -139,6 +156,7 @@ namespace Solnet.Serum.Test
             };
 
             SerumClient sut = new(Cluster.MainNet, null, httpClient);
+            Assert.IsNotNull(sut.RpcClient);
 
             IList<TokenInfo> result = sut.GetTokens();
 
@@ -147,7 +165,23 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(new PublicKey("9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"), result[0].Address.Key);
             Assert.AreEqual("BTC", result[0].Name);
 
-            FinishHttpClientTest(messageHandlerMock, new Uri(GitHubUrl + "token-mints.json"));
+            FinishHttpClientTest(messageHandlerMock);
+        }
+        
+        [TestMethod]
+        public void GetTokensUnsuccessfulTest()
+        {
+            Mock<HttpMessageHandler> messageHandlerMock = SetupHttpClientUnsuccessfulTest();
+
+            HttpClient httpClient = new(messageHandlerMock.Object) {BaseAddress = GitHubUri,};
+
+            SerumClient sut = new(Cluster.MainNet, null, httpClient);
+            Assert.IsNotNull(sut.RpcClient);
+
+            IList<TokenInfo> result = sut.GetTokens();
+
+            Assert.IsNull(result);
+            FinishHttpClientTest(messageHandlerMock);
         }
 
         [TestMethod]
@@ -159,6 +193,7 @@ namespace Solnet.Serum.Test
             HttpClient httpClient = new(messageHandlerMock.Object) {BaseAddress = GitHubUri,};
 
             SerumClient sut = new(Cluster.MainNet, null, httpClient);
+            Assert.IsNotNull(sut.RpcClient);
 
             IList<MarketInfo> result = sut.GetMarkets();
 
@@ -170,7 +205,23 @@ namespace Solnet.Serum.Test
             Assert.AreEqual("4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn", result[0].ProgramId.Key);
             Assert.AreEqual(false, result[^1].Deprecated);
 
-            FinishHttpClientTest(messageHandlerMock, new Uri(GitHubUrl + "markets.json"));
+            FinishHttpClientTest(messageHandlerMock);
+        }
+        
+        [TestMethod]
+        public void GetMarketsUnsuccessfulTest()
+        {
+            Mock<HttpMessageHandler> messageHandlerMock = SetupHttpClientUnsuccessfulTest();
+
+            HttpClient httpClient = new(messageHandlerMock.Object) {BaseAddress = GitHubUri,};
+
+            SerumClient sut = new(Cluster.MainNet, null, httpClient);
+            Assert.IsNotNull(sut.RpcClient);
+
+            IList<MarketInfo> result = sut.GetMarkets();
+
+            Assert.IsNull(result);
+            FinishHttpClientTest(messageHandlerMock);
         }
 
         [TestMethod]
@@ -184,6 +235,7 @@ namespace Solnet.Serum.Test
                 Commitment.Confirmed);
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+            Assert.IsNotNull(sut.RpcClient);
 
             Market result = sut.GetMarket("13vjJ8pxDMmzen26bQ5UrouX8dkXYPW1p3VLVDjxXrKR", Commitment.Confirmed);
 
@@ -213,7 +265,7 @@ namespace Solnet.Serum.Test
             Assert.AreEqual(3328336UL, result.QuoteFeesAccrued);
             Assert.AreEqual(100UL, result.QuoteLotSize);
             Assert.AreEqual(0UL, result.ReferrerRebateAccrued);
-            Assert.AreEqual(17329972132752316649UL, result.VaultSignerNonce);
+            Assert.AreEqual(0UL, result.VaultSignerNonce);
         }
         
         [TestMethod]
@@ -227,6 +279,7 @@ namespace Solnet.Serum.Test
                 Commitment.Confirmed);
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+            Assert.IsNotNull(sut.RpcClient);
 
             EventQueue result = sut.GetEventQueue("3bdmcKUenYeRaEXnJEC2skJhU5KKY7JqK3aPMmxtEqTd", Commitment.Confirmed);
 
@@ -259,6 +312,7 @@ namespace Solnet.Serum.Test
                 Commitment.Confirmed);
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+            Assert.IsNotNull(sut.RpcClient);
 
             OpenOrdersAccount result = sut.GetOpenOrdersAccount("4beBRAZSVcCm7jD7yAmizqqVyi39gVrKNeEPskickzSF", Commitment.Confirmed);
 
@@ -290,6 +344,7 @@ namespace Solnet.Serum.Test
                 Commitment.Confirmed);
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+            Assert.IsNotNull(sut.RpcClient);
 
             OrderBookSide result = sut.GetOrderBookSide("14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ", Commitment.Confirmed);
             Assert.IsNotNull(result);
@@ -321,6 +376,7 @@ namespace Solnet.Serum.Test
                 Commitment.Confirmed);
 
             SerumClient sut = new(Cluster.MainNet, null, rpcClient: rpcMock.Object);
+            Assert.IsNotNull(sut.RpcClient);
 
             OrderBookSide result = sut.GetOrderBookSide("CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ", Commitment.Confirmed);
             Assert.IsNotNull(result);

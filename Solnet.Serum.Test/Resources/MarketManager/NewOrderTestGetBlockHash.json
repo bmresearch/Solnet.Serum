@@ -1,0 +1,11 @@
+{
+  "context": {
+    "slot": 93059550
+  },
+  "value": {
+    "blockhash": "BJ3HqQEXvXsihbgiXKCid3SQA5L5WFZR6miJuMgEtZ1j",
+    "feeCalculator": {
+      "lamportsPerSignature": 5000
+    }
+  }
+}

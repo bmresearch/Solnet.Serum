@@ -8,9 +8,7 @@ namespace Solnet.Serum.Examples
     public class SubscribeOpenOrders : IRunnableExample
     {
         private readonly ISerumClient _serumClient;
-        
-        private List<ISerumClient> _serumClients;
-        
+
         /// <summary>
         /// Public key for Open Orders Account.
         /// </summary>
@@ -19,8 +17,7 @@ namespace Solnet.Serum.Examples
         public SubscribeOpenOrders()
         {
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
-            _serumClients = new List<ISerumClient>();
-            _serumClient.Connect();
+            _serumClient.ConnectAsync().Wait();
             Console.WriteLine($"Initializing {ToString()}");
         }
 
@@ -37,12 +34,12 @@ namespace Solnet.Serum.Examples
                                   $"BaseTotal: {account.BaseTokenTotal} BaseFree: {account.BaseTokenFree}\n" +
                                   $"QuoteTotal: {account.QuoteTokenTotal} QuoteFree: {account.QuoteTokenFree}\n" +
                                   $"Total Orders: {account.Orders.Count}");
-                /*
-                 foreach (OpenOrder order in account.Orders)
+                
+                foreach (OpenOrder order in account.Orders)
                 {
                     Console.WriteLine($"OpenOrder:: IsBid: {order.IsBid} Price: {order.RawPrice}");
                 }
-                */
+                
             }, OpenOrdersAccountAddress);
             
             Console.ReadKey();

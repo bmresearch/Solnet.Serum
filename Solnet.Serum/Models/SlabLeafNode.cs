@@ -15,6 +15,11 @@ namespace Solnet.Serum.Models
         internal static new class Layout
         {
             /// <summary>
+            /// The length of the key parameter.
+            /// </summary>
+            internal const int KeyLength = 16;
+            
+            /// <summary>
             /// 
             /// </summary>
             internal const int OwnerSlotOffset = 0;
@@ -25,17 +30,23 @@ namespace Solnet.Serum.Models
             internal const int FeeTierOffset = 1;
 
             /// <summary>
-            /// 
+            /// The offset at which the price value of the order in the book begins.
+            /// <remarks>This value is only valid after reading the <c>Key</c> value.</remarks>
+            /// </summary>
+            internal const int PriceOffset = 8;
+
+            /// <summary>
+            /// The offset at which the order's owner begins.
             /// </summary>
             internal const int OwnerOffset = 20;
 
             /// <summary>
-            /// 
+            /// The offset at which the order's quantity begins.
             /// </summary>
             internal const int QuantityOffset = 52;
 
             /// <summary>
-            /// 
+            /// The offset at which the order's client id begins.
             /// </summary>
             internal const int ClientOrderIdOffset = 60;
         }
@@ -77,8 +88,8 @@ namespace Solnet.Serum.Models
         /// <returns>The SlabNode structure.</returns>
         public static new SlabLeafNode Deserialize(ReadOnlySpan<byte> data)
         {
-            Span<byte> key = data.GetSpan(SlabNode.Layout.KeyOffset, 16);
-            ulong price = ((ReadOnlySpan<byte>)key).GetU64(8);
+            Span<byte> key = data.GetSpan(SlabNode.Layout.KeyOffset, Layout.KeyLength);
+            ulong price = ((ReadOnlySpan<byte>)key).GetU64(Layout.PriceOffset);
 
             return new SlabLeafNode
             {

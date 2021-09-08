@@ -29,16 +29,44 @@ Solnet.Serum is a package within the same `Solnet.` namespace that implements a 
 separate repository so it is contained, as the goal for [Solnet](https://github.com/bmresearch/Solnet) was to be a core SDK.
 
 ## Features
+- Decoding of Serum data structures:
+  - `Market`
+  - `OpenOrdersAccount`
+  - `Slab`s, which are used for order book data stored under `OrderBookSide` and `OrderBook` which holds both sides
+  - `EventQueue` (`Event` data, used to process and filter for `TradeEvent`s)
+- `SerumProgram` instructions implemented:
+  - `NewOrderV3`
+  - `CancelOrderV2`
+  - `CancelOrderByClientIdV2`
+  - `SettleFunds`
+  - `ConsumeEvents`
+  - `InitOpenOrders`
+  - `CloseOpenOrders`
+  - `Prune`
+- `SerumClient` class which allows to:
+  - Get these structures and decode them only by having their address
+  - Subscribing to these accounts in real time, getting notifications with their decoded structures
+- `MarketManager` class which has:
+  - Various overloads of `NewOrder`, `NewOrders`, `CancelOrder` and `CancelAllOrders`, these:
+    - craft a transaction or several transactions, in the case where they interact with several orders
+    - request a signature using the defined delegate method
+    - submit the transaction to the cluster
+    - and subscribe to the confirmation of the signature, notifying the user when it happens
+    - if the transaction is subject to a custom error defined by the Serum Program [here](https://github.com/project-serum/serum-dex/blob/master/dex/src/error.rs), it is parsed into the appropriate `SerumProgramError` enum value
+- Factory patterns for both `ISerumClient` and `IMarketManager`
+
 
 ## Requirements
 - net 5.0
 
 ## Dependencies
-- Solnet
+- Solnet v0.4.6
 
 ## Examples
 
-- TO DO
+The [Solnet.Serum.Examples](https://github.com/bmresearch/Solnet.Serum/tree/master/Solnet.Serum.Examples) project features some examples on how to use both the [IMarketManager](https://github.com/bmresearch/Solnet.Serum/tree/master/Solnet.Serum/IMarketManager.cs) and the [ISerumClient](https://github.com/bmresearch/Solnet.Serum/tree/master/Solnet.Serum/ISerumClient.cs), these examples include:
+- Streaming market data directly into user-friendly values using the `IMarketManager` interface
+- Submitting new orders and cancelling existing ones
 
 ## Contribution
 

@@ -1,0 +1,35 @@
+{
+  "context": {
+    "slot": 93014702
+  },
+  "value": [
+    {
+      "account": {
+        "data": {
+          "parsed": {
+            "info": {
+              "isNative": false,
+              "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "owner": "hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh",
+              "state": "initialized",
+              "tokenAmount": {
+                "amount": "24340423",
+                "decimals": 6,
+                "uiAmount": 24.340423,
+                "uiAmountString": "24.340423"
+              }
+            },
+            "type": "account"
+          },
+          "program": "spl-token",
+          "space": 165
+        },
+        "executable": false,
+        "lamports": 2039280,
+        "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "rentEpoch": 215
+      },
+      "pubkey": "tWQuevB8Rou1HS9a76fjYSQPrDixZMbVzXe2Q1kY5ma"
+    }
+  ]
+}

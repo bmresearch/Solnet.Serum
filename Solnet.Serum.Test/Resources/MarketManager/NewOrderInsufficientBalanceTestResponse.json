@@ -1,0 +1,20 @@
+{
+  "code": -32002,
+  "message": "Transaction simulation failed: Error processing Instruction 0: custom program error: 0x22",
+  "data": {
+    "accounts": null,
+    "err": {
+      "InstructionError": [
+        0,
+        {
+          "Custom": 34
+        }
+      ]
+    },
+    "logs": [
+      "Program 9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin invoke [1]",
+      "Program 9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin consumed 8214 of 200000 compute units",
+      "Program 9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin failed: custom program error: 0x22"
+    ]
+  }
+}

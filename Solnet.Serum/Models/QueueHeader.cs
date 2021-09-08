@@ -76,9 +76,6 @@ namespace Solnet.Serum.Models
         /// <returns>The Market structure.</returns>
         public static QueueHeader Deserialize(ReadOnlySpan<byte> data)
         {
-            if (data.Length != Layout.QueueHeaderSpanLength)
-                return null;
-
             ReadOnlySpan<byte> padLessData = data.Slice(
                 Market.Layout.StartPadding,
                 data.Length - (Layout.StartPadding + Layout.EndPadding));

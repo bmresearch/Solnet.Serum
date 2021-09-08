@@ -27,12 +27,12 @@ namespace Solnet.Serum.Models
             /// </remarks>
             /// </summary>
             internal const int BumpIndexOffset = 0;
-            
+
             /// <summary>
             /// The offset at which the Free List Length value begins.
             /// </summary>
             internal const int FreeListLengthOffset = 8;
-            
+
             /// <summary>
             /// The offset at which the Free List Head value begins.
             /// </summary>
@@ -42,13 +42,13 @@ namespace Solnet.Serum.Models
             /// The offset at which the Root value begins.
             /// </summary>
             internal const int RootOffset = 20;
-            
+
             /// <summary>
             /// The offset at which the Leaf Count value begins.
             /// </summary>
             internal const int LeafCountOffset = 24;
         }
-        
+
         /// <summary>
         /// The bump index of the slab.
         /// </summary>
@@ -80,11 +80,7 @@ namespace Solnet.Serum.Models
         /// <param name="data">The data to deserialize into the structure.</param>
         /// <returns>The SlabHeader structure.</returns>
         public static SlabHeader Deserialize(ReadOnlySpan<byte> data)
-        {
-            if (data.Length != Layout.SpanLength)
-                return null;
-
-            return new SlabHeader
+            => new()
             {
                 BumpIndex = data.GetU32(Layout.BumpIndexOffset),
                 FreeListLength = data.GetU32(Layout.FreeListLengthOffset),
@@ -92,6 +88,5 @@ namespace Solnet.Serum.Models
                 Root = data.GetU32(Layout.RootOffset),
                 LeafCount = data.GetU32(Layout.LeafCountOffset)
             };
-        }
     }
 }

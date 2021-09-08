@@ -44,6 +44,11 @@ namespace Solnet.Serum
         /// The public key of the fee sweeper.
         /// </summary>
         public static readonly PublicKey FeeSweeperKey = new("DeqYsmBd9BnrbgUwQjVH4sQWK71dEgE6eoZFw3Rp4ftE");
+        
+        /// <summary>
+        /// The program's name.
+        /// </summary>
+        private const string ProgramName = "Serum Program";
 
         /// <summary>
         /// Initializes an instruction to create a new Order on Serum v3.
@@ -122,7 +127,7 @@ namespace Solnet.Serum
                 ProgramId = programId,
                 Keys = keys,
                 Data = SerumProgramData.EncodeNewOrderV3Data(side, limitPrice, maxCoinQty,
-                    orderType, clientOrderId, selfTradeBehaviorType, limit, maxNativePcQtyIncludingFees)
+                    orderType, clientOrderId, selfTradeBehaviorType, maxNativePcQtyIncludingFees, limit)
             };
         }
 
@@ -137,7 +142,7 @@ namespace Solnet.Serum
         /// <param name="referrerPcWallet">The <see cref="PublicKey"/> of the quote wallet or token account.</param>
         /// <returns>The transaction instruction.</returns>
         public static TransactionInstruction SettleFunds(Market market, PublicKey openOrdersAccount, PublicKey owner,
-            PublicKey baseWallet, PublicKey quoteWallet, PublicKey referrerPcWallet)
+            PublicKey baseWallet, PublicKey quoteWallet, PublicKey referrerPcWallet = null)
         {
             byte[] vaultSignerAddress = SerumProgramData.DeriveVaultSignerAddress(market);
 
@@ -149,13 +154,16 @@ namespace Solnet.Serum
                 AccountMeta.Writable(market.OwnAddress, false),
                 AccountMeta.Writable(openOrdersAccount, false),
                 AccountMeta.ReadOnly(owner, true),
-                AccountMeta.Writable(market.BaseVault, true),
-                AccountMeta.Writable(market.QuoteVault, true),
-                AccountMeta.Writable(baseWallet, true),
-                AccountMeta.Writable(quoteWallet, true),
+                AccountMeta.Writable(market.BaseVault, false),
+                AccountMeta.Writable(market.QuoteVault, false),
+                AccountMeta.Writable(baseWallet, false),
+                AccountMeta.Writable(quoteWallet, false),
                 AccountMeta.ReadOnly(new PublicKey(vaultSignerAddress), false),
                 AccountMeta.ReadOnly(TokenProgram.ProgramIdKey, false)
             };
+            
+            if (referrerPcWallet != null)
+                keys.Add(AccountMeta.Writable(referrerPcWallet, false));
 
             return new TransactionInstruction
             {
@@ -181,6 +189,7 @@ namespace Solnet.Serum
         /// </summary>
         /// <param name="openOrdersAccounts">A list of <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
         /// <param name="market">The <see cref="PublicKey"/> of the <see cref="Market"/> we are consuming events on.</param>
+        /// <param name="eventQueue">The <see cref="PublicKey"/> of the <see cref="Market"/>'s event queue.</param>
         /// <param name="coinAccount">The <see cref="PublicKey"/> of the coin account.</param>
         /// <param name="pcAccount">The <see cref="PublicKey"/> of the price coin account.</param>
         /// <param name="limit">The maximum number of events to consume.</param>
@@ -190,10 +199,10 @@ namespace Solnet.Serum
         {
             List<AccountMeta> keys = new();
             openOrdersAccounts.ForEach(pubKey => keys.Add(AccountMeta.Writable(pubKey, false)));
-            keys.Add(AccountMeta.Writable(market, true));
-            keys.Add(AccountMeta.Writable(eventQueue, true));
-            keys.Add(AccountMeta.Writable(coinAccount, true));
-            keys.Add(AccountMeta.Writable(pcAccount, true));
+            keys.Add(AccountMeta.Writable(market, false));
+            keys.Add(AccountMeta.Writable(eventQueue, false));
+            keys.Add(AccountMeta.Writable(coinAccount, false));
+            keys.Add(AccountMeta.Writable(pcAccount, false));
 
             return new TransactionInstruction
             {
@@ -202,7 +211,7 @@ namespace Solnet.Serum
         }
 
         /// <summary>
-        /// Initializes an instruction to cancel an order by <c>clientOrderId</c> in a given market on Serum.
+        /// Initializes an instruction to cancel an order by <c>orderId</c> in a given market on Serum.
         /// </summary>
         /// <param name="market">The <see cref="Market"/> we are trading on.</param>
         /// <param name="openOrdersAccount">The <see cref="PublicKey"/> of the <see cref="OpenOrdersAccount"/> associated with this <see cref="Account"/> and <see cref="Market"/>.</param>
@@ -216,7 +225,7 @@ namespace Solnet.Serum
                 openOrdersAccountOwner, market.EventQueue, side, orderId);
         
         /// <summary>
-        /// Initializes an instruction to cancel orders by <c>clientId</c> in a given market on Serum.
+        /// Initializes an instruction to cancel orders by <c>orderId</c> in a given market on Serum.
         /// </summary>
         /// <param name="programId">The <see cref="PublicKey"/> of the Serum Program associated with this market.</param>
         /// <param name="market">The <see cref="PublicKey"/> of the market.</param>
@@ -282,8 +291,8 @@ namespace Solnet.Serum
                 AccountMeta.Writable(market, false),
                 AccountMeta.Writable(marketBids, false),
                 AccountMeta.Writable(marketAsks, false),
-                AccountMeta.Writable(openOrdersAccount, true),
-                AccountMeta.ReadOnly(openOrdersAccountOwner, false),
+                AccountMeta.Writable(openOrdersAccount, false),
+                AccountMeta.ReadOnly(openOrdersAccountOwner, true),
                 AccountMeta.Writable(eventQueue, false)
             };
 
@@ -425,6 +434,60 @@ namespace Solnet.Serum
                 Data = SerumProgramData.EncodePruneData(limit),
                 Keys = keys
             };
+        }
+
+
+        /// <summary>
+        /// Decodes an instruction created by the System Program.
+        /// </summary>
+        /// <param name="data">The instruction data to decode.</param>
+        /// <param name="keys">The account keys present in the transaction.</param>
+        /// <param name="keyIndices">The indices of the account keys for the instruction as they appear in the transaction.</param>
+        /// <returns>A decoded instruction.</returns>
+        public static DecodedInstruction Decode(ReadOnlySpan<byte> data, IList<PublicKey> keys, byte[] keyIndices)
+        {
+            uint instruction = data.GetU32(SerumProgramLayouts.MethodOffset);
+            SerumProgramInstructions.Values instructionValue =
+                (SerumProgramInstructions.Values) Enum.Parse(typeof(SerumProgramInstructions.Values), instruction.ToString());
+            
+            DecodedInstruction decodedInstruction = new()
+            {
+                PublicKey = ProgramIdKey,
+                InstructionName = SerumProgramInstructions.Names[instructionValue],
+                ProgramName = ProgramName,
+                Values = new Dictionary<string, object>(),
+                InnerInstructions = new List<DecodedInstruction>()
+            };
+
+            switch (instructionValue)
+            {
+                    case SerumProgramInstructions.Values.InitOpenOrders:
+                        SerumProgramData.DecodeInitOpenOrders(decodedInstruction, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.ConsumeEvents:
+                        SerumProgramData.DecodeConsumeEvents(decodedInstruction, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.SettleFunds:
+                        SerumProgramData.DecodeSettleFunds(decodedInstruction, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.NewOrderV3:
+                        SerumProgramData.DecodeNewOrderV3(decodedInstruction, data, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.CancelOrderV2:
+                        SerumProgramData.DecodeCancelOrderV2(decodedInstruction, data, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.CancelOrderByClientIdV2:
+                        SerumProgramData.DecodeCancelOrderByClientIdV2(decodedInstruction, data, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.CloseOpenOrders:
+                        SerumProgramData.DecodeCloseOpenOrders(decodedInstruction, keys, keyIndices);
+                        break;
+                    case SerumProgramInstructions.Values.Prune:
+                        SerumProgramData.DecodePrune(decodedInstruction, keys, keyIndices);
+                        break;
+            }
+
+            return decodedInstruction;
         }
     }
 }
