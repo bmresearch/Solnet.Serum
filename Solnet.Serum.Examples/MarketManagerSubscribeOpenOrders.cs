@@ -8,12 +8,6 @@ namespace Solnet.Serum.Examples
 {
     public class MarketManagerSubscribeOpenOrders : IRunnableExample
     {
-        
-        /// <summary>
-        /// Public key for Open Orders Account.
-        /// </summary>
-        private const string OpenOrdersAccountAddress = "4beBRAZSVcCm7jD7yAmizqqVyi39gVrKNeEPskickzSF";
-
         private readonly PublicKey _marketAddress = new("HXBi8YBwbh4TXF6PjVw81m8Z3Cc4WBofvauj5SBFdgUs");
         private readonly ISerumClient _serumClient;
         private readonly IMarketManager _marketManager;
@@ -23,30 +17,27 @@ namespace Solnet.Serum.Examples
         public MarketManagerSubscribeOpenOrders()
         {
             Console.WriteLine($"Initializing {ToString()}");
-            var rpcClient = Solnet.Rpc.ClientFactory.GetClient("https://node.openserum.ch/");
-            var streamingRpcClient = Solnet.Rpc.ClientFactory.GetStreamingClient("wss://node.openserum.ch/ws/");
-            _serumClient = ClientFactory.GetClient(rpcClient, streamingRpcClient);
-            
+            _serumClient = ClientFactory.GetClient(Cluster.MainNet);            
             _serumClient.ConnectAsync().Wait();
-            Console.WriteLine($"Initializing {ToString()}");
             
             // initialize market manager
-            _marketManager = MarketFactory.GetMarket(_marketAddress, serumClient: _serumClient);
+            _marketManager = MarketFactory.GetMarket(_marketAddress, new ("hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh"), serumClient: _serumClient);
             _marketManager.InitAsync().Wait();
         }
 
         public void Run()
         {
             
-            _marketManager.SubscribeTrades((trades, slot) =>
+            _marketManager.SubscribeOpenOrders((openOrders, slot) =>
             {
-                foreach (var t in trades)
+                foreach (OpenOrder order in openOrders)
                 {
-                    Console.WriteLine($"Trade: {t.Event.OrderId}\tPrice: {t.Price}\tSize: {t.Size}");
+                    Console.WriteLine($"OpenOrder:: IsBid: {order.IsBid} Price: {order.RawPrice}");
                 }
             });
-            
-            
+
+
+            Console.ReadKey();
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Solnet.Serum.Examples
             SolanaKeyStoreService keyStore = new ();
             
             // get the wallet
-            _wallet = keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
+            _wallet = keyStore.RestoreKeystoreFromFile("/path/to/wallet.json");
 
             // serum client
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
@@ -65,8 +65,8 @@ namespace Solnet.Serum.Examples
         public void Run()
         {
             Order order = new OrderBuilder()
-                .SetPrice(3.5f)
-                .SetQuantity(10_000)
+                .SetPrice(0.017f)
+                .SetQuantity(1)
                 .SetSide(Side.Buy)
                 .SetOrderType(OrderType.Limit)
                 .SetSelfTradeBehavior(SelfTradeBehavior.DecrementTake)
@@ -81,7 +81,7 @@ namespace Solnet.Serum.Examples
                 Task.Delay(250);
             }
             
-            /*
+            /**/
             SignatureConfirmation cancelSigConf = _marketManager.CancelOrder(1_000_000UL);
             cancelSigConf.ConfirmationChanged += CancelOrderSignatureConfirmationOnConfirmationChanged;
             
@@ -89,7 +89,7 @@ namespace Solnet.Serum.Examples
             {
                 Task.Delay(250);
             }
-            */
+            
             
             Console.ReadKey();
         }

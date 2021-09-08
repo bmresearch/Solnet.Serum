@@ -76,6 +76,15 @@ namespace Solnet.Serum.Test
             "OfCOn7LyKnNptjseCV\u002Bbw1hkCDQwBAgMEBQYHAAgJCwwzAAoAAAAAAAAArA0AAAAAAACghgEAAAAAAACeKSYIAAAAAAAAAAAA" +
             "AABAQg8AAAAAAP//DQkBAgAICQoHDgsFAAUAAAA=";
 
+        private static readonly string SettleFundsTransaction =
+            "ARgtQuGpzVREjYAIC6lXrFvsSsHgk\u002Bt8ah1psWXoPsrzXfY9t512USKBZ5JtsM3HD2NH9YwQFqmvjyCTsuKO6w4BAAMKCnPnH" +
+            "\u002B3SE2XtCu6E/OTisgZH/TTV7L2hFfAj0mM/h3gxkJiMEg9pt0UY4VGDhoK5gi\u002BlfT9SnYfSCwUM68ArGrDRLePOtF/pN" +
+            "wBZrQrHhveA1F1zpqpkyj0EsJP1LEmzKBWIY6mHqa1Nz\u002BLn9XuT8xqWvv9jEF7NyM\u002BwJOr8s0jxGq22Ar\u002BO5PJ" +
+            "\u002Bq/y5KKpuQZYYRNpKTYpvnGwVw2VBBZJsaUup\u002BJnjXJ8AAf8HKx949paxkKOe2znGSJJFNPXgDTHgtBNp84vnyAvrkV" +
+            "xNRBBpjT60T05B\u002BsVW2BLmSnGpgdiCRuMX9XDIP87eCqZqkDn14UiDO4FzWxHK14PVPQbd9uHXZaGT2cvhRs7reawctIXtX1" +
+            "s3kTqM9YV\u002B/wCphQ8tbgKkevgk0Jq2ncQtcMsoy/okn7fuV7nSVsEnYu/OFy1JqmWOOhq9DwvsmsTrK\u002Bnq7NGWYPKcd" +
+            "M4rtJJ\u002B6AEJCQECAAMEBQYHCAUABQAAAA==";
+
         [TestMethod]
         [ExpectedException(typeof(AggregateException))]
         public void MarketManagerNewOrderExceptionTest()
@@ -135,7 +144,7 @@ namespace Solnet.Serum.Test
             MockGetAccountInfoAsync(rpcMock, "SF3oTvfWzEP3DTwGSvUXRrGTvr75pdZNnBLAH9bzMuX");
             MockGetAccountInfoAsync(rpcMock, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, null,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut = new(SXPUSDCAddress, serumClient: serumMock.Object);
             sut.Init();
@@ -166,7 +175,7 @@ namespace Solnet.Serum.Test
             MockGetTokenAccountsByOwnerAsync(rpcMock, Account, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
             MockGetProgramAccountsAsync(rpcMock, SXPUSDCAddress, Account);
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, null,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut =
                 new(SXPUSDCAddress, Account, UnusedSignatureMethod, serumClient: serumMock.Object);
@@ -224,7 +233,7 @@ namespace Solnet.Serum.Test
             MockGetTokenAccountsByOwnerAsync(rpcMock, Account, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
             MockGetProgramAccountsAsync(rpcMock, SXPUSDCAddress, Account);
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, null,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut =
                 new(SXPUSDCAddress, Account, UnusedSignatureMethod, serumClient: serumMock.Object);
@@ -258,7 +267,7 @@ namespace Solnet.Serum.Test
             MockGetTokenAccountsByOwnerAsync(rpcMock, Account, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
             MockGetProgramAccountsAsync(rpcMock, SXPUSDCAddress, Account);
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, null,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut =
                 new(SXPUSDCAddress, Account, UnusedSignatureMethod, serumClient: serumMock.Object);
@@ -305,7 +314,7 @@ namespace Solnet.Serum.Test
                 "https://api.mainnet-beta.solana.com");
 
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, streamingRpcMock.Object,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut = new(SXPUSDCAddress, Account, NewOrderMockedSignature,
                 serumClient: serumMock.Object);
@@ -375,7 +384,7 @@ namespace Solnet.Serum.Test
                 "https://api.mainnet-beta.solana.com");
 
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, streamingRpcMock.Object,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut = new(SXPUSDCAddress, Account, NewOrderMockedSignature,
                 serumClient: serumMock.Object);
@@ -430,7 +439,7 @@ namespace Solnet.Serum.Test
             MockSendTransactionAsyncWithError(rpcMock, NewOrderInsufficientBalanceTransaction);
 
             Mock<ISerumClient> serumMock = MockSerumClient(rpcMock.Object, null,
-                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData());
+                "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ", GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut = new(SXPUSDCAddress, Account, NewOrderInsufficientBalanceMockedSignature,
                 serumClient: serumMock.Object);
@@ -486,7 +495,7 @@ namespace Solnet.Serum.Test
 
             Mock<ISerumClient> serumMock = MockSerumClient(
                 rpcMock.Object, streamingRpcMock.Object, "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ",
-                GetMarketAccountData());
+                GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager marketManager = new(SXPUSDCAddress, Account, CancelOrderByClientIdMockedSignature,
                 serumClient: serumMock.Object);
@@ -548,7 +557,7 @@ namespace Solnet.Serum.Test
 
             Mock<ISerumClient> serumMock = MockSerumClient(
                 rpcMock.Object, streamingRpcMock.Object, "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ",
-                GetMarketAccountData());
+                GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
 
             MarketManager sut = new(SXPUSDCAddress, Account, CancelAllOrdersMockedSignature,
                 serumClient: serumMock.Object);
@@ -577,12 +586,64 @@ namespace Solnet.Serum.Test
             Assert.IsNull(sigConfs[0].Error);
         }
 
+        [TestMethod]
+        public void MarketManagerSettleFundsTest() 
+        {
+            // Queue mock responses
+            EnqueueResponseFromFile("Resources/MarketManager/MarketGetAccountInfo.json");
+            EnqueueResponseFromFile("Resources/MarketManager/BaseTokenGetAccountInfo.json");
+            EnqueueResponseFromFile("Resources/MarketManager/QuoteTokenGetAccountInfo.json");
+            EnqueueResponseFromFile("Resources/MarketManager/BaseTokenGetTokenAccounts.json");
+            EnqueueResponseFromFile("Resources/MarketManager/QuoteTokenGetTokenAccounts.json");
+            EnqueueResponseFromFile("Resources/MarketManager/OpenOrdersGetProgramAccounts.json");
+            EnqueueResponseFromFile("Resources/MarketManager/SettleFundsTestGetBlockHash.json");
+            EnqueueResponseFromFile("Resources/MarketManager/SettleFundsTestValidResponse.json");
+
+            // Mock the methods in the order they should be called
+            Mock<IRpcClient> rpcMock = MockRpcClient(ClusterUrl);
+            MockGetAccountInfoAsync(rpcMock, "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ");
+            MockGetAccountInfoAsync(rpcMock, "SF3oTvfWzEP3DTwGSvUXRrGTvr75pdZNnBLAH9bzMuX");
+            MockGetAccountInfoAsync(rpcMock, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+            MockGetTokenAccountsByOwnerAsync(rpcMock, Account, "SF3oTvfWzEP3DTwGSvUXRrGTvr75pdZNnBLAH9bzMuX");
+            MockGetTokenAccountsByOwnerAsync(rpcMock, Account, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+            MockGetProgramAccountsAsync(rpcMock, SXPUSDCAddress, Account);
+            MockGetRecentBlockhashAsync(rpcMock);
+            MockSendTransactionAsync(rpcMock, SettleFundsTransaction);
+
+            string subscribeSignatureNotification =
+                File.ReadAllText(
+                    "Resources/MarketManager/SettleFundsTestSubscribeSignatureNotification.json");
+            Mock<IStreamingRpcClient> streamingRpcMock = StreamingClientSignatureSubscribeSetup(
+                "V34cxwkTimbzJmDih5Z4eWFjtJSfVyPiwvUfqDh89e6fNTxaatbGFmqac2QYbQjXpABffvqvHRXdfjHfgr5Yhuo",
+                "https://api.mainnet-beta.solana.com");
+
+            Mock<ISerumClient> serumMock = MockSerumClient(
+                rpcMock.Object, streamingRpcMock.Object, "4LUro5jaPaTurXK737QAxgJywdhABnFAMQkXX4ZyqqaZ",
+                GetMarketAccountData("Resources/MarketManager/SXPUSDCMarketAccountData.txt"));
+
+            MarketManager sut = new(SXPUSDCAddress, Account, SettleFundsMockedSignature,
+                serumClient: serumMock.Object);
+            sut.Init();
+
+            SignatureConfirmation sigConf = sut.SettleFunds();
+
+            Assert.IsNull(sigConf.InstructionError);
+            Assert.IsNull(sigConf.TransactionError);
+            Assert.IsNull(sigConf.Error);
+        }
+
         private void OnConfirmationChangedAssertNoErrors(object? sender, SignatureConfirmationStatus e)
         {
             Assert.IsNull(e.TransactionError);
             Assert.IsNull(e.Error);
             Assert.IsNull(e.InstructionError);
             SignatureConfirmed = true;
+        }
+
+        private byte[] SettleFundsMockedSignature(ReadOnlySpan<byte> messageData)
+        {
+            return Convert.FromBase64String(
+                "GC1C4anNVESNgAgLqVesW+xKweCT63xqHWmxZeg+yvNd9j23nXZRIoFnkm2wzccPY0f1jBAWqa+PIJOy4o7rDg==");
         }
 
         private byte[] CancelAllOrdersMockedSignature(ReadOnlySpan<byte> messageData)

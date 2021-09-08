@@ -69,7 +69,7 @@ namespace Solnet.Serum.Examples
                     for (int i = 24; i >= 0; i--)
                     {
                         Console.WriteLine(
-                            $"Ask: Owner: {bids[i].Owner.Key} Cum:\t{cumulativeAsk:N2}\t(~{cumulativeAskUsd:C2})\tPrice:\t{asks[i].Price:C5}\tSize:\t{asks[i].Quantity:N2}\t");
+                            $"Ask: Owner: {bids[i].Owner.Key} Cum:\t{cumulativeAsk:N2}\t(~{cumulativeAskUsd:C2}) Price:\t{asks[i].Price:C5} Size:\t{asks[i].Quantity:N2}");
                         cumulativeAsk -= asks[i].Quantity;
                         cumulativeAskUsd -= asks[i].Quantity*asks[i].Price;
                     }
@@ -79,7 +79,7 @@ namespace Solnet.Serum.Examples
                         cumulativeBid += bids[i].Quantity;
                         cumulativeBidUsd += bids[i].Quantity*bids[i].Price;
                         Console.WriteLine(
-                            $"Bid: Owner: {bids[i].Owner.Key} Cum:\t{cumulativeBid:N2}\t(~{cumulativeBidUsd:C2})\tPrice:\t{bids[i].Price:C5}\tSize:\t{bids[i].Quantity:N2}");
+                            $"Bid: Owner: {bids[i].Owner.Key} Cum:\t{cumulativeBid:N2} (~{cumulativeBidUsd:C2}) Price:\t{bids[i].Price:C5} Size:\t{bids[i].Quantity:N2}");
                     }
                     Console.WriteLine($"---------------------------------------------------------------------------------------------------");
                     
@@ -99,7 +99,7 @@ namespace Solnet.Serum.Examples
                 foreach (TradeEvent trade in _trades)
                 {
                     Console.WriteLine(
-                        $"TradeEvent:: OpenOrdersAccount:\t{trade.Event.PublicKey.Key}\tSide:\t{trade.Side.ToString()}\tPrice:\t{trade.Price:C5}\tSize:\t{trade.Size:N2}\tCost:\t{trade.Price*trade.Size:C2}");
+                        $"TradeEvent:: OpenOrdersAccount: {trade.Event.PublicKey.Key} Side:\t{trade.Side.ToString()} Price:\t{trade.Price:C5} Size:\t{trade.Size:N2} Cost:\t{trade.Price*trade.Size:C2}");
                 }
                 if (_trades.Count > 25) _trades.Clear();
                 

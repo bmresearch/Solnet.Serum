@@ -302,13 +302,9 @@ namespace Solnet.Serum.Test
         /// </summary>
         /// <param name="serumClientMock"></param>
         /// <param name="eventQueueAddress"></param>
-        protected void MockSerumStreamingClientSubscribeEventQueueAsync(Mock<ISerumClient> serumClientMock, string eventQueueAddress)
+        protected Mock<Subscription> MockSerumStreamingClientSubscribeEventQueueAsync(Mock<ISerumClient> serumClientMock, string eventQueueAddress)
         {
             Mock<Subscription> subscriptionMock = new (MockBehavior.Strict);
-            subscriptionMock
-                .Setup(x => x.Address)
-                .Returns(() => new PublicKey(eventQueueAddress))
-                .Verifiable();
             
             serumClientMock
                 .Setup(x => x.SubscribeEventQueueAsync(
@@ -322,6 +318,7 @@ namespace Solnet.Serum.Test
                     })
                 .ReturnsAsync(() => subscriptionMock.Object)
                 .Verifiable();
+            return subscriptionMock;
         }
         
         /// <summary>
@@ -378,14 +375,9 @@ namespace Solnet.Serum.Test
         /// </summary>
         /// <param name="serumClientMock"></param>
         /// <param name="openOrdersAddress"></param>
-        protected void MockSerumStreamingClientSubscribeOpenOrdersAsync(Mock<ISerumClient> serumClientMock, string openOrdersAddress)
+        protected Mock<Subscription> MockSerumStreamingClientSubscribeOpenOrdersAsync(Mock<ISerumClient> serumClientMock, string openOrdersAddress)
         {
             Mock<Subscription> subscriptionMock = new (MockBehavior.Strict);
-            subscriptionMock
-                .Setup(x => x.Address)
-                .Returns(() => new PublicKey(openOrdersAddress))
-                .Verifiable();
-            
             serumClientMock
                 .Setup(x => x.SubscribeOpenOrdersAccountAsync(
                     It.IsAny<Action<Subscription, OpenOrdersAccount, ulong>>(),
@@ -398,6 +390,7 @@ namespace Solnet.Serum.Test
                     })
                 .ReturnsAsync(() => subscriptionMock.Object)
                 .Verifiable();
+            return subscriptionMock;
         }
 
         protected void EnqueueResponseFromFile(string pathToFile)
@@ -406,9 +399,9 @@ namespace Solnet.Serum.Test
             ResponseQueue.Enqueue(data);
         }
 
-        protected string GetMarketAccountData()
+        protected string GetMarketAccountData(string path)
         {
-            return File.ReadAllText("Resources/MarketManager/SXPUSDCMarketAccountData.txt");
+            return File.ReadAllText(path);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Solnet.Serum.Examples
             SolanaKeyStoreService keyStore = new ();
             
             // get the wallet
-            _wallet = keyStore.RestoreKeystoreFromFile("/home/murlux/hoakwpFB8UoLnPpLC56gsjpY7XbVwaCuRQRMQzN5TVh.json");
+            _wallet = keyStore.RestoreKeystoreFromFile("/path/to/wallet.json");
 
             // serum client
             _serumClient = ClientFactory.GetClient(Cluster.MainNet);
