@@ -14,7 +14,7 @@ namespace Solnet.Serum
     /// <summary>
     /// Implements the system program data encodings.
     /// </summary>
-    internal static class SerumProgramData
+    public static class SerumProgramData
     {
         /// <summary>
         /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.Values.ConsumeEvents"/> method.
@@ -61,7 +61,7 @@ namespace Solnet.Serum
         /// <param name="maxNativePcQtyIncludingFees"></param>
         /// <param name="limit">The maximum number of iterations of the Serum order matching loop.</param>
         /// <returns>The encoded data.</returns>
-        internal static byte[] EncodeNewOrderV3Data(Side side, ulong limitPrice, ulong maxCoinQty,
+        public static byte[] EncodeNewOrderV3Data(Side side, ulong limitPrice, ulong maxCoinQty,
             OrderType orderType, ulong clientOrderId, SelfTradeBehavior selfTradeBehaviorType,
             ulong maxNativePcQtyIncludingFees, ushort limit)
         {
@@ -85,7 +85,7 @@ namespace Solnet.Serum
         /// <param name="side">The order's side.</param>
         /// <param name="orderId">The client's order id.</param>
         /// <returns>The encoded data.</returns>
-        internal static byte[] EncodeCancelOrderV2Data(Side side, BigInteger orderId)
+        public static byte[] EncodeCancelOrderV2Data(Side side, BigInteger orderId)
         {
             byte[] data = new byte[25];
             data.WriteU32((uint)SerumProgramInstructions.Values.CancelOrderV2, SerumProgramLayouts.MethodOffset);
