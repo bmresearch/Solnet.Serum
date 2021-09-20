@@ -23,7 +23,7 @@ namespace Solnet.Serum
         /// <summary>
         /// The offset at which the token mint decimals value begins.
         /// </summary>
-        private const int TokenMintDecimalsOffset = 44;
+        public const int TokenMintDecimalsOffset = 44;
         
         /// <summary>
         /// Gets the token's decimals from the token mint data.

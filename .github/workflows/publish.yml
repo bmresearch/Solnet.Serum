@@ -17,11 +17,6 @@ jobs:
           script-path: build.cake
           target: Pack
           cake-bootstrap: true
-      - name: Publish coverage report to coveralls.io
-        uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.github_token }}
-          path-to-lcov: code_coverage/results.info
       - name: Publish on version change
         id: publish_nuget
         uses: bmresearch/publish-nuget@master
