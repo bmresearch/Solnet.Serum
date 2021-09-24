@@ -6,11 +6,6 @@ namespace Solnet.Serum.Models
     public class OpenOrder : OrderBase
     {
         /// <summary>
-        /// The index of the order within the <see cref="OpenOrdersAccount"/> data.
-        /// </summary>
-        public int OrderIndex;
-
-        /// <summary>
         /// Whether this slot within the <see cref="OpenOrdersAccount"/> Orders is free or not.
         /// </summary>
         public bool IsFreeSlot;

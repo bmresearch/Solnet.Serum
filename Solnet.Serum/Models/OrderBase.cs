@@ -11,6 +11,11 @@ namespace Solnet.Serum.Models
     public abstract class OrderBase
     {
         /// <summary>
+        /// The index of the order within the <see cref="OpenOrdersAccount"/> data.
+        /// </summary>
+        public int OrderIndex;
+        
+        /// <summary>
         /// The order id.
         /// </summary>
         public BigInteger OrderId;

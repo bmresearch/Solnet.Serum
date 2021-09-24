@@ -2,6 +2,7 @@ using Solnet.Serum.Models.Flags;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Solnet.Serum.Models
 {
@@ -57,7 +58,8 @@ namespace Solnet.Serum.Models
                     RawQuantity = slabLeafNode.Quantity, 
                     ClientOrderId = slabLeafNode.ClientOrderId, 
                     Owner = slabLeafNode.Owner,
-                    OrderIndex = slabLeafNode.OwnerSlot
+                    OrderIndex = slabLeafNode.OwnerSlot,
+                    OrderId = new BigInteger(slabLeafNode.Key)
                 }).ToList();
         }
         
