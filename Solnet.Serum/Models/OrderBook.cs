@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Solnet.Serum.Models
 {
@@ -62,6 +63,8 @@ namespace Solnet.Serum.Models
                                 RawQuantity = slabLeafNode.Quantity,
                                 ClientOrderId = slabLeafNode.ClientOrderId,
                                 Owner = slabLeafNode.Owner,
+                                OrderIndex = slabLeafNode.OwnerSlot,
+                                OrderId = new BigInteger(slabLeafNode.Key)
                             }).ToList();
             orders.Sort(Comparer<Order>.Create((order, order1) => order1.RawPrice.CompareTo(order.RawPrice)));
             return orders;
@@ -90,6 +93,8 @@ namespace Solnet.Serum.Models
                         RawQuantity = slabLeafNode.Quantity,
                         ClientOrderId = slabLeafNode.ClientOrderId,
                         Owner = slabLeafNode.Owner,
+                        OrderIndex = slabLeafNode.OwnerSlot,
+                        OrderId = new BigInteger(slabLeafNode.Key)
                     }).ToList();
             orders.Sort(Comparer<Order>.Create((order, order1) => order.RawPrice.CompareTo(order1.RawPrice)));
             return orders;

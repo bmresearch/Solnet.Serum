@@ -1,6 +1,7 @@
 using Solnet.Programs.Utilities;
 using Solnet.Wallet;
 using System;
+using System.Numerics;
 
 namespace Solnet.Serum.Models
 {
