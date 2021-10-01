@@ -200,8 +200,11 @@ namespace Solnet.Serum
             
             foreach (SubscriptionWrapper<OpenOrdersAccount> sub in _openOrdersSubscriptions)
             {
-                if (sub.Address.Key == openOrdersAccountAddress)
-                    subscriptionWrapper = sub;
+                if (sub.Address.Key != openOrdersAccountAddress) continue;
+                
+                subscriptionWrapper = sub;
+                _openOrdersSubscriptions.Remove(sub);
+                break;
             }
 
             return subscriptionWrapper == null ? null : _streamingRpcClient.UnsubscribeAsync(subscriptionWrapper.SubscriptionState);
@@ -240,8 +243,11 @@ namespace Solnet.Serum
             
             foreach (SubscriptionWrapper<OrderBookSide> sub in _orderBookSubscriptions)
             {
-                if (sub.Address.Key == orderBookAccountAddress)
-                    subscriptionWrapper = sub;
+                if (sub.Address.Key != orderBookAccountAddress) continue;
+                
+                subscriptionWrapper = sub;
+                _orderBookSubscriptions.Remove(sub);
+                break;
             }
 
             return subscriptionWrapper == null ? null : _streamingRpcClient.UnsubscribeAsync(subscriptionWrapper.SubscriptionState);
@@ -303,8 +309,11 @@ namespace Solnet.Serum
             
             foreach (SubscriptionWrapper<EventQueue> sub in _eventQueueSubscriptions)
             {
-                if (sub.Address.Key == eventQueueAccountAddress)
-                    subscriptionWrapper = sub;
+                if (sub.Address.Key != eventQueueAccountAddress) continue;
+                
+                subscriptionWrapper = sub;
+                _eventQueueSubscriptions.Remove(sub);
+                break;
             }
 
             return subscriptionWrapper == null ? null : _streamingRpcClient.UnsubscribeAsync(subscriptionWrapper.SubscriptionState);
