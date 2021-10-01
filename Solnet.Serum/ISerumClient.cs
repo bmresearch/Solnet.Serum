@@ -125,19 +125,20 @@ namespace Solnet.Serum
         OpenOrdersAccount GetOpenOrdersAccount(string address, Commitment commitment = Commitment.Finalized);
 
         /// <summary>
-        /// 
+        /// Gets the account data associated with the given order book side. This will either be a Bid or Ask account data.
+        /// This is an asynchronous operation.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="commitment"></param>
-        /// <returns></returns>
+        /// <param name="address">The public key of the bids or asks account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>A task which may return the order book side account data.</returns>
         Task<OrderBookSide> GetOrderBookSideAsync(string address, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
-        /// 
+        /// Gets the account data associated with the given order book side. This will either be a Bid or Ask account data.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="commitment"></param>
-        /// <returns></returns>
+        /// <param name="address">The public key of the bids or asks account.</param>
+        /// <param name="commitment">The commitment parameter for the Rpc Client.</param>
+        /// <returns>A task which may return the order book side data.</returns>
         OrderBookSide GetOrderBookSide(string address, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
@@ -171,15 +172,15 @@ namespace Solnet.Serum
         Subscription SubscribeOpenOrdersAccount(Action<Subscription, OpenOrdersAccount, ulong> action, string openOrdersAccountAddress, Commitment commitment = Commitment.Finalized);
 
         /// <summary>
-        /// Unsubscribe to a live feed of a Serum Market's Open Orders Account. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
+        /// Unsubscribe to a live feed of a Serum Market's Open Orders Account. This is an asynchronous operation.
         /// </summary>
-        /// <param name="openOrdersAccountAddress">The public key of the Order Book account.</param>
+        /// <param name="openOrdersAccountAddress">The public key of the Open Orders Account.</param>
         Task UnsubscribeOpenOrdersAccountAsync(string openOrdersAccountAddress);
 
         /// <summary>
-        /// Unsubscribe to a live feed of a Serum Market's Open Orders Account. This will either be a Bid or Ask account data feed.
+        /// Unsubscribe to a live feed of a Serum Market's Open Orders Account.
         /// </summary>
-        /// <param name="openOrdersAccountAddress">The public key of the Order Book account.</param>
+        /// <param name="openOrdersAccountAddress">The public key of the Open Orders Account.</param>
         void UnsubscribeOpenOrdersAccount(string openOrdersAccountAddress);
 
         /// <summary>
@@ -199,15 +200,15 @@ namespace Solnet.Serum
         Subscription SubscribeEventQueue(Action<Subscription, EventQueue, ulong> action, string eventQueueAccountAddress, Commitment commitment = Commitment.Finalized);
         
         /// <summary>
-        /// Unsubscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed. This is an asynchronous operation.
+        /// Unsubscribe to a live feed of a Serum Market's Event Queue. This is an asynchronous operation.
         /// </summary>
-        /// <param name="eventQueueAccountAddress">The public key of the Order Book account.</param>
+        /// <param name="eventQueueAccountAddress">The public key of the Event Queue account.</param>
         Task UnsubscribeEventQueueAsync(string eventQueueAccountAddress);
 
         /// <summary>
-        /// Unsubscribe to a live feed of a Serum Market's Order Book. This will either be a Bid or Ask account data feed.
+        /// Unsubscribe to a live feed of a Serum Market's Event Queue.
         /// </summary>
-        /// <param name="eventQueueAccountAddress">The public key of the Order Book account.</param>
+        /// <param name="eventQueueAccountAddress">The public key of the Event Queue account.</param>
         void UnsubscribeEventQueue(string eventQueueAccountAddress);
 
         /// <summary>
