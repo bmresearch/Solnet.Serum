@@ -952,13 +952,16 @@ namespace Solnet.Serum
 
             if (req.ServerErrorCode != 0)
             {
-                bool exists = req.ErrorData.TryGetValue("data", out object value);
-                if (!exists) return sigConf;
-                string elem = ((JsonElement)value).ToString();
-                if (elem == null) return sigConf;
-                SimulationLogs simulationLogs =
-                    JsonSerializer.Deserialize<SimulationLogs>(elem, _jsonSerializerOptions);
-                sigConf.ChangeState(simulationLogs);
+                if (req.ErrorData != null)
+                {
+                    bool exists = req.ErrorData.TryGetValue("data", out object value);
+                    if (!exists) return sigConf;
+                    string elem = ((JsonElement)value).ToString();
+                    if (elem == null) return sigConf;
+                    SimulationLogs simulationLogs =
+                        JsonSerializer.Deserialize<SimulationLogs>(elem, _jsonSerializerOptions);
+                    sigConf.ChangeState(simulationLogs);
+                }
 
                 return sigConf;
             }
