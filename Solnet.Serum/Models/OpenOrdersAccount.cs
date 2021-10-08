@@ -83,6 +83,11 @@ namespace Solnet.Serum.Models
             /// The offset at which the value of the Client Ids begin.
             /// </summary>
             internal const int ClientIdsOffset = 2189;
+
+            /// <summary>
+            /// The offset at which the referrer rebates accrued value begins.
+            /// </summary>
+            internal const int ReferrerRebatesAccruedOffset = 3213;
         }
 
         #endregion
@@ -136,19 +141,25 @@ namespace Solnet.Serum.Models
         /// The orders of this open orders account.
         /// </summary>
         public IList<OpenOrder> Orders;
+
+        /// <summary>
+        /// The referrer rebates accrued.
+        /// </summary>
+        public ulong ReferrerRebatesAccrued;
         
         /// <summary>
         /// Deserialize a span of bytes into a <see cref="OpenOrdersAccount"/> instance.
         /// </summary>
         /// <param name="data">The data to deserialize into the structure.</param>
         /// <returns>The Open Orders Account structure.</returns>
-        public static OpenOrdersAccount Deserialize(ReadOnlySpan<byte> data)
+        public static OpenOrdersAccount Deserialize(byte[] data)
         {
+            ReadOnlySpan<byte> span = data.AsSpan();
             List<OpenOrder> orders = new();
-            ReadOnlySpan<byte> ordersData = data.Slice(Layout.OrdersOffset, Layout.OrdersSpanLength);
-            ReadOnlySpan<byte> clientIds = data.Slice(Layout.ClientIdsOffset, Layout.ClientIdsSpanLength);
-            ReadOnlySpan<byte> freeSlotBits = data.Slice(Layout.FreeSlotBidsOffset, 16);
-            ReadOnlySpan<byte> isBidBits = data.Slice(Layout.BidBitsOffset, 16);
+            ReadOnlySpan<byte> ordersData = span.Slice(Layout.OrdersOffset, Layout.OrdersSpanLength);
+            ReadOnlySpan<byte> clientIds = span.Slice(Layout.ClientIdsOffset, Layout.ClientIdsSpanLength);
+            ReadOnlySpan<byte> freeSlotBits = span.Slice(Layout.FreeSlotBidsOffset, 16);
+            ReadOnlySpan<byte> isBidBits = span.Slice(Layout.BidBitsOffset, 16);
 
             for (int i = 0; i < 128; i++)
             {
@@ -175,16 +186,17 @@ namespace Solnet.Serum.Models
 
             return new OpenOrdersAccount
             {
-                Flags = AccountFlags.Deserialize(data.Slice(5, 8)),
-                Market = data.GetPubKey(Layout.MarketOffset),
-                Owner = data.GetPubKey(Layout.OwnerOffset),
-                BaseTokenFree = data.GetU64(Layout.BaseTokenFreeOffset),
-                BaseTokenTotal = data.GetU64(Layout.BaseTokenTotalOffset),
-                QuoteTokenFree = data.GetU64(Layout.QuoteTokenFreeOffset),
-                QuoteTokenTotal = data.GetU64(Layout.QuoteTokenTotalOffset),
+                Flags = AccountFlags.Deserialize(span.Slice(5, 8)),
+                Market = span.GetPubKey(Layout.MarketOffset),
+                Owner = span.GetPubKey(Layout.OwnerOffset),
+                BaseTokenFree = span.GetU64(Layout.BaseTokenFreeOffset),
+                BaseTokenTotal = span.GetU64(Layout.BaseTokenTotalOffset),
+                QuoteTokenFree = span.GetU64(Layout.QuoteTokenFreeOffset),
+                QuoteTokenTotal = span.GetU64(Layout.QuoteTokenTotalOffset),
                 BidBits = isBidBits.ToArray(),
                 FreeSlotBits = freeSlotBits.ToArray(),
-                Orders = orders
+                Orders = orders,
+                ReferrerRebatesAccrued = span.GetU64(Layout.ReferrerRebatesAccruedOffset)
             };
         }
     }
