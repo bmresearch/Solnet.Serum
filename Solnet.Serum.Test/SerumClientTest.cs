@@ -331,6 +331,7 @@ namespace Solnet.Serum.Test
             Assert.AreEqual("CuieVDEDtLo7FypA9SbLM9saXFdb1dsshEkyErMqkRQq", result.Owner.Key);
             Assert.AreEqual("9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT", result.Market.Key);
             Assert.AreEqual(30, result.Orders.Count);
+            Assert.AreEqual(0UL, result.ReferrerRebatesAccrued);
         }
 
         [TestMethod]
