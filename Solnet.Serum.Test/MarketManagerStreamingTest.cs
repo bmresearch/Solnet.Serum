@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Solnet.Programs.Models;
 using Solnet.Rpc;
 using Solnet.Serum.Models;
 using Solnet.Wallet;

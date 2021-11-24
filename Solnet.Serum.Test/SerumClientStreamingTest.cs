@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Solnet.Programs.Models;
 using Solnet.Rpc;
 using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Messages;
@@ -7,13 +8,11 @@ using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Solnet.Serum.Test
 {

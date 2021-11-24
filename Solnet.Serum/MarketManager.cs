@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Solnet.Programs;
+using Solnet.Programs.Models;
 using Solnet.Rpc;
 using Solnet.Rpc.Builders;
 using Solnet.Rpc.Core.Http;
@@ -7,7 +8,6 @@ using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
-using Solnet.Rpc.Utilities;
 using Solnet.Serum.Models;
 using Solnet.Wallet;
 using System;
@@ -16,7 +16,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Solnet.Serum
@@ -952,16 +951,14 @@ namespace Solnet.Serum
 
             if (req.ServerErrorCode != 0)
             {
-                if (req.ErrorData != null)
-                {
-                    bool exists = req.ErrorData.TryGetValue("data", out object value);
-                    if (!exists) return sigConf;
-                    string elem = ((JsonElement)value).ToString();
-                    if (elem == null) return sigConf;
-                    SimulationLogs simulationLogs =
-                        JsonSerializer.Deserialize<SimulationLogs>(elem, _jsonSerializerOptions);
-                    sigConf.ChangeState(simulationLogs);
-                }
+                object value = null;
+                var exists = req.ErrorData?.TryGetValue("data", out value) ?? false;
+                if (!exists) return sigConf;
+                var elem = ((JsonElement)value).ToString();
+                if (elem == null) return sigConf;
+                var simulationLogs =
+                    JsonSerializer.Deserialize<SimulationLogs>(elem, _jsonSerializerOptions);
+                sigConf.ChangeState(simulationLogs);
 
                 return sigConf;
             }

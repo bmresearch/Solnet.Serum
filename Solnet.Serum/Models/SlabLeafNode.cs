@@ -89,8 +89,8 @@ namespace Solnet.Serum.Models
         /// <returns>The SlabNode structure.</returns>
         public static new SlabLeafNode Deserialize(ReadOnlySpan<byte> data)
         {
-            Span<byte> key = data.GetSpan(SlabNode.Layout.KeyOffset, Layout.KeyLength);
-            ulong price = ((ReadOnlySpan<byte>)key).GetU64(Layout.PriceOffset);
+            ReadOnlySpan<byte> key = data.GetSpan(SlabNode.Layout.KeyOffset, Layout.KeyLength);
+            ulong price = key.GetU64(Layout.PriceOffset);
 
             return new SlabLeafNode
             {
