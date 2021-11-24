@@ -1,3 +1,4 @@
+using Solnet.Programs.Models;
 using Solnet.Rpc;
 using Solnet.Serum.Models;
 using System;

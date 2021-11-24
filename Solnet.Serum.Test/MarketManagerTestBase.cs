@@ -1,4 +1,5 @@
 using Moq;
+using Solnet.Programs.Models;
 using Solnet.Rpc;
 using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Core.Sockets;
@@ -6,7 +7,6 @@ using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
 using Solnet.Serum.Models;
-using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +64,8 @@ namespace Solnet.Serum.Test
             rpcMock
                 .Setup(s => s.GetAccountInfoAsync(
                     It.Is<string>(s1 => s1 == address),
-                    It.Is<Commitment>(c => c == commitment)))
+                    It.Is<Commitment>(c => c == commitment),
+                    It.IsAny<BinaryEncoding>()))
                 .Callback(() => { })
                 .ReturnsAsync(new RequestResult<ResponseValue<AccountInfo>>(
                     new HttpResponseMessage(HttpStatusCode.OK),

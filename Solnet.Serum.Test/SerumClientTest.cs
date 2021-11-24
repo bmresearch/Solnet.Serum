@@ -112,7 +112,8 @@ namespace Solnet.Serum.Test
             rpcMock
                 .Setup(s => s.GetAccountInfoAsync(
                         It.Is<string>(s1 => s1 == address),
-                        It.Is<Commitment>(c => c == commitment)))
+                        It.Is<Commitment>(c => c == commitment),
+                        It.IsAny<BinaryEncoding>()))
                 .ReturnsAsync(new RequestResult<ResponseValue<AccountInfo>>(
                         new HttpResponseMessage(HttpStatusCode.OK),
                         JsonSerializer.Deserialize<ResponseValue<AccountInfo>>(responseContent, JsonSerializerOptions)) 
