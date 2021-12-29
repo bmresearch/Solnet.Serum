@@ -64,7 +64,7 @@ namespace Solnet.Serum
             PublicKey orderPayer, PublicKey openOrdersAccountOwner, Order order, PublicKey serumFeeDiscount = null)
             => NewOrderV3(market.OwnAddress, openOrdersAccount, market.RequestQueue, market.EventQueue, market.Bids,
                 market.Asks, orderPayer, openOrdersAccountOwner, market.BaseVault, market.QuoteVault,
-                TokenProgram.ProgramIdKey, SystemProgram.SysVarRentKey, ProgramIdKey, order.Side, order.RawPrice,
+                TokenProgram.ProgramIdKey, SysVars.RentKey, ProgramIdKey, order.Side, order.RawPrice,
                 order.RawQuantity, order.Type, order.ClientOrderId, order.SelfTradeBehavior,
                 ushort.MaxValue, order.MaxQuoteQuantity, serumFeeDiscount);
 
@@ -374,7 +374,7 @@ namespace Solnet.Serum
                 AccountMeta.Writable(openOrdersAccount, false),
                 AccountMeta.ReadOnly(openOrdersAccountOwner, true),
                 AccountMeta.ReadOnly(market, false),
-                AccountMeta.ReadOnly(SystemProgram.SysVarRentKey, false)
+                AccountMeta.ReadOnly(SysVars.RentKey, false)
             };
             
             if (marketAuthority != null)
