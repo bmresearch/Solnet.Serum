@@ -106,7 +106,7 @@ namespace Solnet.Serum
             data.WriteU64(clientOrderId, SerumProgramLayouts.CancelOrderByClientIdV2ClientIdOffset);
             return data;
         }
-        
+
         /// <summary>
         /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.Values.CloseOpenOrders"/> method.
         /// </summary>
@@ -117,7 +117,7 @@ namespace Solnet.Serum
             data.WriteU32((uint)SerumProgramInstructions.Values.CloseOpenOrders, SerumProgramLayouts.MethodOffset);
             return data;
         }
-        
+
         /// <summary>
         /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.Values.InitOpenOrders"/> method.
         /// </summary>
@@ -128,7 +128,7 @@ namespace Solnet.Serum
             data.WriteU32((uint)SerumProgramInstructions.Values.InitOpenOrders, SerumProgramLayouts.MethodOffset);
             return data;
         }
-        
+
         /// <summary>
         /// Encode the <see cref="TransactionInstruction"/> data for the <see cref="SerumProgramInstructions.Values.Prune"/> method.
         /// </summary>
@@ -141,7 +141,7 @@ namespace Solnet.Serum
             data.WriteU16(limit, SerumProgramLayouts.PruneLimitOffset);
             return data;
         }
-        
+
         /// <summary>
         /// Decodes the instruction instruction data  for the <see cref="SerumProgramInstructions.Values.Prune"/> method
         /// </summary>
@@ -174,7 +174,7 @@ namespace Solnet.Serum
             if (keyIndices.Length == 5)
                 decodedInstruction.Values.Add("Market Authority", keys[keyIndices[4]]);
         }
-        
+
         /// <summary>
         /// Decodes the instruction instruction data  for the <see cref="SerumProgramInstructions.Values.CloseOpenOrders"/> method
         /// </summary>
@@ -188,7 +188,7 @@ namespace Solnet.Serum
             decodedInstruction.Values.Add("Destination", keys[keyIndices[2]]);
             decodedInstruction.Values.Add("Market", keys[keyIndices[3]]);
         }
-        
+
         /// <summary>
         /// Decodes the instruction instruction data  for the <see cref="SerumProgramInstructions.Values.SettleFunds"/> method
         /// </summary>
@@ -207,7 +207,7 @@ namespace Solnet.Serum
             decodedInstruction.Values.Add("Vault Signer", keys[keyIndices[7]]);
             decodedInstruction.Values.Add("Token Program Id", keys[keyIndices[8]]);
         }
-        
+
         /// <summary>
         /// Decodes the instruction instruction data  for the <see cref="SerumProgramInstructions.Values.ConsumeEvents"/> method
         /// </summary>
@@ -225,7 +225,7 @@ namespace Solnet.Serum
                 decodedInstruction.Values.Add($"Open Orders Account {i + 1}", keys[keyIndices[i]]);
             }
         }
-        
+
         /// <summary>
         /// Decodes the instruction instruction data  for the <see cref="SerumProgramInstructions.Values.CancelOrderByClientIdV2"/> method
         /// </summary>
@@ -242,10 +242,10 @@ namespace Solnet.Serum
             decodedInstruction.Values.Add("Open Orders Account", keys[keyIndices[3]]);
             decodedInstruction.Values.Add("Owner", keys[keyIndices[4]]);
             decodedInstruction.Values.Add("Event Queue", keys[keyIndices[5]]);
-            
+
             decodedInstruction.Values.Add("Client Id", data.GetU64(SerumProgramLayouts.CancelOrderByClientIdV2ClientIdOffset));
         }
-        
+
         /// <summary>
         /// Decodes the instruction instruction data  for the <see cref="SerumProgramInstructions.Values.CancelOrderV2"/> method
         /// </summary>
@@ -262,7 +262,7 @@ namespace Solnet.Serum
             decodedInstruction.Values.Add("Open Orders Account", keys[keyIndices[3]]);
             decodedInstruction.Values.Add("Owner", keys[keyIndices[4]]);
             decodedInstruction.Values.Add("Event Queue", keys[keyIndices[5]]);
-            
+
             Side side = (Side)Enum.Parse(typeof(Side),
                 data.GetU8(SerumProgramLayouts.CancelOrderV2.SideOffset).ToString());
             decodedInstruction.Values.Add("Side", side);
@@ -297,11 +297,11 @@ namespace Solnet.Serum
             decodedInstruction.Values.Add("Limit Price", data.GetU64(SerumProgramLayouts.NewOrderV3.PriceOffset));
             decodedInstruction.Values.Add("Max Base Coin Quantity", data.GetU64(SerumProgramLayouts.NewOrderV3.MaxBaseQuantityOffset));
             decodedInstruction.Values.Add("Max Quote Coin Quantity", data.GetU64(SerumProgramLayouts.NewOrderV3.MaxQuoteQuantity));
-            
+
             SelfTradeBehavior selfTradeBehavior = (SelfTradeBehavior)Enum.Parse(typeof(SelfTradeBehavior),
                 data.GetU8(SerumProgramLayouts.NewOrderV3.SelfTradeBehaviorOffset).ToString());
             decodedInstruction.Values.Add("Self Trade Behavior", selfTradeBehavior);
-            
+
             OrderType orderType = (OrderType)Enum.Parse(typeof(OrderType),
                 data.GetU8(SerumProgramLayouts.NewOrderV3.OrderTypeOffset).ToString());
             decodedInstruction.Values.Add("Order Type", orderType);
@@ -311,19 +311,27 @@ namespace Solnet.Serum
         /// Derive the vault signer address for the given market.
         /// </summary>
         /// <param name="market">The market.</param>
+        /// <param name="vaultSignerNonce">The vault's signer nonce.</param>
         /// <returns>The vault signer address.</returns>
-        /// <exception cref="Exception">Throws exception when unable to derive the vault signer address.</exception>
-        internal static byte[] DeriveVaultSignerAddress(Market market)
+        public static byte[] DeriveVaultSignerAddress(PublicKey market, ulong vaultSignerNonce)
         {
             byte[] buffer = new byte[8];
-            buffer.WriteU64(market.VaultSignerNonce, 0);
-            
-            List<byte[]> seeds = new () { market.OwnAddress.KeyBytes, BitConverter.GetBytes(market.VaultSignerNonce) };
-            
+            buffer.WriteU64(vaultSignerNonce, 0);
+
+            List<byte[]> seeds = new() { market.KeyBytes, BitConverter.GetBytes(vaultSignerNonce) };
+
             bool success = AddressExtensions.TryCreateProgramAddress(seeds,
                 SerumProgram.ProgramIdKey.KeyBytes, out byte[] vaultSignerAddress);
 
             return !success ? null : vaultSignerAddress;
         }
+
+        /// <summary>
+        /// Derive the vault signer address for the given market.
+        /// </summary>
+        /// <param name="market">The market.</param>
+        /// <returns>The vault signer address.</returns>
+        /// <exception cref="Exception">Throws exception when unable to derive the vault signer address.</exception>
+        public static byte[] DeriveVaultSignerAddress(Market market) => DeriveVaultSignerAddress(market.OwnAddress, market.VaultSignerNonce);
     }
 }
