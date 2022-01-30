@@ -60,9 +60,9 @@ separate repository so it is contained, as the goal for [Solnet](https://github.
 - net 5.0
 
 ## Dependencies
-- Solnet.Rpc v0.4.9
-- Solnet.Wallet v0.4.9
-- Solnet.Programs v0.4.9
+- Solnet.Rpc v0.5.0
+- Solnet.Wallet v0.5.0
+- Solnet.Programs v0.5.0
 
 ## Examples
 
