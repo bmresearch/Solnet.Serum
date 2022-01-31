@@ -10,7 +10,7 @@ namespace Solnet.Serum.Examples
     {
         public static void Main(string[] args)
         {
-            InstructionDecoder.Register(SerumProgram.ProgramIdKey, SerumProgram.Decode);
+            InstructionDecoder.Register(SerumProgram.MainNetProgramIdKeyV3, SerumProgram.Decode);
             List<Type> examples = Assembly.GetEntryAssembly()?.GetExportedTypes().Where(t => t.IsAssignableTo(typeof(IRunnableExample))).ToList();
             if (examples == null)
                 return;

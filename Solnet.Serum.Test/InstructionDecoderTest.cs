@@ -68,7 +68,7 @@ namespace Solnet.Serum.Test
         [ClassInitialize]
         public static void Setup(TestContext tc)
         {
-            InstructionDecoder.Register(SerumProgram.ProgramIdKey, SerumProgram.Decode);
+            InstructionDecoder.Register(SerumProgram.MainNetProgramIdKeyV3, SerumProgram.Decode);
         }
         
         [TestMethod]

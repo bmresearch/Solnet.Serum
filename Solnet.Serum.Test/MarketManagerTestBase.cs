@@ -87,7 +87,7 @@ namespace Solnet.Serum.Test
         {
             rpcMock
                 .Setup(s => s.GetProgramAccountsAsync(
-                    It.Is<string>(s1 => s1 == SerumProgram.ProgramIdKey),
+                    It.Is<string>(s1 => s1 == SerumProgram.MainNetProgramIdKeyV3),
                     It.Is<Commitment>(c => c == commitment),
                     It.Is<int>(i => i == OpenOrdersAccount.Layout.SpanLength),
                     It.Is<List<MemCmp>>(

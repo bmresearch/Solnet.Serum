@@ -82,6 +82,7 @@ namespace Solnet.Serum.Test
         [TestMethod]
         public void NewOrderV3Test()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
@@ -102,7 +103,7 @@ namespace Solnet.Serum.Test
             order.RawQuantity = 10000UL;
             order.MaxQuoteQuantity = 10000UL;
             
-            TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
+            TransactionInstruction txInstruction = serum.NewOrderV3(
                 market, 
                 openOrders.PublicKey, 
                 payer.PublicKey, 
@@ -112,13 +113,14 @@ namespace Solnet.Serum.Test
             
             Assert.AreEqual(12, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedNewOrderV3Data, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         
         [TestMethod]
         public void EncodeNewOrderV3Test()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
@@ -147,6 +149,7 @@ namespace Solnet.Serum.Test
         [TestMethod]
         public void NewOrderV3SerumFeeDiscountTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
@@ -167,7 +170,7 @@ namespace Solnet.Serum.Test
             order.RawQuantity = 10000UL;
             order.MaxQuoteQuantity = 10000UL;
             
-            TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
+            TransactionInstruction txInstruction = serum.NewOrderV3(
                 market, 
                 openOrders.PublicKey, 
                 payer.PublicKey, 
@@ -178,13 +181,14 @@ namespace Solnet.Serum.Test
 
             Assert.AreEqual(13, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedNewOrderV3SerumFeeData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         
         [TestMethod]
         public void SettleFundsInvalidTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
@@ -193,7 +197,7 @@ namespace Solnet.Serum.Test
             var quoteW = wallet.GetAccount(4);
             var referrerPcWallet = wallet.GetAccount(4);
 
-            TransactionInstruction txInstruction = SerumProgram.SettleFunds(
+            TransactionInstruction txInstruction = serum.SettleFunds(
                 market,
                 openOrders,
                 ownerAccount, 
@@ -208,6 +212,7 @@ namespace Solnet.Serum.Test
         [TestMethod]
         public void SettleFundsTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketV3Account();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
@@ -216,7 +221,7 @@ namespace Solnet.Serum.Test
             var quoteW = wallet.GetAccount(4);
             var referrerPcWallet = wallet.GetAccount(4);
             
-            TransactionInstruction txInstruction = SerumProgram.SettleFunds(
+            TransactionInstruction txInstruction = serum.SettleFunds(
                 market,
                 openOrders,
                 ownerAccount, 
@@ -227,41 +232,41 @@ namespace Solnet.Serum.Test
             Assert.IsNotNull(txInstruction);
             Assert.AreEqual(10, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedSettleFundsData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]
         public void ConsumeEventsTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
-            var ownerAccount = wallet.GetAccount(1);
             var baseW = wallet.GetAccount(2);
             var openOrders = wallet.GetAccount(3);
             var quoteW = wallet.GetAccount(4);
 
-            TransactionInstruction txInstruction = SerumProgram.ConsumeEvents(
+            TransactionInstruction txInstruction = serum.ConsumeEvents(
                 new List<PublicKey>{openOrders}, 
-                market.OwnAddress,
-                ownerAccount,
+                market,
                 baseW, 
                 quoteW, 10);
             
             Assert.AreEqual(5, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedConsumeEventsData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
 
         [TestMethod]
         public void CancelOrderV2Test()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
             var openOrders = wallet.GetAccount(3);
 
             var orderId = new BigInteger(464876397401554404955348M);
-            TransactionInstruction txInstruction = SerumProgram.CancelOrderV2(
+            TransactionInstruction txInstruction = serum.CancelOrderV2(
                 market,
                 openOrders,
                 ownerAccount,
@@ -270,18 +275,19 @@ namespace Solnet.Serum.Test
             
             Assert.AreEqual(6, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedCancelOrderV2Data, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]
         public void CancelOrderByClientIdV2Test()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
             var openOrders = wallet.GetAccount(3);
 
-            TransactionInstruction txInstruction = SerumProgram.CancelOrderByClientIdV2(
+            TransactionInstruction txInstruction = serum.CancelOrderByClientIdV2(
                 market,
                 openOrders,
                 ownerAccount,
@@ -289,37 +295,39 @@ namespace Solnet.Serum.Test
             
             Assert.AreEqual(6, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedCancelOrderByClientIdV2Data, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]
         public void InitOpenOrdersTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
             var openOrders = wallet.GetAccount(3);
 
-            TransactionInstruction txInstruction = SerumProgram.InitOpenOrders(
+            TransactionInstruction txInstruction = serum.InitOpenOrders(
                 openOrders,
                 ownerAccount,
                 market.OwnAddress);
             
             Assert.AreEqual(4, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedInitOpenOrdersData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]
         public void InitOpenOrdersMarketAuthorityTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
             var openOrders = wallet.GetAccount(3);
             var marketAuthority = wallet.GetAccount(5);
 
-            TransactionInstruction txInstruction = SerumProgram.InitOpenOrders(
+            TransactionInstruction txInstruction = serum.InitOpenOrders(
                 openOrders,
                 ownerAccount,
                 market.OwnAddress,
@@ -327,19 +335,20 @@ namespace Solnet.Serum.Test
             
             Assert.AreEqual(5, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedInitOpenOrdersData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]
         public void CloseOpenOrdersTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
             var openOrders = wallet.GetAccount(3);
             var refundAccount = wallet.GetAccount(3);
 
-            TransactionInstruction txInstruction = SerumProgram.CloseOpenOrders(
+            TransactionInstruction txInstruction = serum.CloseOpenOrders(
                 openOrders,
                 ownerAccount,
                 refundAccount,
@@ -347,19 +356,20 @@ namespace Solnet.Serum.Test
             
             Assert.AreEqual(4, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedCloseOpenOrdersData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
         
         [TestMethod]
         public void PruneTest()
         {
+            var serum = SerumProgram.CreateMainNet();
             var market = GetMarketAccount();
             var wallet = new Wallet.Wallet(MnemonicWords);
             var ownerAccount = wallet.GetAccount(1);
             var pruneAuthority = wallet.GetAccount(2);
             var openOrders = wallet.GetAccount(3);
 
-            TransactionInstruction txInstruction = SerumProgram.Prune(
+            TransactionInstruction txInstruction = serum.Prune(
                 market,
                 pruneAuthority,
                 openOrders,
@@ -367,7 +377,7 @@ namespace Solnet.Serum.Test
             
             Assert.AreEqual(7, txInstruction.Keys.Count);
             CollectionAssert.AreEqual(ExpectedPruneData, txInstruction.Data);
-            CollectionAssert.AreEqual(SerumProgram.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
+            CollectionAssert.AreEqual(serum.ProgramIdKey.KeyBytes, txInstruction.ProgramId);
         }
     }
 }

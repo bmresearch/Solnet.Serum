@@ -34,7 +34,7 @@ namespace Solnet.Serum.Examples
                 new MemCmp{ Offset = 45, Bytes = OwnerAddress }
             };
             RequestResult<List<AccountKeyPair>> accounts = 
-                RpcClient.GetProgramAccounts(SerumProgram.ProgramIdKey, dataSize: OpenOrdersAccount.Layout.SpanLength, memCmpList: filters);           
+                RpcClient.GetProgramAccounts(SerumProgram.MainNetProgramIdKeyV3, dataSize: OpenOrdersAccount.Layout.SpanLength, memCmpList: filters);           
             
             /* Print all of the found open orders accounts */
             foreach (AccountKeyPair account in accounts.Result)

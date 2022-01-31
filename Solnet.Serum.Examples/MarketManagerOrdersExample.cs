@@ -24,6 +24,7 @@ namespace Solnet.Serum.Examples
         private readonly ISerumClient _serumClient;
         private readonly IMarketManager _marketManager;
         private readonly Wallet.Wallet _wallet;
+        private readonly SerumProgram _serum;
         private OrderBook _orderBook;
         private List<Order> _bids;
         private List<Order> _asks;
@@ -35,6 +36,7 @@ namespace Solnet.Serum.Examples
             Console.WriteLine($"Initializing {ToString()}");
             // init stuff
             SolanaKeyStoreService keyStore = new ();
+            _serum = SerumProgram.CreateMainNet();
             
             // get the wallet
             _wallet = keyStore.RestoreKeystoreFromFile("/path/to/wallet.json");
@@ -133,7 +135,7 @@ namespace Solnet.Serum.Examples
 
             SignatureConfirmation sigConf = null;
 
-            TransactionInstruction settleIx = SerumProgram.SettleFunds(
+            TransactionInstruction settleIx = _serum.SettleFunds(
                 _marketManager.Market,
                 _marketManager.OpenOrdersAddress,
                 _wallet.Account,
@@ -144,7 +146,7 @@ namespace Solnet.Serum.Examples
             {
                 orders[i].ConvertOrderValues(_marketManager.BaseDecimals, _marketManager.QuoteDecimals, _marketManager.Market);
 
-                TransactionInstruction txInstruction = SerumProgram.NewOrderV3(
+                TransactionInstruction txInstruction = _serum.NewOrderV3(
                     _marketManager.Market,
                     _marketManager.OpenOrdersAddress,
                     orders[i].Side == Side.Buy ? 
