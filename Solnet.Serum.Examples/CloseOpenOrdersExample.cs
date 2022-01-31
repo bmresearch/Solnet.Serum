@@ -22,12 +22,14 @@ namespace Solnet.Serum.Examples
         private readonly IMarketManager _marketManager;
         private readonly Wallet.Wallet _wallet;
         private readonly SolanaKeyStoreService _keyStore;
+        private readonly SerumProgram _serum;
 
         public CloseOpenOrdersExample()
         {
             Console.WriteLine($"Initializing {ToString()}");
             // init stuff
             _keyStore = new SolanaKeyStoreService();
+            _serum = SerumProgram.CreateMainNet();
 
             // get the wallet
             _wallet = _keyStore.RestoreKeystoreFromFile("/path/to/wallet.json");
@@ -74,7 +76,7 @@ namespace Solnet.Serum.Examples
                 new MemCmp { Offset = 45, Bytes = _wallet.Account.PublicKey }
             };
             RequestResult<List<AccountKeyPair>> accounts = await
-                _serumClient.RpcClient.GetProgramAccountsAsync(SerumProgram.ProgramIdKey,
+                _serumClient.RpcClient.GetProgramAccountsAsync(SerumProgram.MainNetProgramIdKeyV3,
                     dataSize: OpenOrdersAccount.Layout.SpanLength, memCmpList: filters);
 
             Console.WriteLine($"Found {accounts.Result.Count} open orders account for market {_marketAddress}");
@@ -88,13 +90,13 @@ namespace Solnet.Serum.Examples
                 var txBytes = new TransactionBuilder()
                     .SetFeePayer(_wallet.Account)
                     .SetRecentBlockHash(blockhash.Result.Value.Blockhash)
-                    .AddInstruction(SerumProgram.SettleFunds(
+                    .AddInstruction(_serum.SettleFunds(
                         _marketManager.Market,
                         new (openOrdersAccount.PublicKey),
                         _wallet.Account,
                         _marketManager.BaseTokenAccountAddress,
                         _marketManager.QuoteTokenAccountAddress))
-                    .AddInstruction(SerumProgram.CloseOpenOrders(
+                    .AddInstruction(_serum.CloseOpenOrders(
                         new (openOrdersAccount.PublicKey),
                         _wallet.Account,
                         _wallet.Account,
@@ -125,8 +127,8 @@ namespace Solnet.Serum.Examples
                     openOrdersAccount,
                     rentExemption.Result,
                     OpenOrdersAccount.Layout.SpanLength,
-                    SerumProgram.ProgramIdKey))
-                .AddInstruction(SerumProgram.InitOpenOrders(
+                    _serum.ProgramIdKey))
+                .AddInstruction(_serum.InitOpenOrders(
                     openOrdersAccount,
                     _wallet.Account,
                     _marketAddress))
@@ -167,7 +169,7 @@ namespace Solnet.Serum.Examples
             var txBytes = new TransactionBuilder()
                 .SetFeePayer(_wallet.Account)
                 .SetRecentBlockHash(blockhash.Result.Value.Blockhash)
-                .AddInstruction(SerumProgram.CloseOpenOrders(
+                .AddInstruction(_serum.CloseOpenOrders(
                     _marketManager.OpenOrdersAddress, _wallet.Account, _wallet.Account, _marketAddress))
                 .CompileMessage();
 

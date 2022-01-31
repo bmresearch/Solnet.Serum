@@ -211,7 +211,7 @@ namespace Solnet.Serum
                 new MemCmp { Offset = 45, Bytes = _ownerAccount }
             };
             RequestResult<List<AccountKeyPair>> accounts = await
-                _serumClient.RpcClient.GetProgramAccountsAsync(SerumProgram.ProgramIdKey,
+                _serumClient.RpcClient.GetProgramAccountsAsync(SerumProgram.MainNetProgramIdKeyV3,
                     dataSize: OpenOrdersAccount.Layout.SpanLength, memCmpList: filters);
 
             if (!accounts.WasRequestSuccessfullyHandled) return;
@@ -298,8 +298,8 @@ namespace Solnet.Serum
             {
                 List<TradeEvent> tradeEvents =
                     (from evt in queue.Events
-                        where evt.Flags.IsFill && evt.NativeQuantityPaid > 0
-                        select MarketUtils.ProcessTradeEvent(evt, _baseDecimals, _quoteDecimals)).ToList();
+                     where evt.Flags.IsFill && evt.NativeQuantityPaid > 0
+                     select MarketUtils.ProcessTradeEvent(evt, _baseDecimals, _quoteDecimals)).ToList();
                 action(tradeEvents, slot);
             }, Market.EventQueue, Commitment.Confirmed);
         }
@@ -396,14 +396,31 @@ namespace Solnet.Serum
             order.ConvertOrderValues(_baseDecimals, _quoteDecimals, Market);
 
             txBuilder.AddInstruction(SerumProgram.NewOrderV3(
-                Market,
+                _marketAccount,
                 ooa,
+                Market.RequestQueue,
+                Market.EventQueue,
+                Market.Bids,
+                Market.Asks,
                 order.Side == Side.Buy ? qAta : bAta,
                 _ownerAccount,
-                order,
+                Market.BaseVault,
+                Market.QuoteVault,
+                TokenProgram.ProgramIdKey,
+                SysVars.RentKey,
+                SerumProgram.MainNetProgramIdKeyV3,
+                order.Side,
+                order.RawPrice,
+                order.RawQuantity,
+                order.Type,
+                order.ClientOrderId,
+                order.SelfTradeBehavior,
+                ushort.MaxValue,
+                order.MaxQuoteQuantity,
                 _srmAccount));
 
             txBuilder.AddInstruction(SerumProgram.SettleFunds(
+                SerumProgram.MainNetProgramIdKeyV3,
                 Market,
                 ooa,
                 _ownerAccount,
@@ -471,14 +488,31 @@ namespace Solnet.Serum
             PublicKey ooa = await GetOrCreateOpenOrdersAccount(txBuilder);
 
             txBuilder.AddInstruction(SerumProgram.NewOrderV3(
-                    Market,
+                    _marketAccount,
                     ooa,
+                    Market.RequestQueue,
+                    Market.EventQueue,
+                    Market.Bids,
+                    Market.Asks,
                     order.Side == Side.Buy ? qAta : bAta,
                     _ownerAccount,
-                    order,
+                    Market.BaseVault,
+                    Market.QuoteVault,
+                    TokenProgram.ProgramIdKey,
+                    SysVars.RentKey,
+                    SerumProgram.MainNetProgramIdKeyV3,
+                    order.Side,
+                    order.RawPrice,
+                    order.RawQuantity,
+                    order.Type,
+                    order.ClientOrderId,
+                    order.SelfTradeBehavior,
+                    ushort.MaxValue,
+                    order.MaxQuoteQuantity,
                     _srmAccount));
 
             txBuilder.AddInstruction(SerumProgram.SettleFunds(
+                        SerumProgram.MainNetProgramIdKeyV3,
                 Market,
                 ooa,
                 _ownerAccount,
@@ -540,12 +574,17 @@ namespace Solnet.Serum
             (PublicKey qAta, bool qWrapped) = GetOrCreateQuoteTokenAccountAndWrapSolIfNeeded(txBuilder, isCancelOrder: true);
 
             txBuilder.AddInstruction(SerumProgram.CancelOrderV2(
-                        Market,
+                        SerumProgram.MainNetProgramIdKeyV3,
+                        _marketAccount,
+                        Market.Bids,
+                        Market.Asks,
                         _openOrdersAccount,
                         _ownerAccount,
+                        Market.EventQueue,
                         openOrder.IsBid ? Side.Buy : Side.Sell,
                         openOrder.OrderId))
                 .AddInstruction(SerumProgram.SettleFunds(
+                        SerumProgram.MainNetProgramIdKeyV3,
                     Market,
                     _openOrdersAccount,
                     _ownerAccount,
@@ -599,10 +638,16 @@ namespace Solnet.Serum
             (PublicKey qAta, bool qWrapped) = GetOrCreateQuoteTokenAccountAndWrapSolIfNeeded(txBuilder, isCancelOrder: true);
 
             txBuilder.AddInstruction(SerumProgram.CancelOrderByClientIdV2(
-                        Market,
+                        SerumProgram.MainNetProgramIdKeyV3,
+                        _marketAccount,
+                        Market.Bids,
+                        Market.Asks,
                         _openOrdersAccount,
-                        _ownerAccount, clientId))
+                        _ownerAccount,
+                        Market.EventQueue,
+                        clientId))
                 .AddInstruction(SerumProgram.SettleFunds(
+                        SerumProgram.MainNetProgramIdKeyV3,
                         Market,
                         _openOrdersAccount,
                         _ownerAccount,
@@ -660,6 +705,7 @@ namespace Solnet.Serum
                 (PublicKey qAta, bool qWrapped) = GetOrCreateQuoteTokenAccountAndWrapSolIfNeeded(txBuilder, isCancelOrder: true);
 
                 TransactionInstruction settleIx = SerumProgram.SettleFunds(
+                    SerumProgram.MainNetProgramIdKeyV3,
                     Market,
                     _openOrdersAccount,
                     _ownerAccount,
@@ -672,9 +718,13 @@ namespace Solnet.Serum
 
                     TransactionInstruction txInstruction =
                         SerumProgram.CancelOrderV2(
-                            Market,
+                            SerumProgram.MainNetProgramIdKeyV3,
+                            _marketAccount,
+                            Market.Bids,
+                            Market.Asks,
                             _openOrdersAccount,
                             _ownerAccount,
+                            Market.EventQueue,
                             OpenOrders[i].IsBid ? Side.Buy : Side.Sell,
                             OpenOrders[i].OrderId);
 
@@ -747,6 +797,7 @@ namespace Solnet.Serum
             (PublicKey qAta, bool qWrapped) = GetOrCreateQuoteTokenAccountAndWrapSolIfNeeded(txBuilder, isCancelOrder: true);
 
             txBuilder.AddInstruction(SerumProgram.SettleFunds(
+                        SerumProgram.MainNetProgramIdKeyV3,
                         Market,
                         _openOrdersAccount,
                         _ownerAccount,
@@ -927,9 +978,10 @@ namespace Solnet.Serum
                     account,
                     lamports.Result,
                     OpenOrdersAccount.Layout.SpanLength,
-                    SerumProgram.ProgramIdKey);
+                    SerumProgram.MainNetProgramIdKeyV3);
             txBuilder.AddInstruction(txInstruction);
             txInstruction = SerumProgram.InitOpenOrders(
+                SerumProgram.MainNetProgramIdKeyV3,
                 account,
                 _ownerAccount,
                 _marketAccount);
