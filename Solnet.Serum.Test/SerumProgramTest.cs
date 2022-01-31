@@ -327,7 +327,7 @@ namespace Solnet.Serum.Test
             var openOrders = wallet.GetAccount(3);
             var marketAuthority = wallet.GetAccount(5);
 
-            TransactionInstruction txInstruction = SerumProgram.InitOpenOrders(
+            TransactionInstruction txInstruction = serum.InitOpenOrders(
                 openOrders,
                 ownerAccount,
                 market.OwnAddress,
