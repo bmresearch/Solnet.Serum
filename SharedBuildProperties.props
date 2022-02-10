@@ -2,8 +2,8 @@
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <Product>Solnet.Serum</Product>
-        <Version>1.2.0</Version>
-        <Copyright>Copyright 2021 &#169; Solnet</Copyright>
+        <Version>1.3.0</Version>
+        <Copyright>Copyright 2022 &#169; Solnet</Copyright>
         <Authors>blockmountain</Authors>
         <PublisherName>blockmountain</PublisherName>
         <RepositoryUrl>https://github.com/bmresearch/Solnet.Serum</RepositoryUrl>

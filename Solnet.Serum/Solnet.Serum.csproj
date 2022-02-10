@@ -19,9 +19,9 @@
         <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0.0" />
-        <PackageReference Include="Solnet.Programs" Version="0.5.0" />
-        <PackageReference Include="Solnet.Rpc" Version="0.5.0" />
-        <PackageReference Include="Solnet.Wallet" Version="0.5.0" />
+        <PackageReference Include="Solnet.Programs" Version="0.6.0" />
+        <PackageReference Include="Solnet.Rpc" Version="0.6.0" />
+        <PackageReference Include="Solnet.Wallet" Version="0.6.0" />
     </ItemGroup>
 
 

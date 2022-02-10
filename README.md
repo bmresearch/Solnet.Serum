@@ -5,10 +5,14 @@
 <p align="center">
     <a href="https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml">
         <img src="https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml/badge.svg"
-            alt="GitHub Workflow Build Status (master)" ></a>
+            alt="Build" ></a>
+    <a href="https://github.com/bmresearch/Solnet.Serum/actions/workflows/publish.yml">
+        <img src="https://github.com/bmresearch/Solnet.Serum/actions/workflows/publish.yml/badge.svg"
+            alt="Release" ></a>
     <a href="https://coveralls.io/github/bmresearch/Solnet.Serum?branch=master">
         <img src="https://coveralls.io/repos/github/bmresearch/Solnet.Serum/badge.svg?branch=master" 
             alt="Coverage Status" ></a>
+<br/>
     <a href="">
         <img src="https://img.shields.io/github/license/bmresearch/solnet.serum?style=flat-square"
             alt="Code License"></a>
@@ -60,9 +64,9 @@ separate repository so it is contained, as the goal for [Solnet](https://github.
 - net 5.0
 
 ## Dependencies
-- Solnet.Rpc v0.5.0
-- Solnet.Wallet v0.5.0
-- Solnet.Programs v0.5.0
+- Solnet.Rpc v0.6.0
+- Solnet.Wallet v0.6.0
+- Solnet.Programs v0.6.0
 
 ## Examples
 
