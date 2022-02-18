@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master # Default release branch
-      - net # .NET 5 release branch
+      - net5 # .NET 5 release branch
 jobs:
   publish:
     name: build, pack & publish
