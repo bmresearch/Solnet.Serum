@@ -314,17 +314,17 @@ namespace Solnet.Serum
         /// <param name="vaultSignerNonce">The vault's signer nonce.</param>
         /// <param name="programIdKey">The program id key.</param>
         /// <returns>The vault signer address.</returns>
-        public static byte[] DeriveVaultSignerAddress(PublicKey market, ulong vaultSignerNonce, PublicKey programIdKey)
+        public static PublicKey DeriveVaultSignerAddress(PublicKey market, ulong vaultSignerNonce, PublicKey programIdKey)
         {
             byte[] buffer = new byte[8];
             buffer.WriteU64(vaultSignerNonce, 0);
 
             List<byte[]> seeds = new() { market.KeyBytes, BitConverter.GetBytes(vaultSignerNonce) };
 
-            bool success = AddressExtensions.TryCreateProgramAddress(seeds,
-                programIdKey, out byte[] vaultSignerAddress);
+            var _ = PublicKey.TryCreateProgramAddress(seeds,
+                programIdKey, out PublicKey vaultSignerAddress);
 
-            return !success ? null : vaultSignerAddress;
+            return vaultSignerAddress;
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace Solnet.Serum
         /// <param name="programIdKey">The program id key.</param>
         /// <returns>The vault signer address.</returns>
         /// <exception cref="Exception">Throws exception when unable to derive the vault signer address.</exception>
-        public static byte[] DeriveVaultSignerAddress(Market market, PublicKey programIdKey) 
+        public static PublicKey DeriveVaultSignerAddress(Market market, PublicKey programIdKey) 
             => DeriveVaultSignerAddress(market.OwnAddress, market.VaultSignerNonce, programIdKey);
 
         /// <summary>
@@ -347,7 +347,7 @@ namespace Solnet.Serum
         /// <param name="market">The market.</param>
         /// <returns>The vault signer address.</returns>
         /// <exception cref="Exception">Throws exception when unable to derive the vault signer address.</exception>
-        public static byte[] DeriveVaultSignerAddress(Market market)
+        public static PublicKey DeriveVaultSignerAddress(Market market)
             => DeriveVaultSignerAddress(market.OwnAddress, market.VaultSignerNonce, SerumProgram.MainNetProgramIdKeyV3);
     }
 }
