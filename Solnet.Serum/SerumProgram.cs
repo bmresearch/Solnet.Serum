@@ -185,9 +185,9 @@ namespace Solnet.Serum
         public static TransactionInstruction SettleFunds(PublicKey programId, Market market, PublicKey openOrdersAccount, PublicKey owner,
             PublicKey baseWallet, PublicKey quoteWallet, PublicKey referrerPcWallet = null)
         {
-            byte[] vaultSignerAddress = SerumProgramData.DeriveVaultSignerAddress(market);
+            PublicKey vaultSigner = SerumProgramData.DeriveVaultSignerAddress(market);
 
-            if (vaultSignerAddress == null)
+            if (vaultSigner == null)
                 return null;
 
             List<AccountMeta> keys = new()
@@ -199,7 +199,7 @@ namespace Solnet.Serum
                 AccountMeta.Writable(market.QuoteVault, false),
                 AccountMeta.Writable(baseWallet, false),
                 AccountMeta.Writable(quoteWallet, false),
-                AccountMeta.ReadOnly(new PublicKey(vaultSignerAddress), false),
+                AccountMeta.ReadOnly(vaultSigner, false),
                 AccountMeta.ReadOnly(TokenProgram.ProgramIdKey, false)
             };
             
