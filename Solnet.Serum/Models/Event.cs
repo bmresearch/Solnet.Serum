@@ -134,7 +134,7 @@ namespace Solnet.Serum.Models
                 NativeQuantityReleased = data.GetU64(Layout.NativeQuantityReleasedOffset),
                 NativeQuantityPaid = data.GetU64(Layout.NativeQuantityPaidOffset),
                 NativeFeeOrRebate = data.GetU64(Layout.NativeFeeOrRebateOffset),
-                OrderId = data.GetBigInt(Layout.OrderIdOffset, 16),
+                OrderId = data.GetBigInt(Layout.OrderIdOffset, 16, true),
                 PublicKey = data.GetPubKey(Layout.PublicKeyOffset),
                 ClientId = data.GetU64(Layout.ClientOrderIdOffset)
             };
