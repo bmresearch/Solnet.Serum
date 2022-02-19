@@ -32,11 +32,6 @@ jobs:
           TAG_FORMAT: v*
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
           INCLUDE_SYMBOLS: true
-      - name: Build Changelog
-        id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -50,6 +45,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.ACCESS_TOKEN }}
-          file: Solnet.Serum/bin/Release/net5.0/ref/Solnet.Serum.dll
+          file: artifacts/Solnet.Serum.dll
           tag: ${{ steps.publish_nuget.outputs.VERSION }}
           upload_url: ${{ steps.create_release.outputs.upload_url }}
