@@ -5,10 +5,17 @@
 <p align="center">
     <a href="https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml">
         <img src="https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml/badge.svg"
-            alt="Build" ></a>
+            alt="Build .NET6" ></a>
     <a href="https://github.com/bmresearch/Solnet.Serum/actions/workflows/publish.yml">
         <img src="https://github.com/bmresearch/Solnet.Serum/actions/workflows/publish.yml/badge.svg"
-            alt="Release" ></a>
+            alt="Release .NET6" ></a>
+<br/>
+    <a href="https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml">
+        <img src="https://github.com/bmresearch/Solnet.Serum/actions/workflows/dotnet.yml/badge.svg?branch=net5"
+            alt="Build .NET5" ></a>
+    <a href="https://github.com/bmresearch/Solnet.Serum/actions/workflows/publish.yml">
+        <img src="https://github.com/bmresearch/Solnet.Serum/actions/workflows/publish.yml/badge.svg?branch=net5"
+            alt="Release .NET5" ></a>
     <a href="https://coveralls.io/github/bmresearch/Solnet.Serum?branch=master">
         <img src="https://coveralls.io/repos/github/bmresearch/Solnet.Serum/badge.svg?branch=master" 
             alt="Coverage Status" ></a>
