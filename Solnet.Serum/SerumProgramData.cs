@@ -90,7 +90,7 @@ namespace Solnet.Serum
             byte[] data = new byte[25];
             data.WriteU32((uint)SerumProgramInstructions.Values.CancelOrderV2, SerumProgramLayouts.MethodOffset);
             data.WriteU32((uint)side, SerumProgramLayouts.CancelOrderV2.SideOffset);
-            data.WriteBigInt(orderId, SerumProgramLayouts.CancelOrderV2.OrderIdOffset);
+            data.WriteBigInt(orderId, SerumProgramLayouts.CancelOrderV2.OrderIdOffset, 16, true);
             return data;
         }
 
@@ -266,7 +266,7 @@ namespace Solnet.Serum
             Side side = (Side)Enum.Parse(typeof(Side),
                 data.GetU8(SerumProgramLayouts.CancelOrderV2.SideOffset).ToString());
             decodedInstruction.Values.Add("Side", side);
-            decodedInstruction.Values.Add("Order Id", data.GetBigInt(SerumProgramLayouts.CancelOrderV2.OrderIdOffset, 16));
+            decodedInstruction.Values.Add("Order Id", data.GetBigInt(SerumProgramLayouts.CancelOrderV2.OrderIdOffset, 16, true));
         }
 
         /// <summary>
