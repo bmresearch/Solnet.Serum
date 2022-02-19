@@ -164,7 +164,7 @@ namespace Solnet.Serum.Models
             for (int i = 0; i < 128; i++)
             {
                 ulong clientId = clientIds.GetU64(i * 8);
-                BigInteger orderId = ordersData.GetBigInt(i * 16, 16);
+                BigInteger orderId = ordersData.GetBigInt(i * 16, 16, true);
                 ulong rawPrice = ordersData.GetU64((i * 16) + 8);
                 
                 bool isFreeSlot = freeSlotBits.CheckBit(i);
