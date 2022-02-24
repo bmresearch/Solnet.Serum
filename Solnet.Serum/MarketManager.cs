@@ -1003,14 +1003,7 @@ namespace Solnet.Serum
 
             if (req.ServerErrorCode != 0)
             {
-                object value = null;
-                var exists = req.ErrorData?.TryGetValue("data", out value) ?? false;
-                if (!exists) return sigConf;
-                var elem = ((JsonElement)value).ToString();
-                if (elem == null) return sigConf;
-                var simulationLogs =
-                    JsonSerializer.Deserialize<SimulationLogs>(elem, _jsonSerializerOptions);
-                sigConf.ChangeState(simulationLogs);
+                sigConf.ChangeState(req.ErrorData);
 
                 return sigConf;
             }
