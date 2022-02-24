@@ -70,7 +70,8 @@ namespace Solnet.Serum.Test
                 .ReturnsAsync(new RequestResult<ResponseValue<AccountInfo>>(
                     new HttpResponseMessage(HttpStatusCode.OK),
                     JsonSerializer.Deserialize<ResponseValue<AccountInfo>>(ResponseQueue.Dequeue(),
-                        JsonSerializerOptions)) { WasRequestSuccessfullyHandled = true })
+                        JsonSerializerOptions))
+                { WasRequestSuccessfullyHandled = true })
                 .Verifiable();
         }
 
@@ -122,7 +123,8 @@ namespace Solnet.Serum.Test
                 .ReturnsAsync(new RequestResult<ResponseValue<List<TokenAccount>>>(
                     new HttpResponseMessage(HttpStatusCode.OK),
                     JsonSerializer.Deserialize<ResponseValue<List<TokenAccount>>>(ResponseQueue.Dequeue(),
-                        JsonSerializerOptions)) { WasRequestSuccessfullyHandled = true })
+                        JsonSerializerOptions))
+                { WasRequestSuccessfullyHandled = true })
                 .Verifiable();
         }
 
@@ -140,7 +142,8 @@ namespace Solnet.Serum.Test
                 .ReturnsAsync(new RequestResult<ResponseValue<BlockHash>>(
                     new HttpResponseMessage(HttpStatusCode.OK),
                     JsonSerializer.Deserialize<ResponseValue<BlockHash>>(ResponseQueue.Dequeue(),
-                        JsonSerializerOptions)) { WasRequestSuccessfullyHandled = true })
+                        JsonSerializerOptions))
+                { WasRequestSuccessfullyHandled = true })
                 .Verifiable();
         }
 
@@ -160,7 +163,8 @@ namespace Solnet.Serum.Test
                 .ReturnsAsync(new RequestResult<ulong>(
                     new HttpResponseMessage(HttpStatusCode.OK),
                     JsonSerializer.Deserialize<ulong>(ResponseQueue.Dequeue(),
-                        JsonSerializerOptions)) { WasRequestSuccessfullyHandled = true })
+                        JsonSerializerOptions))
+                { WasRequestSuccessfullyHandled = true })
                 .Verifiable();
         }
 
@@ -182,7 +186,8 @@ namespace Solnet.Serum.Test
                 .ReturnsAsync(new RequestResult<string>(
                     new HttpResponseMessage(HttpStatusCode.OK),
                     JsonSerializer.Deserialize<string>(ResponseQueue.Dequeue(),
-                        JsonSerializerOptions)) { WasRequestSuccessfullyHandled = true })
+                        JsonSerializerOptions))
+                { WasRequestSuccessfullyHandled = true })
                 .Verifiable();
         }
 
@@ -206,7 +211,7 @@ namespace Solnet.Serum.Test
                 {
                     WasRequestSuccessfullyHandled = false,
                     ServerErrorCode = -32002,
-                    ErrorData = JsonSerializer.Deserialize<Dictionary<string, object>>(ResponseQueue.Dequeue(),
+                    ErrorData = JsonSerializer.Deserialize<ErrorData>(ResponseQueue.Dequeue(),
                         JsonSerializerOptions)
                 })
                 .Verifiable();
@@ -305,8 +310,8 @@ namespace Solnet.Serum.Test
         /// <param name="eventQueueAddress"></param>
         protected Mock<Subscription> MockSerumStreamingClientSubscribeEventQueueAsync(Mock<ISerumClient> serumClientMock, string eventQueueAddress)
         {
-            Mock<Subscription> subscriptionMock = new (MockBehavior.Strict);
-            
+            Mock<Subscription> subscriptionMock = new(MockBehavior.Strict);
+
             serumClientMock
                 .Setup(x => x.SubscribeEventQueueAsync(
                     It.IsAny<Action<Subscription, EventQueue, ulong>>(),
@@ -321,7 +326,7 @@ namespace Solnet.Serum.Test
                 .Verifiable();
             return subscriptionMock;
         }
-        
+
         /// <summary>
         /// Mocks a given serum client used to stream data pertaining to the associated market address.
         /// </summary>
@@ -329,8 +334,8 @@ namespace Solnet.Serum.Test
         /// <param name="orderBidAddress"></param>
         protected Mock<Subscription> MockSerumStreamingClientSubscribeOrderBookBidSideAsync(Mock<ISerumClient> serumClientMock, string orderBidAddress)
         {
-            Mock<Subscription> subscriptionMock = new (MockBehavior.Strict);
-            
+            Mock<Subscription> subscriptionMock = new(MockBehavior.Strict);
+
             serumClientMock
                 .Setup(x => x.SubscribeOrderBookSideAsync(
                     It.IsAny<Action<Subscription, OrderBookSide, ulong>>(),
@@ -346,7 +351,7 @@ namespace Solnet.Serum.Test
 
             return subscriptionMock;
         }
-        
+
         /// <summary>
         /// Mocks a given serum client used to stream data pertaining to the associated market address.
         /// </summary>
@@ -354,8 +359,8 @@ namespace Solnet.Serum.Test
         /// <param name="orderAskAddress"></param>
         protected Mock<Subscription> MockSerumStreamingClientSubscribeOrderBookAskSideAsync(Mock<ISerumClient> serumClientMock, string orderAskAddress)
         {
-            Mock<Subscription> subscriptionMock = new (MockBehavior.Strict);
-            
+            Mock<Subscription> subscriptionMock = new(MockBehavior.Strict);
+
             serumClientMock
                 .Setup(x => x.SubscribeOrderBookSideAsync(
                     It.IsAny<Action<Subscription, OrderBookSide, ulong>>(),
@@ -370,7 +375,7 @@ namespace Solnet.Serum.Test
                 .Verifiable();
             return subscriptionMock;
         }
-        
+
         /// <summary>
         /// Mocks a given serum client used to stream data pertaining to the associated market address.
         /// </summary>
@@ -378,7 +383,7 @@ namespace Solnet.Serum.Test
         /// <param name="openOrdersAddress"></param>
         protected Mock<Subscription> MockSerumStreamingClientSubscribeOpenOrdersAsync(Mock<ISerumClient> serumClientMock, string openOrdersAddress)
         {
-            Mock<Subscription> subscriptionMock = new (MockBehavior.Strict);
+            Mock<Subscription> subscriptionMock = new(MockBehavior.Strict);
             serumClientMock
                 .Setup(x => x.SubscribeOpenOrdersAccountAsync(
                     It.IsAny<Action<Subscription, OpenOrdersAccount, ulong>>(),
