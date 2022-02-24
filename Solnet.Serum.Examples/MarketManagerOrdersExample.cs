@@ -210,17 +210,7 @@ namespace Solnet.Serum.Examples
 
             if (req.ServerErrorCode != 0)
             {
-                bool exists = req.ErrorData.TryGetValue("data", out object value);
-                if (!exists) return sigConf;
-                string elem = ((JsonElement)value).ToString();
-                if (elem == null) return sigConf;
-                SimulationLogs simulationLogs = JsonSerializer.Deserialize<SimulationLogs>(elem,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-                    });
-                sigConf.ChangeState(simulationLogs);
+                sigConf.ChangeState(req.ErrorData);
 
                 return sigConf;
             }
