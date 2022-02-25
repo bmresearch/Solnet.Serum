@@ -80,6 +80,22 @@ namespace Solnet.Serum.Test
         }
 
         [TestMethod]
+        public void CreateMainNet()
+        {
+            var serum = SerumProgram.CreateMainNet();
+
+            Assert.AreEqual(serum.ProgramIdKey, SerumProgram.MainNetProgramIdKeyV3);
+        }
+
+        [TestMethod]
+        public void CreateDevNet()
+        {
+            var serum = SerumProgram.CreateDevNet();
+
+            Assert.AreEqual(serum.ProgramIdKey, SerumProgram.DevNetProgramIdKeyV3);
+        }
+
+        [TestMethod]
         public void NewOrderV3Test()
         {
             var serum = SerumProgram.CreateMainNet();
