@@ -74,7 +74,7 @@ namespace Solnet.Serum
         /// Initialize the <see cref="SerumProgram"/> for <see cref="Cluster.MainNet"/>.
         /// </summary>
         /// <returns>The <see cref="SerumProgram"/> instance.</returns>
-        public static SerumProgram CreateMainNet() => new SerumProgram(DevNetProgramIdKeyV3, DefaultProgramName);
+        public static SerumProgram CreateMainNet() => new SerumProgram(MainNetProgramIdKeyV3, DefaultProgramName);
 
         /// <summary>
         /// Initializes an instruction to create a new Order on Serum v3.
