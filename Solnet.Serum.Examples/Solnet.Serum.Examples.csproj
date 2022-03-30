@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Solnet.Rpc" Version="5.0.3" />
-      <PackageReference Include="Solnet.Wallet" Version="5.0.3" />
-      <PackageReference Include="Solnet.KeyStore" Version="5.0.3" />
+      <PackageReference Include="Solnet.Rpc" Version="5.0.4" />
+      <PackageReference Include="Solnet.Wallet" Version="5.0.4" />
+      <PackageReference Include="Solnet.KeyStore" Version="5.0.4" />
     </ItemGroup>
 </Project>
