@@ -25,7 +25,7 @@ namespace Solnet.Serum
         /// <summary>
         /// The Serum V3 Program key for <see cref="Cluster.MainNet"/>.
         /// </summary>
-        public static readonly PublicKey MainNetProgramIdKeyV3 = new("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin");
+        public static readonly PublicKey MainNetProgramIdKeyV3 = new("srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX");
 
         /// <summary>
         /// The Serum V3 Program key for <see cref="Cluster.DevNet"/>.

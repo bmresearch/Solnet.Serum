@@ -71,9 +71,9 @@ separate repository so it is contained, as the goal for [Solnet](https://github.
 - net 6.0
 
 ## Dependencies
-- Solnet.Rpc v6.0.13
-- Solnet.Wallet v6.0.13
-- Solnet.Programs v6.0.13
+- Solnet.Rpc v6.0.14
+- Solnet.Wallet v6.0.14
+- Solnet.Programs v6.0.14
 
 ## Examples
 

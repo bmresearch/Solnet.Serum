@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PREV="6.0.13"
+PREV="6.0.14"
 
 FILES="README.md
 SharedBuildProperties.props
