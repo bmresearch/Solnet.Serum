@@ -1,3 +1,4 @@
+#module nuget:?package=Cake.DotNetTool.Module&version=0.4.0
 #addin nuget:?package=Cake.Coverlet&version=2.5.4
 #tool dotnet:?package=dotnet-reportgenerator-globaltool&version=4.8.7
 
@@ -27,13 +28,13 @@ Task("Clean")
 
 Task("Restore")
     .Does(() => {
-    DotNetRestore(solutionFolder);
+    DotNetCoreRestore(solutionFolder);
     });
 
 Task("Build")
     .IsDependentOn("Restore")
     .Does(() => {
-        DotNetBuild(solutionFolder, new DotNetBuildSettings
+        DotNetCoreBuild(solutionFolder, new DotNetCoreBuildSettings
         {
             NoRestore = true,
             Configuration = configuration
@@ -52,7 +53,7 @@ Task("Test")
             CoverletOutputFormat = CoverletOutputFormat.lcov
         };
 
-        var testSettings = new DotNetTestSettings
+        var testSettings = new DotNetCoreTestSettings
         {
             NoRestore = true,
             Configuration = configuration,
@@ -60,7 +61,7 @@ Task("Test")
             ArgumentCustomization = args => args.Append($"--logger trx"),
         };
 
-        DotNetTest(testProjectsRelativePaths[0], testSettings, coverletSettings);
+        DotNetCoreTest(testProjectsRelativePaths[0], testSettings, coverletSettings);
     });
 
 
@@ -79,7 +80,7 @@ Task("Report")
 Task("Publish")
     .IsDependentOn("Report")
     .Does(() => {
-        DotNetPublish(solutionFolder, new DotNetPublishSettings
+        DotNetCorePublish(solutionFolder, new DotNetCorePublishSettings
         {
             NoRestore = true,
             Configuration = configuration,
@@ -92,7 +93,7 @@ Task("Pack")
     .IsDependentOn("Publish")
     .Does(() =>
     {
-        var settings = new DotNetPackSettings
+        var settings = new DotNetCorePackSettings
         {
             Configuration = configuration,
             NoBuild = true,
@@ -101,7 +102,7 @@ Task("Pack")
             OutputDirectory = packagesDir
         };
 
-        DotNetPack("./Solnet.Serum/", settings);
+        DotNetCorePack("./Solnet.Serum/", settings);
     });
 
 RunTarget(target);
